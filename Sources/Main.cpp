@@ -168,7 +168,7 @@ namespace {
 		}
 
 		// Update and render particles
-		particleSystem->SetPosition(SpherePO->GetPosition());
+		particleSystem->setPosition(SpherePO->GetPosition());
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, particleImage, vLocation, mLocation, nLocation, tintLocation, View);
 
@@ -272,16 +272,16 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(vec3(-pos, 5.5f, pos), 100, structure);
+		particleSystem = new ParticleSystem(vec3(-pos, 5.5f, pos), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 100, structure);
 	}
 }
 
 int kore(int argc, char** argv) {
-	Kore::System::setName("KOM Jam");
+	Kore::System::setName("Korerorinpa");
 	Kore::System::setup();
 
 	Kore::WindowOptions options;
-	options.title = "KoreGroup";
+	options.title = "Korerorinpa";
 	options.width = width;
 	options.height = height;
 	options.x = 100;

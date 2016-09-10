@@ -8,30 +8,24 @@ class Particle;
 
 class ParticleSystem {
 public:
-	ParticleSystem(vec3 pos, int maxParticles, const VertexStructure& structure);
+	ParticleSystem(vec3 pos, float timeToLive, vec4 colorS, vec4 colorE, int maxParticles, const VertexStructure& structure);
 
-	void SetPosition(vec3 pos) {
-		position = pos;
-		float b = 0.1f;
-		emitMin = position + vec3(-b, -b, -b);
-		emitMax = position + vec3(b, b, b);
-	}
-
+	void setPosition(vec3 position);
 	void update(float deltaTime);
-	void render(TextureUnit tex, Texture* image, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, Kore::mat4 V);
+	void render(TextureUnit tex, Texture* image, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V);
 
 private:
-	// The center of the particle system
-	vec3 position;
+	VertexBuffer* vb;
+	IndexBuffer* ib;
 
-	// The minimum coordinates of the emitter box
+	// The coordinates of the emitter box
 	vec3 emitMin;
-
-	// The maximal coordinates of the emitter box
 	vec3 emitMax;
 
-	// The list of particles
-	Particle* particles;
+	// Particle data
+	vec3* particlePos; // The current position
+	vec3* particleVel; // The current velocity
+	float* particleTTL; // The remaining time to live
 
 	// The number of particles
 	int numParticles;
@@ -42,6 +36,17 @@ private:
 	// When should the next particle be spawned?
 	float nextSpawn;
 
+	// The total time time to live
+	float totalTimeToLive;
+
+	// The beginning color
+	vec4 colorStart;
+
+	// The end color
+	vec4 colorEnd;
+
+	void init(const VertexStructure& structure);
+	void setVertex(float* vertices, int index, float x, float y, float z, float u, float v);
+	void emitParticle(int index);
 	float getRandom(float minValue, float maxValue);
-	void EmitParticle(int index);
 };
