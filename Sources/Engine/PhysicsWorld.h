@@ -22,24 +22,22 @@ class PhysicsObject;
 // Handles all physically simulated objects.
 class PhysicsWorld {
 public:
-	
-	// The ground plane
-	PlaneCollider plane;
 
-	TriangleCollider triangle1;
-	TriangleCollider triangle2;
+	// Static coliiders (null terminated array of pointers)
+	TriangleMeshCollider** staticColliders;
 
-	TriangleMeshCollider meshCollider;
-
-	// null terminated array of PhysicsObject pointers
-	PhysicsObject** physicsObjects;
+	// Dynamic objects (null terminated array of pointers)
+	PhysicsObject** dynamicObjects;
 
 	PhysicsWorld();
 	
 	// Integration step
 	void Update(float deltaT);
 	
-	// Add an object to be simulated
-	void AddObject(PhysicsObject* po);
+	// Add a static collider for collisions
+	void AddStaticCollider(TriangleMeshCollider* staticCollider);
+
+	// Add a dynamic object to be simulated
+	void AddDynamicObject(PhysicsObject* dynamicObject);
 
 };

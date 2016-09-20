@@ -9,9 +9,10 @@
 
 using namespace Kore;
 
-ParticleSystem::ParticleSystem(vec3 pos, float timeToLive, vec4 colorS, vec4 colorE, int maxParticles, const VertexStructure& structure) :
+ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure) :
 	colorStart(colorS),
 	colorEnd(colorE),
+	gravity(grav),
 	totalTimeToLive(timeToLive),
 	numParticles(maxParticles) {
 
@@ -24,6 +25,7 @@ ParticleSystem::ParticleSystem(vec3 pos, float timeToLive, vec4 colorS, vec4 col
 
 	init(structure);
 	setPosition(pos);
+	setDirection(dir);
 }
 
 void ParticleSystem::init(const VertexStructure& structure) {
@@ -51,6 +53,10 @@ void ParticleSystem::setPosition(vec3 position) {
 	float b = 0.1f;
 	emitMin = position + vec3(-b, -b, -b);
 	emitMax = position + vec3(b, b, b);
+}
+
+void ParticleSystem::setDirection(vec3 direction) {
+	emitDir = direction;
 }
 
 void ParticleSystem::setVertex(float* vertices, int index, float x, float y, float z, float u, float v) {
@@ -83,8 +89,7 @@ void ParticleSystem::update(float deltaTime) {
 		}
 
 		particleTTL[i] -= deltaTime;
-
-		// Note: We are using no forces or gravity at the moment.
+		particleVel[i] += vec3(0, -gravity * deltaTime, 0);
 		particlePos[i] += particleVel[i] * deltaTime;
 	}
 }
@@ -127,7 +132,7 @@ void ParticleSystem::emitParticle(int index) {
 	float z = getRandom(emitMin.z(), emitMax.z());
 
 	particlePos[index].set(x, y, z);
-	particleVel[index].set(0, 0.3f, 0);
+	particleVel[index] = emitDir;
 	particleTTL[index] = totalTimeToLive;
 }
 

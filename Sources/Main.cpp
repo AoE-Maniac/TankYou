@@ -56,7 +56,7 @@ namespace {
 	float lightPosZ;
 
 	MeshObject* sphere;
-	PhysicsObject* po;
+	PhysicsObject* spherePO;
 
 	PhysicsWorld physics;
 	
@@ -102,9 +102,9 @@ namespace {
 		
 		targetCameraPosition.set(x, 2, z);
 
-		targetCameraPosition = physics.physicsObjects[0]->GetPosition();
+		targetCameraPosition = spherePO->GetPosition();
 		targetCameraPosition = targetCameraPosition + vec3(-10, 5, 10);
-		vec3 targetLookAt = physics.physicsObjects[0]->GetPosition();
+		vec3 targetLookAt = spherePO->GetPosition();
 
 		// Interpolate the camera to not follow small physics movements
 		float alpha = 0.3f;
@@ -137,23 +137,21 @@ namespace {
 		if (right) forceZ += 1.0f;
 
 		// Apply inputs
-		PhysicsObject** currentP = &physics.physicsObjects[0];
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		(*currentP)->ApplyForceToCenter(force);
+		spherePO->ApplyForceToCenter(force);
 
 		// Update physics
 		physics.Update(deltaT);
 
 		// Check for game over
-		PhysicsObject* SpherePO = physics.physicsObjects[0];
-		bool result = SpherePO->Collider.IntersectsWith(boxCollider);
+		bool result = spherePO->Collider.IntersectsWith(boxCollider);
 		if (result) {
 			// ...
 		}
 
 		// Render dynamic objects
-		currentP = &physics.physicsObjects[0];
+		PhysicsObject** currentP = &physics.dynamicObjects[0];
 		while (*currentP != nullptr) {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
@@ -168,7 +166,8 @@ namespace {
 		}
 
 		// Update and render particles
-		particleSystem->setPosition(SpherePO->GetPosition());
+		particleSystem->setPosition(spherePO->GetPosition());
+		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, particleImage, vLocation, mLocation, nLocation, tintLocation, View);
 
@@ -176,19 +175,11 @@ namespace {
 		Graphics::swapBuffers();
 	}
 
-	void SpawnSphere(vec3 Position, vec3 Velocity) {
-		PhysicsObject* po = new PhysicsObject(false, 1.0f);
-		po->SetPosition(Position);
-		po->Velocity = Velocity;
-		
-		po->Collider.radius = 0.5f;
+	void ResetSphere(vec3 Position, vec3 Velocity) {
+		spherePO->SetPosition(Position);
+		spherePO->Velocity = Velocity;
 
-		po->Mass = 5;
-		po->Mesh = sphere;
-		
-		// The impulse should carry the object forward
-		po->ApplyImpulse(Velocity);
-		physics.AddObject(po);
+		spherePO->ApplyImpulse(Velocity);
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -252,14 +243,20 @@ namespace {
 		lightPosLocation = program->getConstantLocation("lightPos");
 		tintLocation = program->getConstantLocation("tint");
 
-		staticObjects[0] = new MeshObject("level.obj", "level.png", structure);
-		
 		sphere = new MeshObject("cube.obj", "cube.png", structure);
 
-		float pos = -10.0f;
-		SpawnSphere(vec3(-pos, 5.5f, pos), vec3(0, 0, 0));
+		spherePO = new PhysicsObject(false, 1.0f);
+		spherePO->Collider.radius = 0.5f;
+		spherePO->Mass = 5;
+		spherePO->Mesh = sphere;
+		physics.AddDynamicObject(spherePO);
 
-		physics.meshCollider.mesh = staticObjects[0];
+		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
+
+		TriangleMeshCollider* tmc = new TriangleMeshCollider();
+		staticObjects[0] = new MeshObject("level.obj", "level.png", structure);
+		tmc->mesh = staticObjects[0];
+		physics.AddStaticCollider(tmc);
 
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -272,7 +269,7 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(vec3(-pos, 5.5f, pos), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 100, structure);
+		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure);
 	}
 }
 
