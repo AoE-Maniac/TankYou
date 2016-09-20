@@ -35,10 +35,7 @@ namespace {
 	bool right;
 	bool up;
 	bool down;
-
-	// null terminated array of MeshObject pointers
-	MeshObject* staticObjects[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-
+	
 	mat4 P;
 	mat4 View;
 	mat4 PV;
@@ -55,7 +52,7 @@ namespace {
 	float lightPosY;
 	float lightPosZ;
 
-	MeshObject* sphere;
+	MeshObject* sphereMesh;
 	PhysicsObject* spherePO;
 
 	PhysicsWorld physics;
@@ -151,18 +148,16 @@ namespace {
 		}
 
 		// Render dynamic objects
-		PhysicsObject** currentP = &physics.dynamicObjects[0];
-		while (*currentP != nullptr) {
+		for (int i = 0; i < physics.currentDynamicObjects; i++) {
+			PhysicsObject** currentP = &physics.dynamicObjects[i];
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
-			++currentP;
 		}
 
 		// Render static objects
-		MeshObject** current = &staticObjects[0];
-		while (*current != nullptr) {
-			(*current)->render(mLocation, nLocation, tex);
-			++current;
+		for (int i = 0; i < physics.currentStaticColliders; i++) {
+			TriangleMeshCollider** current = &physics.staticColliders[i];
+			(*current)->mesh->render(mLocation, nLocation, tex);
 		}
 
 		// Update and render particles
@@ -243,19 +238,18 @@ namespace {
 		lightPosLocation = program->getConstantLocation("lightPos");
 		tintLocation = program->getConstantLocation("tint");
 
-		sphere = new MeshObject("cube.obj", "cube.png", structure);
+		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
 
 		spherePO = new PhysicsObject(false, 1.0f);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mass = 5;
-		spherePO->Mesh = sphere;
+		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
 
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
 
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		staticObjects[0] = new MeshObject("level.obj", "level.png", structure);
-		tmc->mesh = staticObjects[0];
+		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
 
 		/*Sound* winSound;

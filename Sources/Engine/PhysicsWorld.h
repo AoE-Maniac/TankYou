@@ -17,16 +17,20 @@ using namespace Kore;
 #include "Collision.h"
 #include "PhysicsObject.h"
 
+#define MAX_STATIC_MESHES 10
+#define MAX_DYNAMIC_MESHES 100
+
 class PhysicsObject;
 
 // Handles all physically simulated objects.
 class PhysicsWorld {
 public:
-
-	// Static coliiders (null terminated array of pointers)
+	// Static colliders
+	int currentStaticColliders;
 	TriangleMeshCollider** staticColliders;
 
-	// Dynamic objects (null terminated array of pointers)
+	// Dynamic objects
+	int currentDynamicObjects;
 	PhysicsObject** dynamicObjects;
 
 	PhysicsWorld();
@@ -39,5 +43,4 @@ public:
 
 	// Add a dynamic object to be simulated
 	void AddDynamicObject(PhysicsObject* dynamicObject);
-
 };
