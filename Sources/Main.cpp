@@ -196,7 +196,7 @@ namespace {
 		});
 		
 
-		//renderLandscape(mLocation, nLocation);
+		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -336,7 +336,7 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
+		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
 

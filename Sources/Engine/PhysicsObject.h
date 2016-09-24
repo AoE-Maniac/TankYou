@@ -42,6 +42,10 @@ public:
 	vec3 GetPosition() {
 		return Position;
 	}
+
+	void SetRotation(Quat rot) {
+		Rotation = rot;
+	}
 	
 	// Force accumulator
 	vec3 Accumulator;

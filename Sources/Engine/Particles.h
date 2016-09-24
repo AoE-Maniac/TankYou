@@ -8,7 +8,7 @@ class Particle;
 
 class ParticleSystem {
 public:
-	ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image);
+	ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image);
 
 	void setPosition(vec3 position);
 	void setDirection(vec3 direction);
@@ -53,7 +53,7 @@ private:
 	// The number of particles
 	float gravity;
 
-	void init(const VertexStructure& structure);
+	void init(float halfSize, const VertexStructure& structure);
 	void setVertex(float* vertices, int index, float x, float y, float z, float u, float v);
 	void emitParticle(int index);
 	float getRandom(float minValue, float maxValue);

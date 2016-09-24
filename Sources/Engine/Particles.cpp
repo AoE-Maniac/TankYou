@@ -9,7 +9,7 @@
 
 using namespace Kore;
 
-ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image) :
+ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image) :
 	colorStart(colorS),
 	colorEnd(colorE),
 	gravity(grav),
@@ -24,18 +24,18 @@ ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS
 	spawnRate = 0.05f;
 	nextSpawn = spawnRate;
 
-	init(structure);
+	init(size / 2, structure);
 	setPosition(pos);
 	setDirection(dir);
 }
 
-void ParticleSystem::init(const VertexStructure& structure) {
+void ParticleSystem::init(float halfSize, const VertexStructure& structure) {
 	vb = new VertexBuffer(4, structure, 0);
 	float* vertices = vb->lock();
-	setVertex(vertices, 0, -1, -1, 0, 0, 0);
-	setVertex(vertices, 1, -1, 1, 0, 0, 1);
-	setVertex(vertices, 2, 1, 1, 0, 1, 1);
-	setVertex(vertices, 3, 1, -1, 0, 1, 0);
+	setVertex(vertices, 0, -1 * halfSize, -1 * halfSize, 0, 0, 0);
+	setVertex(vertices, 1, -1 * halfSize, 1 * halfSize, 0, 0, 1);
+	setVertex(vertices, 2, 1 * halfSize, 1 * halfSize, 0, 1, 1);
+	setVertex(vertices, 3, 1 * halfSize, -1 * halfSize, 0, 1, 0);
 	vb->unlock();
 
 	// Set index buffer
