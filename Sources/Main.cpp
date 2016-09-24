@@ -188,13 +188,14 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
-		/*
-		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
-			tank.update();
+		
+		std::for_each(tanks.begin(), tanks.end(), [=](Tank& tank) {
+			tank.update(deltaT);
 			tank.render(mLocation, nLocation, tex);
 		});
-		*/
-		renderLandscape(mLocation, nLocation);
+		
+
+		//renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -312,8 +313,8 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structure);
-		tankBottom = new MeshObject("tank_bottom.obj", "cube.png", structure);
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structure, 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
 		tanks.push_back(Tank(tankTop, tankBottom));
 
 		/*Sound* winSound;
