@@ -168,8 +168,9 @@ namespace {
 		force = force * 20.0f;
 		//spherePO->ApplyForceToCenter(force);
         
-        vec3 targetPosition = vec3(-10, 5.5f, -13);
-        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        vec3 targetPosition = vec3(-15, 0.5f, -15);
+        //vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        vec3 velocity = move->PursueTarget(spherePO->GetPosition(), targetPosition, vec3(0.1f, 0.2f, 0.0f), vec3(0, 0, 0), 0.1f);
         spherePO->ApplyImpulse(velocity);
 
 		// Update physics
@@ -187,13 +188,14 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
-		/*
-		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
-			tank.update();
+		
+		std::for_each(tanks.begin(), tanks.end(), [=](Tank& tank) {
+			tank.update(deltaT);
 			tank.render(mLocation, nLocation, tex);
 		});
-		*/
-		renderLandscape(mLocation, nLocation);
+		
+
+		//renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -246,6 +248,21 @@ namespace {
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
 		mouseX = x;
 		mouseY = y;
+
+		float screenX = (x / (float)width - 0.5f) * 2.0f;
+		float screenY = (y / (float)height - 0.5f) * 2.0f;
+
+		vec4 position = PV.Invert() * vec4(screenX, screenY, -1, 1);
+
+		vec3 dir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
+		dir.normalize();
+
+		for (int i = 0; i < physics.currentDynamicObjects; i++) {
+			PhysicsObject* p = physics.dynamicObjects[i];
+			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
+				log(Info, "Picky");
+			}
+		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -296,8 +313,8 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structure);
-		tankBottom = new MeshObject("tank_bottom.obj", "cube.png", structure);
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structure, 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
 		tanks.push_back(Tank(tankTop, tankBottom));
 
 		/*Sound* winSound;

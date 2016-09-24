@@ -7,10 +7,11 @@ public:
 	Tank(MeshObject* top, MeshObject* bottom);
 	void render(ConstantLocation mLocation, ConstantLocation nLocation, TextureUnit tex);
 	void rotateTurret(float angle);
-	void update();
+	void update(float deltaT);
 
 private:
 	MeshObject* Top;
 	MeshObject* Bottom;
 	float turretAngle;
+	void setTurretTransform();
 };
