@@ -169,7 +169,7 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		//spherePO->ApplyForceToCenter(force);
+		spherePO->ApplyForceToCenter(force);
         
 //        Tank tank = tanks[0];
 //        vec3 currentPos = tank.getPosition();
@@ -200,16 +200,14 @@ namespace {
 		// Render dynamic objects
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject** currentP = &physics.dynamicObjects[i];
-			//(*currentP)->UpdateMatrix();
-			//(*currentP)->Mesh->render(mLocation, nLocation, tex);
+			(*currentP)->UpdateMatrix();
+			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
 		
-        
         // Update physics
-        //physics.Update(deltaT);
+        physics.Update(deltaT);
 		
-
-		//renderLandscape(mLocation, nLocation);
+		renderLandscape(mLocation, nLocation, tex);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -222,7 +220,9 @@ namespace {
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
-
+		
+		// Reset tint for objects that should not be tinted
+		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		projectiles->update(deltaT);
 		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
 
@@ -231,8 +231,8 @@ namespace {
 	}
 
 	void ResetSphere(vec3 Position, vec3 Velocity) {
-		//spherePO->SetPosition(Position);
-		//spherePO->Velocity = Velocity;
+		spherePO->SetPosition(Position);
+		spherePO->Velocity = Velocity;
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -322,9 +322,8 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(1.0f, true, false);
+		spherePO = new PhysicsObject(5, true, false);
 		spherePO->Collider.radius = 0.5f;
-		spherePO->Mass = 5;
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
 
@@ -338,9 +337,7 @@ namespace {
 		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
         Tank* tank = new Tank(tankTop, tankBottom);
         tank->Collider.radius = 0.5f;
-        //tank->Mass = 5;
-        //tank->Mesh = tankBottom;
-        tank->SetPosition(vec3(0, 1, 0));
+        tank->SetPosition(vec3(7.5f, 5, -7.5f));
         physics.AddDynamicObject(tank);
         tanks.push_back(tank);
         
