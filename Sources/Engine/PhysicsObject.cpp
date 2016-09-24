@@ -4,7 +4,7 @@
 
 using namespace Kore;
 
-PhysicsObject::PhysicsObject(bool isStatic, float mass) : IsStatic(isStatic), Mass(mass) {
+PhysicsObject::PhysicsObject(float mass, bool ignoreGravity, bool ignoreRotation) : Mass(mass), IgnoreGravity(ignoreGravity), IgnoreRotation(ignoreRotation) {
 	Accumulator = vec3(0, 0, 0);
 	Velocity = vec3(0, 0, 0);
 	Collider.radius = 0.5f;
@@ -196,8 +196,10 @@ void PhysicsObject::Integrate(float deltaT) {
 	float damping = 0.98f;
 	Velocity *= damping;
 
-	AngularVelocity *= damping;
-	Rotation.addScaledVector(AngularVelocity, deltaT);
+	if (!IgnoreRotation) {
+		AngularVelocity *= damping;
+		Rotation.addScaledVector(AngularVelocity, deltaT);
+	}
 
 	// Derive a new position based on the velocity (Note: Use SetPosition to also set the collider's values)
 	SetPosition(Position + Velocity * deltaT);
