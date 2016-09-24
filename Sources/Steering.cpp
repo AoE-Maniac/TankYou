@@ -32,11 +32,10 @@ vec3 Steering::Wander(vec3 characterPos, vec3 targetPos) {
 vec3 Steering::PursueTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel, vec3 targetVel, float maxVelocity) {
     vec3 distance = targetPos - characterPos;
     float time = distance.getLength() / maxVelocity;    // time needed to catch the target
-    vec3 p = targetPos + targetPos * time;              // predict the target position
+    vec3 p = targetPos + targetVel * time;              // predict the target position
     vec3 velocity = p - characterPos;
     velocity = velocity / velocity.getLength();
     velocity.multiply(maxVelocity);
-    
     return velocity;
 }
 

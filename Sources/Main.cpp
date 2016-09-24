@@ -168,8 +168,9 @@ namespace {
 		force = force * 20.0f;
 		//spherePO->ApplyForceToCenter(force);
         
-        vec3 targetPosition = vec3(-10, 5.5f, -13);
-        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        vec3 targetPosition = vec3(-15, 0.5f, -15);
+        //vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        vec3 velocity = move->PursueTarget(spherePO->GetPosition(), targetPosition, vec3(0.1f, 0.2f, 0.0f), vec3(0, 0, 0), 0.1f);
         spherePO->ApplyImpulse(velocity);
 
 		// Update physics
