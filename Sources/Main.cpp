@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
@@ -258,15 +259,22 @@ namespace {
 		dir.normalize();
 
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
-			PhysicsObject* p = physics.dynamicObjects[i];
+			PhysicsObject* p = physics.dynamicObjects[i];/*
 			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
 				log(Info, "Picky");
-			}
+			}*/
 		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		if(tanks.empty()) {
+			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		} else {
+			vec3 p = tanks.front().getPosition();
+			vec3 l = tanks.front().getTurretLookAt();
+			projectiles->fire(p, l, 10);
+			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
+		}
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {

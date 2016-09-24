@@ -26,3 +26,11 @@ void Tank::update(float deltaT) {
 void Tank::rotateTurret(float angle) {
 	turretAngle += angle;
 }
+
+vec3 Tank::getTurretLookAt() {
+	return mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-1,1);
+}
+
+vec3 Tank::getPosition() {
+	return GetPosition() + vec3(0,1,0) + vec3((mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-3,1)));
+}
