@@ -8,16 +8,17 @@ class Particle;
 
 class ParticleSystem {
 public:
-	ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure);
+	ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image);
 
 	void setPosition(vec3 position);
 	void setDirection(vec3 direction);
 	void update(float deltaTime);
-	void render(TextureUnit tex, Texture* image, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V);
+	void render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V);
 
 private:
 	VertexBuffer* vb;
 	IndexBuffer* ib;
+	Texture* texture;
 
 	// The coordinates of the emitter box
 	vec3 emitMin;
