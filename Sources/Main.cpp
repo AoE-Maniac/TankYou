@@ -24,6 +24,9 @@ namespace {
 	const int width = 1024;
 	const int height = 768;
 
+	int mouseX = width / 2;
+	int mouseY = height / 2;
+
 	double startTime;
 	Shader* vertexShader;
 	Shader* fragmentShader;
@@ -41,12 +44,12 @@ namespace {
 	mat4 PV;
 
 	vec3 cameraPosition;
-	vec3 targetCameraPosition;
-	vec3 oldCameraPosition;
+	//vec3 targetCameraPosition;
+	//vec3 oldCameraPosition;
 
 	vec3 lookAt;
-	vec3 targetLookAt;
-	vec3 oldLookAt;
+	//vec3 targetLookAt;
+	//vec3 oldLookAt;
 
 	float lightPosX;
 	float lightPosY;
@@ -97,20 +100,28 @@ namespace {
 		float x = 0 + 10 * Kore::cos(cameraAngle);
 		float z = 0 + 10 * Kore::sin(cameraAngle);
 		
-		targetCameraPosition.set(x, 2, z);
-
-		targetCameraPosition = spherePO->GetPosition();
-		targetCameraPosition = targetCameraPosition + vec3(-10, 5, 10);
-		vec3 targetLookAt = spherePO->GetPosition();
-
 		// Interpolate the camera to not follow small physics movements
 		float alpha = 0.3f;
 
-		cameraPosition = oldCameraPosition * (1.0f - alpha) + targetCameraPosition * alpha;
-		oldCameraPosition = cameraPosition;
+		const float cameraSpeed = 0.5f;
+		if (mouseY < 50) {
+			lookAt.z() -= cameraSpeed;
+			lookAt.x() += cameraSpeed;
+		}
+		if (mouseY > height - 50) {
+			lookAt.z() += cameraSpeed;
+			lookAt.x() -= cameraSpeed;
+		}
+		if (mouseX < 50) {
+			lookAt.z() += cameraSpeed;
+			lookAt.x() += cameraSpeed;
+		}
+		if (mouseX > width - 50) {
+			lookAt.z() -= cameraSpeed;
+			lookAt.x() -= cameraSpeed;
+		}
 
-		lookAt = oldLookAt * (1.0f - alpha) + targetLookAt * alpha;
-		oldLookAt = lookAt;
+		cameraPosition = lookAt + vec3(-10, 5, 10);
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 100);
@@ -202,7 +213,8 @@ namespace {
 	}
 
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
-
+		mouseX = x;
+		mouseY = y;
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -264,6 +276,9 @@ namespace {
 
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure);
+
+		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
+		lookAt = spherePO->GetPosition();
 	}
 }
 
