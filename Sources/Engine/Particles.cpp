@@ -98,6 +98,7 @@ void ParticleSystem::update(float deltaTime) {
 void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V) {
 	Graphics::setBlendingMode(BlendingOperation::SourceAlpha, BlendingOperation::InverseSourceAlpha);
 	Graphics::setRenderState(RenderState::DepthWrite, false);
+	Graphics::setRenderState(RenderState::DepthTest, false);
 	
 	Graphics::setMatrix(vLocation, V);
 
@@ -124,6 +125,7 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 		Graphics::drawIndexedVertices();
 	}
 	Graphics::setRenderState(RenderState::DepthWrite, true);
+	Graphics::setRenderState(RenderState::DepthTest, true);
 }
 
 void ParticleSystem::emitParticle(int index) {

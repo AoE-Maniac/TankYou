@@ -17,5 +17,5 @@ public:
 private:
 	int maxProj;
 	int currProj;
-	Projectile* projectiles;
+	Projectile** projectiles;
 };
