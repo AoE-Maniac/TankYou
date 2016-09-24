@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Landscape.h"
+#include <Kore/Math/Random.h>
 
 using namespace Kore;
 
@@ -7,26 +8,40 @@ Kore::VertexBuffer* landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 
 void createLandscape() {
+	const float size = 50;
+	const int w = 50;
+	const int h = 50;
+
 	VertexStructure structure;
 	structure.add("pos", Float3VertexData);
 	structure.add("tex", Float2VertexData);
 	structure.add("nor", Float3VertexData);
-	landscapeVertices = new Kore::VertexBuffer(4, structure);
+	landscapeVertices = new Kore::VertexBuffer((w + 1) * (h + 1), structure);
 
 	float* vertices = landscapeVertices->lock();
-	const float size = 50;
 	int i = 0;
-	vertices[i++] = -size / 2; vertices[i++] = 0; vertices[i++] = size / 2; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-	vertices[i++] = size / 2; vertices[i++] = 0; vertices[i++] = size / 2; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-	vertices[i++] = size / 2; vertices[i++] = 0; vertices[i++] = -size / 2; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-	vertices[i++] = -size / 2; vertices[i++] = 0; vertices[i++] = -size / 2; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+	for (int y = 0; y <= h; ++y) {
+		for (int x = 0; x <= w; ++x) {
+			vertices[i++] = -size / 2 + size / w * x; vertices[i++] = Kore::Random::get(0, 100) / 100.0f; vertices[i++] = -size / 2 + size / h * y; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		}
+	}
 	landscapeVertices->unlock();
 
-	landscapeIndices = new IndexBuffer(6);
+	landscapeIndices = new IndexBuffer(w * h * 6);
 	int* indices = landscapeIndices->lock();
 	i = 0;
-	indices[i++] = 0; indices[i++] = 1; indices[i++] = 2;
-	indices[i++] = 0; indices[i++] = 2; indices[i++] = 3;
+	for (int y = 0; y < h; ++y) {
+		for (int x = 0; x < w; ++x) {
+			int baseindex = y * (w + 1) + x;
+			indices[i++] = baseindex;
+			indices[i++] = baseindex + 1;
+			indices[i++] = baseindex + (w + 1);
+
+			indices[i++] = baseindex + 1;
+			indices[i++] = baseindex + (w + 1);
+			indices[i++] = baseindex + (w + 1) + 1;
+		}
+	}
 	landscapeIndices->unlock();
 }
 
