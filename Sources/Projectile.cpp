@@ -3,15 +3,13 @@
 
 using namespace Kore;
 
-Projectile::Projectile() {}
-
-void Projectile::init(Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) {
+Projectile::Projectile(Texture* particleTex, MeshObject* mesh, VertexStructure** particleStructures, PhysicsWorld* physics) {
 	physicsObject = new PhysicsObject(0.001f, true, true);
 	physicsObject->Collider.radius = 0.5f * PROJECTILE_SIZE;
 	physicsObject->Mesh = mesh;
 	physics->AddDynamicObject(physicsObject);
 	
-	particles = new ParticleSystem(physicsObject->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, particleStructure, particleTex);
+	particles = new ParticleSystem(physicsObject->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, particleStructures, particleTex);
 
 	timeToLife = 0;
 }

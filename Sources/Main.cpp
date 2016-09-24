@@ -76,8 +76,6 @@ namespace {
 	TextureUnit tex;
 	ConstantLocation pLocation;
 	ConstantLocation vLocation;
-	ConstantLocation mLocation;
-	ConstantLocation nLocation;
 	ConstantLocation lightPosLocation;
 	ConstantLocation tintLocation;
 
@@ -288,26 +286,29 @@ namespace {
 		fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 
 		// This defines the structure of your Vertex Buffer
-		VertexStructure structure;
-		structure.add("pos", Float3VertexData);
-		structure.add("tex", Float2VertexData);
-		structure.add("nor", Float3VertexData);
+		VertexStructure** structures;
+		structures[0] = new VertexStructure();
+		structures[0]->add("pos", Float3VertexData);
+		structures[0]->add("tex", Float2VertexData);
+		structures[0]->add("nor", Float3VertexData);
+		
+		structures[1] = new VertexStructure();
+		structures[1]->add("M", Float4x4VertexData);
+		structures[1]->add("N", Float4x4VertexData);
 
 		program = new Program;
 		program->setVertexShader(vertexShader);
 		program->setFragmentShader(fragmentShader);
-		program->link(structure);
+		program->link(structures, 2);
 
 		tex = program->getTextureUnit("tex");
 		pLocation = program->getConstantLocation("P");
 		vLocation = program->getConstantLocation("V");
-		mLocation = program->getConstantLocation("M");
-		nLocation = program->getConstantLocation("N");
 		lightPosLocation = program->getConstantLocation("lightPos");
 		tintLocation = program->getConstantLocation("tint");
 		
-		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
+		sphereMesh = new MeshObject("cube.obj", "cube.png", *structures[0]);
+		projectileMesh = new MeshObject("projectile.obj", "projectile.png", *structures[0], PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(1.0f, false, false);
 		spherePO->Collider.radius = 0.5f;
@@ -318,11 +319,11 @@ namespace {
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
+		tmc->mesh = new MeshObject("level.obj", "level.png", *structures[0]);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structure, 10);
-		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
+		tankTop = new MeshObject("tank_top.obj", "cube.png", *structures[0], 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", *structures[0], 10);
 		tanks.push_back(Tank(tankTop, tankBottom));
 
 		/*Sound* winSound;
@@ -336,9 +337,9 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
+		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
 
-		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
+		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();

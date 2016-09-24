@@ -5,11 +5,10 @@
 
 using namespace Kore;
 
-Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) : maxProj(maxProjectiles) {
+Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** particleStructures, PhysicsWorld* physics) : maxProj(maxProjectiles) {
 	projectiles = new Projectile*[maxProjectiles];
 	for (int i = 0; i < maxProjectiles; i++) {
-		projectiles[i] = new Projectile();
-		projectiles[i]->init(particleTex, mesh, particleStructure, physics);
+		projectiles[i] = new Projectile(particleTex, mesh, particleStructures, physics);
 	}
 	currProj = 0;
 }

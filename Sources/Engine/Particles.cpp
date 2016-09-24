@@ -9,7 +9,7 @@
 
 using namespace Kore;
 
-ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image) :
+ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, VertexStructure** structures, Texture* image) :
 	colorStart(colorS),
 	colorEnd(colorE),
 	gravity(grav),
@@ -24,19 +24,21 @@ ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive,
 	spawnRate = 0.05f;
 	nextSpawn = spawnRate;
 
-	init(size / 2, structure);
+	init(size / 2, maxParticles, structures);
 	setPosition(pos);
 	setDirection(dir);
 }
 
-void ParticleSystem::init(float halfSize, const VertexStructure& structure) {
-	vb = new VertexBuffer(4, structure, 0);
-	float* vertices = vb->lock();
+void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** structures) {
+	vbs[0] = new VertexBuffer(4, *structures[0], 0);
+	float* vertices = vbs[0]->lock();
 	setVertex(vertices, 0, -1 * halfSize, -1 * halfSize, 0, 0, 0);
 	setVertex(vertices, 1, -1 * halfSize, 1 * halfSize, 0, 0, 1);
 	setVertex(vertices, 2, 1 * halfSize, 1 * halfSize, 0, 1, 1);
 	setVertex(vertices, 3, 1 * halfSize, -1 * halfSize, 0, 1, 0);
-	vb->unlock();
+	vbs[0]->unlock();
+	
+	vbs[1] = new VertexBuffer(maxParticles, *structures[1], 1);
 
 	// Set index buffer
 	ib = new IndexBuffer(6);
@@ -69,6 +71,26 @@ void ParticleSystem::setVertex(float* vertices, int index, float x, float y, flo
 	vertices[index * 8 + 5] = 0.0f;
 	vertices[index * 8 + 6] = 0.0f;
 	vertices[index * 8 + 7] = -1.0f;
+}
+
+void ParticleSystem::setMatrix(float* data, int instanceIndex, int matIndex, mat4 m) {
+	int offset = (instanceIndex * 2 + matIndex) * 16;
+	data[offset +  0] = m[0][0];
+	data[offset +  1] = m[0][1];
+	data[offset +  2] = m[0][2];
+	data[offset +  3] = m[0][3];
+	data[offset +  4] = m[1][0];
+	data[offset +  5] = m[1][1];
+	data[offset +  6] = m[1][2];
+	data[offset +  7] = m[1][3];
+	data[offset +  8] = m[2][0];
+	data[offset +  9] = m[2][1];
+	data[offset + 10] = m[2][2];
+	data[offset + 11] = m[2][3];
+	data[offset + 12] = m[3][0];
+	data[offset + 13] = m[3][1];
+	data[offset + 14] = m[3][2];
+	data[offset + 15] = m[3][3];
 }
 
 void ParticleSystem::update(float deltaTime) {
@@ -107,6 +129,7 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 	view.Set(1, 3, 0.0f);
 	view.Set(2, 3, 0.0f);
 
+	int alive = 0;
 	for (int i = 0; i < numParticles; i++) {
 		// Skip dead particles
 		if (particleTTL[i] <= 0.0f) continue;
@@ -116,14 +139,21 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 		Graphics::setFloat4(tintLocation, colorStart * interpolation + colorEnd * (1.0f - interpolation));
 
 		mat4 M = mat4::Translation(particlePos[i].x(), particlePos[i].y(), particlePos[i].z()) * mat4::Scale(0.2f, 0.2f, 0.2f);
-		Graphics::setMatrix(mLocation, M * view);
-		Graphics::setMatrix(nLocation, calculateN(M * view));
+		
+		float* data = vbs[1]->lock();
+		setMatrix(data, alive, 0, M * view);
+		setMatrix(data, alive, 1, calculateN(M * view));
+		vbs[1]->unlock();
 
-		Graphics::setTexture(tex, texture);
-		Graphics::setVertexBuffer(*vb);
-		Graphics::setIndexBuffer(*ib);
-		Graphics::drawIndexedVertices();
+		++alive;
 	}
+	
+	Graphics::setTexture(tex, texture);
+	Graphics::setVertexBuffers(vbs, 2);
+	Graphics::setIndexBuffer(*ib);
+	Graphics::drawIndexedVertices();
+	Graphics::drawIndexedVerticesInstanced(alive);
+
 	Graphics::setRenderState(RenderState::DepthWrite, true);
 	Graphics::setRenderState(RenderState::DepthTest, true);
 }
