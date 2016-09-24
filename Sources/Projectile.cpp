@@ -6,7 +6,7 @@ using namespace Kore;
 Projectile::Projectile() {}
 
 void Projectile::init(Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) {
-	physicsObject = new PhysicsObject(false, 0.001f);
+	physicsObject = new PhysicsObject(0.001f, true, true);
 	physicsObject->Collider.radius = 0.5f * PROJECTILE_SIZE;
 	physicsObject->Mesh = mesh;
 	physics->AddDynamicObject(physicsObject);
