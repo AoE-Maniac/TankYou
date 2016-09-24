@@ -25,7 +25,8 @@ vec3 Position;
 Quat Rotation;
 
 public:
-	bool IsStatic;
+	bool IgnoreGravity;
+	bool IgnoreRotation;
 	float Mass;
 	vec3 Velocity;
 	vec3 AngularVelocity;
@@ -49,7 +50,7 @@ public:
 	
 	MeshObject* Mesh;
 
-	PhysicsObject(bool isStatic, float mass);
+	PhysicsObject(float mass, bool ignoreGravity, bool ignoreRotation);
 
 	// Do the integration step for the equations of motion
 	void Integrate(float deltaT);

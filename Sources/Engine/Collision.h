@@ -355,6 +355,33 @@ public:
 		return !separated;
 	}
 
+	bool IntersectsWith(vec3 orig, vec3 dir) const {
+		float t0, t1; // solutions for t if the ray intersects 
+		// geometric solution
+		vec3 L = center - orig;
+		float tca = L * dir;
+		// if (tca < 0) return false;
+		float d2 = L * L - tca * tca;
+		if (d2 > radius * radius) return false;
+		float thc = Kore::sqrt(radius * radius - d2);
+		t0 = tca - thc;
+		t1 = tca + thc;
+
+		if (t0 > t1) {
+			float temp = t0;
+			t0 = t1;
+			t1 = temp;
+		}
+
+		if (t0 < 0) {
+			t0 = t1; // if t0 is negative, let's use t1 instead 
+			if (t0 < 0) return false; // both t0 and t1 are negative 
+		}
+
+		//t = t0;
+
+		return true;
+	}
 };
 
 

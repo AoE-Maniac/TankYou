@@ -19,7 +19,9 @@ void PhysicsWorld::Update(float deltaT) {
 
 		// Apply gravity (= constant accceleration, so we multiply with the mass and divide in the integration step.
 		// The alternative would be to add gravity during the integration as a constant.
-		(*currentP)->ApplyForceToCenter(vec3(0, (*currentP)->Mass * -9.81, 0));
+		if (!(*currentP)->IgnoreGravity) {
+			(*currentP)->ApplyForceToCenter(vec3(0, (*currentP)->Mass * -9.81, 0));
+		}
 
 		// Check for collisions with the other objects
 		for (int j = i + 1; j < currentDynamicObjects; j++) {
