@@ -8,6 +8,8 @@ public:
 	void render(ConstantLocation mLocation, ConstantLocation nLocation, TextureUnit tex);
 	void rotateTurret(float angle);
 	void update(float deltaT);
+	vec3 getTurretLookAt();
+	vec3 getPosition();
 
 private:
 	MeshObject* Top;
