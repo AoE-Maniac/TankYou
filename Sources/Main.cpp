@@ -93,7 +93,7 @@ namespace {
 	MeshObject* tankTop;
 	MeshObject* tankBottom;
 
-	std::vector<Tank> tanks;
+	std::vector<Tank*> tanks;
     
     vec3 targetPosition = vec3(25, 0.5f, 15);
 
@@ -169,7 +169,7 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		spherePO->ApplyForceToCenter(force);
+		//spherePO->ApplyForceToCenter(force);
         
 //        Tank tank = tanks[0];
 //        vec3 currentPos = tank.getPosition();
@@ -183,12 +183,12 @@ namespace {
 		
         
         for (int i = 0; i < tanks.size(); i++) {
-            Tank tank = tanks[i];
-            tank.SetPosition(spherePO->GetPosition());
-            //tank.ApplyForceToCenter(force);
-            //tank.Integrate(deltaT);
-            tank.update(deltaT);
-            tank.render(mLocation, nLocation, tex);
+            Tank* tank = tanks[i];
+            //tank.SetPosition(spherePO->GetPosition());
+            tank->ApplyForceToCenter(force);
+            tank->Integrate(deltaT);
+            tank->update(deltaT);
+            tank->render(mLocation, nLocation, tex);
         }
 
 		// Check for game over
@@ -200,16 +200,16 @@ namespace {
 		// Render dynamic objects
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject** currentP = &physics.dynamicObjects[i];
-			(*currentP)->UpdateMatrix();
-			(*currentP)->Mesh->render(mLocation, nLocation, tex);
+			//(*currentP)->UpdateMatrix();
+			//(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
 		
         
         // Update physics
-        physics.Update(deltaT);
+        //physics.Update(deltaT);
 		
 
-		renderLandscape(mLocation, nLocation);
+		//renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -231,8 +231,8 @@ namespace {
 	}
 
 	void ResetSphere(vec3 Position, vec3 Velocity) {
-		spherePO->SetPosition(Position);
-		spherePO->Velocity = Velocity;
+		//spherePO->SetPosition(Position);
+		//spherePO->Velocity = Velocity;
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -283,8 +283,8 @@ namespace {
 		if(tanks.empty()) {
 			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
 		} else {
-			vec3 p = tanks.front().getPosition();
-			vec3 l = tanks.front().getTurretLookAt();
+			vec3 p = tanks.front()->getPosition();
+			vec3 l = tanks.front()->getTurretLookAt();
 			projectiles->fire(p, l, 10);
 			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
 		}
@@ -342,7 +342,7 @@ namespace {
         //tank->Mesh = tankBottom;
         tank->SetPosition(vec3(0, 1, 0));
         physics.AddDynamicObject(tank);
-        tanks.push_back(*tank);
+        tanks.push_back(tank);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
