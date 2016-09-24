@@ -6,31 +6,38 @@
 using namespace Kore;
 
 Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) : maxProj(maxProjectiles) {
-	projectiles = new Projectile[maxProjectiles];
+	projectiles = new Projectile*[maxProjectiles];
 	for (int i = 0; i < maxProjectiles; i++) {
-		projectiles[i].init(particleTex, mesh, particleStructure, physics);
+		projectiles[i] = new Projectile();
+		projectiles[i]->init(particleTex, mesh, particleStructure, physics);
 	}
 	currProj = 0;
 }
 
 void Projectiles::fire(vec3 pos, vec3 dir, float s) {
 	assert(currProj + 1 < maxProj);
-	projectiles[currProj].fire(pos, dir, s);
+	projectiles[currProj]->fire(pos, dir, s);
 	currProj++;
 }
 
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < currProj; i++) {
-		if (projectiles[i].timeToLife > 0) {
-			projectiles[i].update(deltaT);
+		if (projectiles[i]->timeToLife > 0) {
+			projectiles[i]->update(deltaT);
+		}
+		else {
+			Projectile* temp = projectiles[i];
+			projectiles[i] = projectiles[currProj - 1];
+			projectiles[currProj - 1] = temp;
+
+			--currProj;
+			--i;
 		}
 	}
 }
 
 void Projectiles::render(ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
 	for (int i = 0; i < currProj; i++) {
-		if (projectiles[i].timeToLife > 0) {
-			projectiles[i].render(mLocation, nLocation, vLocation, tintLocation, tex, view);
-		}
+		projectiles[i]->render(mLocation, nLocation, vLocation, tintLocation, tex, view);
 	}
 }
