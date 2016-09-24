@@ -195,7 +195,7 @@ namespace {
 		});
 		
 
-		//renderLandscape(mLocation, nLocation);
+		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
