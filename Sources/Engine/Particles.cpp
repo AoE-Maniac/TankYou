@@ -9,12 +9,13 @@
 
 using namespace Kore;
 
-ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure) :
+ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, const VertexStructure& structure, Texture* image) :
 	colorStart(colorS),
 	colorEnd(colorE),
 	gravity(grav),
 	totalTimeToLive(timeToLive),
-	numParticles(maxParticles) {
+	numParticles(maxParticles),
+	texture (image) {
 
 	particlePos = new vec3[maxParticles];
 	particleVel = new vec3[maxParticles];
@@ -94,7 +95,7 @@ void ParticleSystem::update(float deltaTime) {
 	}
 }
 
-void ParticleSystem::render(TextureUnit tex, Texture* image, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V) {
+void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V) {
 	Graphics::setBlendingMode(BlendingOperation::SourceAlpha, BlendingOperation::InverseSourceAlpha);
 	Graphics::setRenderState(RenderState::DepthWrite, false);
 	
@@ -117,7 +118,7 @@ void ParticleSystem::render(TextureUnit tex, Texture* image, ConstantLocation vL
 		Graphics::setMatrix(mLocation, M * view);
 		Graphics::setMatrix(nLocation, calculateN(M * view));
 
-		Graphics::setTexture(tex, image);
+		Graphics::setTexture(tex, texture);
 		Graphics::setVertexBuffer(*vb);
 		Graphics::setIndexBuffer(*ib);
 		Graphics::drawIndexedVertices();
