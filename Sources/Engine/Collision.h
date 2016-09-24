@@ -363,7 +363,7 @@ public:
 		// if (tca < 0) return false;
 		float d2 = L * L - tca * tca;
 		if (d2 > radius * radius) return false;
-		float thc = sqrt(radius * radius - d2);
+		float thc = Kore::sqrt(radius * radius - d2);
 		t0 = tca - thc;
 		t1 = tca + thc;
 
