@@ -1,4 +1,4 @@
-#include "Engine/pch.h"
+#include "pch.h"
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
@@ -17,6 +17,7 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 #include "Engine/Rendering.h"
+#include "Landscape.h"
 
 using namespace Kore;
 
@@ -165,11 +166,13 @@ namespace {
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
 
+		renderLandscape(mLocation, nLocation);
+
 		// Render static objects
-		for (int i = 0; i < physics.currentStaticColliders; i++) {
+		/*for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(mLocation, nLocation, tex);
-		}
+		}*/
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
@@ -279,6 +282,8 @@ namespace {
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
+
+		createLandscape();
 	}
 }
 
