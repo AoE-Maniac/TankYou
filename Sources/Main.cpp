@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
@@ -67,7 +68,6 @@ namespace {
 	MeshObject* sphereMesh;
 	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
-    PhysicsObject* enemy;
 
 	Projectiles* projectiles;
 
@@ -95,7 +95,7 @@ namespace {
 
 	std::vector<Tank> tanks;
     
-    vec3 targetPosition = vec3(-15, 0.5f, -15);
+    vec3 targetPosition = vec3(25, 0.5f, 15);
 
 	void update() {
 		double t = System::time() - startTime;
@@ -169,18 +169,27 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		enemy->ApplyForceToCenter(force);
+		spherePO->ApplyForceToCenter(force);
         
-        vec3 currentPos = spherePO->GetPosition();
-        vec3 maxVelocity = vec3(0.1f,0.1f,0.1f);
+//        Tank tank = tanks[0];
+//        vec3 currentPos = tank.getPosition();
+//        vec3 maxVelocity = vec3(1.1f,1.1f,1.1f);
         //vec3 velocity = move->Seek(currentPos, enemy->GetPosition(), maxVelocity);
         //vec3 velocity = move->PursueTarget(currentPos, enemy->GetPosition(), spherePO->Velocity, enemy->Velocity, 0.1f);
-        vec3 velocity = move->Wander(currentPos, targetPosition, maxVelocity);
-        //log(Info, "%f %f %f", targetPosition.x(), targetPosition.y(), targetPosition.z());
-        spherePO->ApplyImpulse(velocity);
+//        targetPosition = spherePO->GetPosition();
+//        vec3 velocity = move->Wander(currentPos, targetPosition, maxVelocity);
+//        log(Info, "%f %f %f", velocity.x(), velocity.y(), velocity.z());
 
-		// Update physics
-		physics.Update(deltaT);
+		
+        
+        for (int i = 0; i < tanks.size(); i++) {
+            Tank tank = tanks[i];
+            tank.SetPosition(spherePO->GetPosition());
+            //tank.ApplyForceToCenter(force);
+            //tank.Integrate(deltaT);
+            tank.update(deltaT);
+            tank.render(mLocation, nLocation, tex);
+        }
 
 		// Check for game over
 		bool result = spherePO->Collider.IntersectsWith(boxCollider);
@@ -194,12 +203,12 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
-		/*
-		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
-			tank.update();
-			tank.render(mLocation, nLocation, tex);
-		});
-		*/
+		
+        
+        // Update physics
+        physics.Update(deltaT);
+		
+
 		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
@@ -263,15 +272,22 @@ namespace {
 		dir.normalize();
 
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
-			PhysicsObject* p = physics.dynamicObjects[i];
+			PhysicsObject* p = physics.dynamicObjects[i];/*
 			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
-				//log(Info, "Picky");
-			}
+				log(Info, "Picky");
+			}*/
 		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		if(tanks.empty()) {
+			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		} else {
+			vec3 p = tanks.front().getPosition();
+			vec3 l = tanks.front().getTurretLookAt();
+			projectiles->fire(p, l, 10);
+			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
+		}
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -314,22 +330,20 @@ namespace {
 
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
         
-        enemy = new PhysicsObject(1.0f, true, false);
-        //enemy->Collider.radius = 0.5f;
-        enemy->Mass = 1;
-        enemy->Mesh = sphereMesh;
-        physics.AddDynamicObject(enemy);
-        enemy->SetPosition(vec3(-20, 5.5f, 20));
-        enemy->Velocity = vec3(0, 0, 0);
-        
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structure);
-		tankBottom = new MeshObject("tank_bottom.obj", "cube.png", structure);
-		tanks.push_back(Tank(tankTop, tankBottom));
-
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structure, 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
+        Tank* tank = new Tank(tankTop, tankBottom);
+        tank->Collider.radius = 0.5f;
+        //tank->Mass = 5;
+        //tank->Mesh = tankBottom;
+        tank->SetPosition(vec3(0, 1, 0));
+        physics.AddDynamicObject(tank);
+        tanks.push_back(*tank);
+        
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
 		Mixer::play(winSound);*/
@@ -341,7 +355,7 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
+		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
 
