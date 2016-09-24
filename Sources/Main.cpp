@@ -247,6 +247,21 @@ namespace {
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
 		mouseX = x;
 		mouseY = y;
+
+		float screenX = (x / (float)width - 0.5f) * 2.0f;
+		float screenY = (y / (float)height - 0.5f) * 2.0f;
+
+		vec4 position = PV.Invert() * vec4(screenX, screenY, -1, 1);
+
+		vec3 dir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
+		dir.normalize();
+
+		for (int i = 0; i < physics.currentDynamicObjects; i++) {
+			PhysicsObject* p = physics.dynamicObjects[i];
+			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
+				log(Info, "Picky");
+			}
+		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
