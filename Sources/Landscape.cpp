@@ -28,11 +28,11 @@ void createLandscape() {
 			int color = 0xff00 & map->at(static_cast<int>(x / (float)(w + 1) * map->width), static_cast<int>(y / (float)(h + 1) * map->height));
 			color >>= 8;
 			int normal = normalmap->at(static_cast<int>(x / (float)(w + 1) * map->width), static_cast<int>(y / (float)(h + 1) * map->height));
-			int nxi = (normal & 0xff0000) >> 16;
-			int nyi = (normal & 0xff00) >> 8;
-			int nzi = (normal & 0xff) >> 0;
+			int nxi = (normal & 0xff000000) >> 24;
+			int nyi = (normal & 0xff0000) >> 16;
+			int nzi = (normal & 0xff00) >> 8;
 			float nx = (nxi / 255.0f - 0.5f) * 2.0f;
-			float ny = (nyi / 255.0f - 0.5f) * 2.0f; ny *= -1.0f;
+			float ny = (nyi / 255.0f - 0.5f) * 2.0f;
 			float nz = (nzi / 255.0f - 0.5f) * 2.0f;
 			vertices[i++] = -size / 2 + size / w * x; vertices[i++] = color / 255.0f * 10.0f; vertices[i++] = -size / 2 + size / h * y; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
 		}
