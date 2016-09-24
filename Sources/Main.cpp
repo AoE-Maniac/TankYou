@@ -285,7 +285,7 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(false, 1.0f);
+		spherePO = new PhysicsObject(1.0f, false, false);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mass = 5;
 		spherePO->Mesh = sphereMesh;

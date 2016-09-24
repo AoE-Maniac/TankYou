@@ -1,7 +1,7 @@
 #include "Tank.h"
 #include "Kore/Math/Matrix.h"
 
-Tank::Tank(MeshObject* top, MeshObject* bottom) : PhysicsObject(false, 100), Top(top), Bottom(bottom) {
+Tank::Tank(MeshObject* top, MeshObject* bottom) : PhysicsObject(100, true, true), Top(top), Bottom(bottom) {
 	Mesh = bottom;
 }
 
