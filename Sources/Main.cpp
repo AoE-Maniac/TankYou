@@ -60,10 +60,10 @@ namespace {
 	float lightPosZ;
 
 	MeshObject* sphereMesh;
-	MeshObject* projectileMesh;
+//	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
 
-	Projectile* projectile;
+//	Projectile* projectile;
 
 	PhysicsWorld physics;
 	
@@ -159,11 +159,8 @@ namespace {
 		//spherePO->ApplyForceToCenter(force);
         
         vec3 targetPosition = vec3(-10, 5.5f, -13);
-        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 3.0f);
-        if(!move->Arrive(spherePO->GetPosition(), targetPosition))
-            spherePO->ApplyImpulse(velocity);
-        else
-            spherePO->ApplyImpulse(vec3(0,0,0));
+        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        spherePO->ApplyImpulse(velocity);
 
 		// Update physics
 		physics.Update(deltaT);
@@ -195,8 +192,8 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
 
-		projectile->update(deltaT);
-		projectile->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+//		projectile->update(deltaT);
+//		projectile->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -237,7 +234,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectile->fire(vec3(0, 2, 0), vec3(0, 0, 1), 10);
+//		projectile->fire(vec3(0, 2, 0), vec3(0, 0, 1), 10);
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -270,7 +267,7 @@ namespace {
 		tintLocation = program->getConstantLocation("tint");
 		
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure);
+//		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure);
 
 		spherePO = new PhysicsObject(false, 1.0f);
 		spherePO->Collider.radius = 0.5f;
@@ -297,7 +294,7 @@ namespace {
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
 
-		projectile = new Projectile(particleImage, projectileMesh, structure, &physics);
+//		projectile = new Projectile(particleImage, projectileMesh, structure, &physics);
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
