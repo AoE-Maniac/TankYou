@@ -16,11 +16,11 @@ public:
     
     Steering();
     
-    vec3 Seek(vec3 characterPos, vec3 targetPos, float maxVelocity);
+    vec3 Seek(vec3 characterPos, vec3 targetPos, vec3 maxVelocity);
     
-    vec3 Flee(vec3 characterPos, vec3 targetPos, float maxVelocity);
+    vec3 Flee(vec3 characterPos, vec3 targetPos, vec3 maxVelocity);
     
-    vec3 Wander(vec3 characterPos, vec3 targetPos);
+    vec3 Wander(vec3 characterPos, vec3& targetPos, vec3 maxVelocity);
     
     vec3 PursueTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel, vec3 targetVel, float maxVelocity);
     

@@ -3,13 +3,13 @@
 
 Steering::Steering() {
     Random::init(1);
-    ariveRadius = 5;
+    ariveRadius = 10;
 }
 
-vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
+vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, vec3 maxVelocity) {
     vec3 distance = targetPos - characterPos;
-    distance = distance / distance.getLength();
-    distance.multiply(maxVelocity);
+    distance = distance.normalize();
+    distance.multiplyComponents(maxVelocity);
     
     if (distance.getLength() < ariveRadius) {
         // Slow down the character
@@ -19,20 +19,21 @@ vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
     return distance;
 }
 
-vec3 Steering::Flee(vec3 characterPos, vec3 targetPos, float maxVelocity) {
+vec3 Steering::Flee(vec3 characterPos, vec3 targetPos, vec3 maxVelocity) {
     return -Seek(characterPos, targetPos, maxVelocity);
 }
 
-vec3 Steering::Wander(vec3 characterPos, vec3 targetPos) {
-    float randVelocity = Random::get(1, 2);
-
-    return Seek(characterPos, targetPos, randVelocity);
+vec3 Steering::Wander(vec3 characterPos, vec3& targetPos, vec3 maxVelocity) {
+    if (Arrive(characterPos, targetPos)) {
+        targetPos = vec3(characterPos.x() + Random::get(-20,20), 1, characterPos.z() + Random::get(-20,20));
+    }
+    return Seek(characterPos, targetPos, maxVelocity);
 }
 
 vec3 Steering::PursueTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel, vec3 targetVel, float maxVelocity) {
     vec3 distance = targetPos - characterPos;
-    float time = distance.getLength() / maxVelocity;    // time needed to catch the target
-    vec3 p = targetPos + targetVel * time;              // predict the target position
+    float time = distance.getLength() / maxVelocity;    // Time needed to catch the target
+    vec3 p = targetPos + targetVel * time;              // Predict the target position
     vec3 velocity = p - characterPos;
     velocity = velocity / velocity.getLength();
     velocity.multiply(maxVelocity);

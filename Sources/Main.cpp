@@ -67,6 +67,7 @@ namespace {
 	MeshObject* sphereMesh;
 	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
+    PhysicsObject* enemy;
 
 	Projectiles* projectiles;
 
@@ -93,6 +94,8 @@ namespace {
 	MeshObject* tankBottom;
 
 	std::vector<Tank> tanks;
+    
+    vec3 targetPosition = vec3(-15, 0.5f, -15);
 
 	void update() {
 		double t = System::time() - startTime;
@@ -166,11 +169,14 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		//spherePO->ApplyForceToCenter(force);
+		enemy->ApplyForceToCenter(force);
         
-        vec3 targetPosition = vec3(-15, 0.5f, -15);
-        //vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
-        vec3 velocity = move->PursueTarget(spherePO->GetPosition(), targetPosition, vec3(0.1f, 0.2f, 0.0f), vec3(0, 0, 0), 0.1f);
+        vec3 currentPos = spherePO->GetPosition();
+        vec3 maxVelocity = vec3(0.1f,0.1f,0.1f);
+        //vec3 velocity = move->Seek(currentPos, enemy->GetPosition(), maxVelocity);
+        //vec3 velocity = move->PursueTarget(currentPos, enemy->GetPosition(), spherePO->Velocity, enemy->Velocity, 0.1f);
+        vec3 velocity = move->Wander(currentPos, targetPosition, maxVelocity);
+        //log(Info, "%f %f %f", targetPosition.x(), targetPosition.y(), targetPosition.z());
         spherePO->ApplyImpulse(velocity);
 
 		// Update physics
@@ -259,7 +265,7 @@ namespace {
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject* p = physics.dynamicObjects[i];
 			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
-				log(Info, "Picky");
+				//log(Info, "Picky");
 			}
 		}
 	}
@@ -300,13 +306,21 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(1.0f, false, false);
+		spherePO = new PhysicsObject(1.0f, true, false);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mass = 5;
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
 
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
+        
+        enemy = new PhysicsObject(1.0f, true, false);
+        //enemy->Collider.radius = 0.5f;
+        enemy->Mass = 1;
+        enemy->Mesh = sphereMesh;
+        physics.AddDynamicObject(enemy);
+        enemy->SetPosition(vec3(-20, 5.5f, 20));
+        enemy->Velocity = vec3(0, 0, 0);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
@@ -335,6 +349,8 @@ namespace {
 		lookAt = spherePO->GetPosition();
         
         move = new Steering;
+        
+        Random::init(123);
 
 		createLandscape();
 	}
