@@ -30,6 +30,7 @@ ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive,
 }
 
 void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** structures) {
+	vbs = new VertexBuffer*[2];
 	vbs[0] = new VertexBuffer(4, *structures[0], 0);
 	float* vertices = vbs[0]->lock();
 	setVertex(vertices, 0, -1 * halfSize, -1 * halfSize, 0, 0, 0);

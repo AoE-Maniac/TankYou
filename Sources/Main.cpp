@@ -286,7 +286,7 @@ namespace {
 		fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 
 		// This defines the structure of your Vertex Buffer
-		VertexStructure** structures;
+		VertexStructure** structures = new VertexStructure*[2];
 		structures[0] = new VertexStructure();
 		structures[0]->add("pos", Float3VertexData);
 		structures[0]->add("tex", Float2VertexData);
