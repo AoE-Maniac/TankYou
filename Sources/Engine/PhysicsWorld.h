@@ -18,7 +18,7 @@ using namespace Kore;
 #include "PhysicsObject.h"
 
 #define MAX_STATIC_MESHES 10
-#define MAX_DYNAMIC_MESHES 100
+#define MAX_DYNAMIC_MESHES 1000
 
 class PhysicsObject;
 
