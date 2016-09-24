@@ -20,6 +20,7 @@
 #include "Landscape.h"
 
 #include "Projectiles.h"
+#include "Steering.h"
 
 using namespace Kore;
 
@@ -78,6 +79,8 @@ namespace {
 
 	Texture* particleImage;
 	ParticleSystem* particleSystem;
+    
+    Steering* move;
 
 	double lastTime;
 
@@ -153,7 +156,14 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		spherePO->ApplyForceToCenter(force);
+		//spherePO->ApplyForceToCenter(force);
+        
+        vec3 targetPosition = vec3(-10, 5.5f, -13);
+        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 3.0f);
+        if(!move->Arrive(spherePO->GetPosition(), targetPosition))
+            spherePO->ApplyImpulse(velocity);
+        else
+            spherePO->ApplyImpulse(vec3(0,0,0));
 
 		// Update physics
 		physics.Update(deltaT);
@@ -269,7 +279,7 @@ namespace {
 		physics.AddDynamicObject(spherePO);
 
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
-
+        
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
@@ -291,6 +301,8 @@ namespace {
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
+        
+        move = new Steering;
 
 		//createLandscape();
 	}
