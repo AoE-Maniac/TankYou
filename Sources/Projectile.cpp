@@ -3,9 +3,11 @@
 
 using namespace Kore;
 
-Projectile::Projectile(Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) {
+Projectile::Projectile() {}
+
+void Projectile::init(Texture* particleTex, MeshObject* mesh, const VertexStructure& particleStructure, PhysicsWorld* physics) {
 	physicsObject = new PhysicsObject(false, 0.001f);
-	physicsObject->Collider.radius = 0.5f;
+	physicsObject->Collider.radius = 0.5f * PROJECTILE_SIZE;
 	physicsObject->Mesh = mesh;
 	physics->AddDynamicObject(physicsObject);
 	
@@ -21,14 +23,18 @@ void Projectile::fire(vec3 pos, vec3 dir, float s) {
 }
 
 void Projectile::update(float deltaT) {
-	physicsObject->UpdateMatrix();
+	if (active) {
+		physicsObject->UpdateMatrix();
 
-	particles->setPosition(physicsObject->GetPosition());
-	particles->setDirection(vec3(0, 1, 0));
-	particles->update(deltaT);
+		particles->setPosition(physicsObject->GetPosition());
+		particles->setDirection(vec3(0, 1, 0));
+		particles->update(deltaT);
+	}
 }
 
 void Projectile::render(ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
-	physicsObject->Mesh->render(mLocation, nLocation, tex);
-	particles->render(tex, vLocation, mLocation, nLocation, tintLocation, view);
+	if (active) {
+		physicsObject->Mesh->render(mLocation, nLocation, tex);
+		particles->render(tex, vLocation, mLocation, nLocation, tintLocation, view);
+	}
 }

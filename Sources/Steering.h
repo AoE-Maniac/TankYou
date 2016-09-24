@@ -12,7 +12,6 @@ private:
     
     float ariveRadius;
     
-    
 public:
     
     Steering();

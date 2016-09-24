@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#include <vector>
+#include <algorithm>
+
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
 #include <Kore/Math/Random.h>
@@ -19,14 +22,16 @@
 #include "Engine/Rendering.h"
 #include "Landscape.h"
 
+#include "Projectiles.h"
 #include "Steering.h"
-#include "Projectile.h"
+
+#include "Tank.h"
 
 using namespace Kore;
 
 namespace {
-	const int width = 1024;
-	const int height = 768;
+	const int width = 800;
+	const int height = 600;
 
 	int mouseX = width / 2;
 	int mouseY = height / 2;
@@ -60,10 +65,10 @@ namespace {
 	float lightPosZ;
 
 	MeshObject* sphereMesh;
-//	MeshObject* projectileMesh;
+	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
 
-//	Projectile* projectile;
+	Projectiles* projectiles;
 
 	PhysicsWorld physics;
 	
@@ -83,6 +88,11 @@ namespace {
     Steering* move;
 
 	double lastTime;
+
+	MeshObject* tankTop;
+	MeshObject* tankBottom;
+
+	std::vector<Tank> tanks;
 
 	void update() {
 		double t = System::time() - startTime;
@@ -177,14 +187,19 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
-
+		/*
+		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
+			tank.update();
+			tank.render(mLocation, nLocation, tex);
+		});
+		*/
 		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
-		/*for (int i = 0; i < physics.currentStaticColliders; i++) {
+		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(mLocation, nLocation, tex);
-		}*/
+		}
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
@@ -192,8 +207,8 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
 
-//		projectile->update(deltaT);
-//		projectile->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+		projectiles->update(deltaT);
+		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -234,7 +249,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-//		projectile->fire(vec3(0, 2, 0), vec3(0, 0, 1), 10);
+		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -267,7 +282,7 @@ namespace {
 		tintLocation = program->getConstantLocation("tint");
 		
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
-//		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure);
+		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(false, 1.0f);
 		spherePO->Collider.radius = 0.5f;
@@ -280,6 +295,10 @@ namespace {
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
+
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structure);
+		tankBottom = new MeshObject("tank_bottom.obj", "cube.png", structure);
+		tanks.push_back(Tank(tankTop, tankBottom));
 
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -294,7 +313,7 @@ namespace {
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
 
-//		projectile = new Projectile(particleImage, projectileMesh, structure, &physics);
+		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
@@ -314,7 +333,7 @@ int kore(int argc, char** argv) {
 	options.width = width;
 	options.height = height;
 	options.x = 100;
-	options.y = 100;
+	options.y = 0;
 	options.targetDisplay = -1;
 	options.mode = WindowModeWindow;
 	options.rendererOptions.depthBufferBits = 16;
