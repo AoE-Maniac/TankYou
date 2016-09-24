@@ -22,8 +22,8 @@
 #include "Engine/Rendering.h"
 #include "Landscape.h"
 
+#include "Projectiles.h"
 #include "Steering.h"
-#include "Projectile.h"
 
 #include "Tank.h"
 
@@ -68,7 +68,7 @@ namespace {
 	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
 
-	Projectile* projectile;
+	Projectiles* projectiles;
 
 	PhysicsWorld physics;
 	
@@ -190,19 +190,19 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
-
+		/*
 		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
 			tank.update();
 			tank.render(mLocation, nLocation, tex);
 		});
-
+		*/
 		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
-		/*for (int i = 0; i < physics.currentStaticColliders; i++) {
+		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(mLocation, nLocation, tex);
-		}*/
+		}
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
@@ -210,8 +210,8 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
 
-		projectile->update(deltaT);
-		projectile->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+		projectiles->update(deltaT);
+		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -252,7 +252,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectile->fire(vec3(0, 2, 0), vec3(0, 0, 1), 10);
+		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -285,7 +285,7 @@ namespace {
 		tintLocation = program->getConstantLocation("tint");
 		
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure);
+		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(false, 1.0f);
 		spherePO->Collider.radius = 0.5f;
@@ -316,14 +316,14 @@ namespace {
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
 
-		projectile = new Projectile(particleImage, projectileMesh, structure, &physics);
+		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
         
         move = new Steering;
 
-		createLandscape();
+		//createLandscape();
 	}
 }
 
