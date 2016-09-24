@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#include <vector>
+#include <algorithm>
+
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
 #include <Kore/Math/Random.h>
@@ -22,11 +25,13 @@
 #include "Steering.h"
 #include "Projectile.h"
 
+#include "Tank.h"
+
 using namespace Kore;
 
 namespace {
-	const int width = 1024;
-	const int height = 768;
+	const int width = 800;
+	const int height = 600;
 
 	int mouseX = width / 2;
 	int mouseY = height / 2;
@@ -83,6 +88,11 @@ namespace {
     Steering* move;
 
 	double lastTime;
+
+	MeshObject* tankTop;
+	MeshObject* tankBottom;
+
+	std::vector<Tank> tanks;
 
 	void update() {
 		double t = System::time() - startTime;
@@ -180,6 +190,11 @@ namespace {
 			(*currentP)->UpdateMatrix();
 			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
+
+		std::for_each(tanks.begin(), tanks.end(), [](Tank tank) {
+			tank.update();
+			tank.render(mLocation, nLocation, tex);
+		});
 
 		renderLandscape(mLocation, nLocation);
 
@@ -284,6 +299,10 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
 		physics.AddStaticCollider(tmc);
 
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structure);
+		tankBottom = new MeshObject("tank_bottom.obj", "cube.png", structure);
+		tanks.push_back(Tank(tankTop, tankBottom));
+
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
 		Mixer::play(winSound);*/
@@ -317,7 +336,7 @@ int kore(int argc, char** argv) {
 	options.width = width;
 	options.height = height;
 	options.x = 100;
-	options.y = 100;
+	options.y = 0;
 	options.targetDisplay = -1;
 	options.mode = WindowModeWindow;
 	options.rendererOptions.depthBufferBits = 16;

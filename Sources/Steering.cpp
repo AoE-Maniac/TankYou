@@ -3,6 +3,7 @@
 
 Steering::Steering() {
     Random::init(1);
+	ariveRadius = vec3(5.0f, 5.0f, 5.0f);
 }
 
 vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
