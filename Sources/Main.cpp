@@ -169,11 +169,8 @@ namespace {
 		//spherePO->ApplyForceToCenter(force);
         
         vec3 targetPosition = vec3(-10, 5.5f, -13);
-        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 3.0f);
-        if(!move->Arrive(spherePO->GetPosition(), targetPosition))
-            spherePO->ApplyImpulse(velocity);
-        else
-            spherePO->ApplyImpulse(vec3(0,0,0));
+        vec3 velocity = move->Seek(spherePO->GetPosition(), targetPosition, 0.1f);
+        spherePO->ApplyImpulse(velocity);
 
 		// Update physics
 		physics.Update(deltaT);

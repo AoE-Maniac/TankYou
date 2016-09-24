@@ -10,8 +10,7 @@ private:
     //float maxVelocity = 2.0f;
     //float minVelocity = 1.0f;
     
-    vec3 ariveRadius;
-    
+    float ariveRadius;
     
 public:
     

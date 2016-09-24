@@ -3,14 +3,18 @@
 
 Steering::Steering() {
     Random::init(1);
-	ariveRadius = vec3(5.0f, 5.0f, 5.0f);
+    ariveRadius = 5;
 }
 
 vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
     vec3 distance = targetPos - characterPos;
-    
     distance = distance / distance.getLength();
     distance.multiply(maxVelocity);
+    
+    if (distance.getLength() < ariveRadius) {
+        // Slow down the character
+        distance / ariveRadius;
+    }
     
     return distance;
 }
@@ -42,7 +46,7 @@ vec3 Steering::EvadeTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel,
 
 bool Steering::Arrive(vec3 characterPos, vec3 targetPos) {
     vec3 distance = targetPos - characterPos;
-    if (distance.getLength() < ariveRadius.getLength())
+    if (distance.getLength() < ariveRadius)
         return true;
     return false;
 }
