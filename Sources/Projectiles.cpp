@@ -21,12 +21,16 @@ void Projectiles::fire(vec3 pos, vec3 dir, float s) {
 
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < currProj; i++) {
-		projectiles[i].update(deltaT);
+		if (projectiles[i].timeToLife > 0) {
+			projectiles[i].update(deltaT);
+		}
 	}
 }
 
 void Projectiles::render(ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
 	for (int i = 0; i < currProj; i++) {
-		projectiles[i].render(mLocation, nLocation, vLocation, tintLocation, tex, view);
+		if (projectiles[i].timeToLife > 0) {
+			projectiles[i].render(mLocation, nLocation, vLocation, tintLocation, tex, view);
+		}
 	}
 }
