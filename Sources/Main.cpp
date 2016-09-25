@@ -143,12 +143,10 @@ namespace {
 		float alpha = 0.3f;
 
 		const float cameraSpeed = 1.5f;
-			log(Kore::LogLevel::Info, "%i", mouseY);
 		if (mouseY < 50) {
 			lookAt.z() += cameraSpeed * (1 - mouseY / 50.0f);
 		}
 		if (mouseY > height - 50) {
-			log(Kore::LogLevel::Info, "%i: %f", mouseY, ((mouseY - height + 50) / 50.0f));
 			lookAt.z() -= cameraSpeed * ((mouseY - height + 50) / 50.0f);
 		}
 		if (mouseX < 50) {
