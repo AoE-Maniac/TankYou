@@ -1,26 +1,30 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay) :
+TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
-		spawnPos1(spawn1),
-		spawnPos2(spawn2),
+		spawnPos1a(spawn1a),
+		spawnPos1b(spawn1b),
+		spawnPos2a(spawn2a),
+		spawnPos2b(spawn2b),
 		spawnDelay(delay) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
 }
 
+void spawnTank(std::vector<Tank*>* tanks, vec3 spawnPosa, vec3 spawnPosb) {
+	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
+	Tank* t1 = new Tank();
+	tanks->push_back(t1);
+	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
+}
+
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		Tank* t1 = new Tank();
-		tanks.push_back(t1);
-		t1->SetPosition(spawnPos1);
-		
-		Tank* t2 = new Tank();
-		tanks.push_back(t2);
-		t2->SetPosition(spawnPos2);
+		spawnTank(&tanks, spawnPos1a, spawnPos1b);
+		spawnTank(&tanks, spawnPos2a, spawnPos2b);
 		
 		spawnTimer = spawnDelay;
 	}

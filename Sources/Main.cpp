@@ -48,6 +48,7 @@ namespace {
 	Program* program;
 
 	float cameraAngle = 0.0f;
+	float cameraZoom = 0.5f;
 
 	bool left;
 	bool right;
@@ -139,25 +140,23 @@ namespace {
 		// Interpolate the camera to not follow small physics movements
 		float alpha = 0.3f;
 
-		const float cameraSpeed = 0.5f;
+		const float cameraSpeed = 1.5f;
+			log(Kore::LogLevel::Info, "%i", mouseY);
 		if (mouseY < 50) {
-			lookAt.z() -= cameraSpeed;
-			lookAt.x() += cameraSpeed;
+			lookAt.z() += cameraSpeed * (1 - mouseY / 50.0f);
 		}
 		if (mouseY > height - 50) {
-			lookAt.z() += cameraSpeed;
-			lookAt.x() -= cameraSpeed;
+			log(Kore::LogLevel::Info, "%i: %f", mouseY, ((mouseY - height + 50) / 50.0f));
+			lookAt.z() -= cameraSpeed * ((mouseY - height + 50) / 50.0f);
 		}
 		if (mouseX < 50) {
-			lookAt.z() += cameraSpeed;
-			lookAt.x() += cameraSpeed;
+			lookAt.x() -= cameraSpeed * (1 - mouseX / 50.0f);
 		}
 		if (mouseX > width - 50) {
-			lookAt.z() -= cameraSpeed;
-			lookAt.x() -= cameraSpeed;
+			lookAt.x() += cameraSpeed * ((mouseX - width + 50) / 50.0f);
 		}
 
-		cameraPosition = lookAt + vec3(0, 80, -40);
+		cameraPosition = lookAt + vec3(0, 80, -40) * cameraZoom;
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
@@ -167,9 +166,9 @@ namespace {
 		Graphics::setMatrix(vLocation, View);
 
 		// update light pos
-		lightPosX = 20 * Kore::sin(2 * t);
-		lightPosY = 10;
-		lightPosZ = 20 * Kore::cos(2 * t);
+		lightPosX = 100; //20 * Kore::sin(2 * t);
+		lightPosY = 100; // 10;
+		lightPosZ = 100; //20 * Kore::cos(2 * t);
 		Graphics::setFloat3(lightPosLocation, lightPosX, lightPosY, lightPosZ);
 
 		// Handle inputs
@@ -288,6 +287,10 @@ namespace {
 		
 	}
 
+	void mouseScroll(int windowId, int delta) {
+		cameraZoom += delta * 0.1f;
+	}
+	
 	void init() {
 		FileReader vs("shader.vert");
 		FileReader fs("shader.frag");
@@ -333,7 +336,7 @@ namespace {
 		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
-        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3);
+        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -393,6 +396,7 @@ int kore(int argc, char** argv) {
 	Mouse::the()->Move = mouseMove;
 	Mouse::the()->Press = mousePress;
 	Mouse::the()->Release = mouseRelease;
+	Mouse::the()->Scroll = mouseScroll;
 
 	Kore::System::start();
 
