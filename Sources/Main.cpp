@@ -342,11 +342,11 @@ namespace {
         particleImage = new Texture("particle.png", true);
         particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
         
-        projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
+        projectiles = new Projectiles(1000, particleImage, projectileMesh, structures, &physics);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
-		physics.AddStaticCollider(tmc);
+		//physics.AddStaticCollider(tmc);
 
 		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
