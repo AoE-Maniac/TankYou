@@ -6,10 +6,12 @@ using namespace Kore;
 
 Kore::VertexBuffer* landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
+Kore::Texture* landscapeTexture;
 
 void createLandscape() {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
+	landscapeTexture = new Texture("sand.png", true);
 
 	const float size = 50;
 	const int w = 50;
@@ -34,7 +36,9 @@ void createLandscape() {
 			float nx = (nxi / 255.0f - 0.5f) * 2.0f;
 			float ny = (nyi / 255.0f - 0.5f) * 2.0f;
 			float nz = (nzi / 255.0f - 0.5f) * 2.0f;
-			vertices[i++] = -size / 2 + size / w * x; vertices[i++] = color / 255.0f * 10.0f; vertices[i++] = -size / 2 + size / h * y; vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
+			vertices[i++] = -size / 2 + size / w * x; vertices[i++] = color / 255.0f * 10.0f; vertices[i++] = -size / 2 + size / h * y;
+			vertices[i++] = x % 2; vertices[i++] = y % 2;
+			vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
 		}
 	}
 	landscapeVertices->unlock();
@@ -57,10 +61,11 @@ void createLandscape() {
 	landscapeIndices->unlock();
 }
 
-void renderLandscape(Kore::ConstantLocation mLocation, Kore::ConstantLocation nLocation) {
+void renderLandscape(Kore::ConstantLocation mLocation, Kore::ConstantLocation nLocation, Kore::TextureUnit tex) {
 	Graphics::setMatrix(mLocation, mat4::Identity());
 	Graphics::setMatrix(nLocation, mat4::Identity());
-
+	
+	Graphics::setTexture(tex, landscapeTexture);
 	Graphics::setVertexBuffer(*landscapeVertices);
 	Graphics::setIndexBuffer(*landscapeIndices);
 	Graphics::drawIndexedVertices();
