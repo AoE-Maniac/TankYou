@@ -6,6 +6,7 @@
 
 #include "Engine/Collision.h"
 #include "Engine/PhysicsObject.h"
+#include "Engine/Explosion.h"
 #include "Projectiles.h"
 
 enum StateMachineState {
