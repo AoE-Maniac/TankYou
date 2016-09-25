@@ -7,18 +7,16 @@
 
 #include "PhysicsObject.h"
 
-using namespace Kore;
-
 class InstancedMeshObject {
 public:
-	InstancedMeshObject(const char* meshFile, const char* textureFile, VertexStructure** structures, int maxCount, float scale = 1.0f);
+	InstancedMeshObject(const char* meshFile, const char* textureFile, Kore::VertexStructure** structures, int maxCount, float scale = 1.0f);
 	
-	VertexBuffer** vertexBuffers;
-	void render(TextureUnit tex, int instances);
+	Kore::VertexBuffer** vertexBuffers;
+	void render(Kore::TextureUnit tex, int instances);
 
 private:
-	IndexBuffer* indexBuffer;
+	Kore::IndexBuffer* indexBuffer;
 
 	Mesh* mesh;
-	Texture* image;
+	Kore::Texture* image;
 };

@@ -2,34 +2,32 @@
 
 #include <Kore/Graphics/Graphics.h>
 
-using namespace Kore;
-
 class Particle;
 
 class ParticleSystem {
 public:
-	ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive, vec4 colorS, vec4 colorE, float grav, int maxParticles, VertexStructure** structures, Texture* image);
+	ParticleSystem(Kore::vec3 pos, Kore::vec3 dir, float size, float timeToLive, Kore::vec4 colorS, Kore::vec4 colorE, float grav, int maxParticles, Kore::VertexStructure** structures, Kore::Texture* image);
 
-	void setPosition(vec3 position);
-	void setDirection(vec3 direction);
+	void setPosition(Kore::vec3 position);
+	void setDirection(Kore::vec3 direction);
 	void update(float deltaTime);
-	void render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V);
+	void render(Kore::TextureUnit tex, Kore::ConstantLocation vLocation, Kore::ConstantLocation tintLocation, Kore::mat4 V);
 
 //private:
-	VertexBuffer** vbs;
-	IndexBuffer* ib;
-	Texture* texture;
+	Kore::VertexBuffer** vbs;
+	Kore::IndexBuffer* ib;
+	Kore::Texture* texture;
 
 	// The coordinates of the emitter box
-	vec3 emitMin;
-	vec3 emitMax;
+	Kore::vec3 emitMin;
+	Kore::vec3 emitMax;
 
 	// The direction of the emission
-	vec3 emitDir;
+	Kore::vec3 emitDir;
 
 	// Particle data
-	vec3* particlePos; // The current position
-	vec3* particleVel; // The current velocity
+	Kore::vec3* particlePos; // The current position
+	Kore::vec3* particleVel; // The current velocity
 	float* particleTTL; // The remaining time to live
 
 	// The number of particles
@@ -45,16 +43,16 @@ public:
 	float totalTimeToLive;
 
 	// The beginning color
-	vec4 colorStart;
+	Kore::vec4 colorStart;
 
 	// The end color
-	vec4 colorEnd;
+	Kore::vec4 colorEnd;
 
 	// The number of particles
 	float gravity;
     float spawnArea = 0.1;
 
-	void init(float halfSize, int maxParticles, VertexStructure** structures);
+	void init(float halfSize, int maxParticles, Kore::VertexStructure** structures);
 	void emitParticle(int index);
 	float getRandom(float minValue, float maxValue);
 };

@@ -1,9 +1,7 @@
 #include "Engine/pch.h"
 #include "Projectiles.h"
-
 #include <cassert>
 
-using namespace Kore;
 using namespace Kore;
 
 Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
