@@ -12,9 +12,9 @@ Tank::Tank(MeshObject* top, MeshObject* bottom) : PhysicsObject(10, true, true),
 	setTurretTransform();
 }
 
-void Tank::render(TextureUnit tex) {
-	Top->render(tex);
-	Bottom->render(tex);
+void Tank::render(TextureUnit tex, mat4 V) {
+	Top->render(tex, V);
+	Bottom->render(tex, V);
 }
 
 void Tank::update(float deltaT) {
