@@ -16,7 +16,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { log(Info, "Projectile %d collided with %d", i, other); kill(i); };
+		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
 		physics->AddDynamicObject(physicsObject[i]);
@@ -32,9 +32,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 }
 
 void Projectiles::fire(vec3 pos, vec3 dir, float s, int dmg) {
-	log(Info, "fire!");
 	assert(currProj + 1 < maxProj);
-
 	vec3 direction = dir.normalize();
 	physicsObject[currProj]->SetPosition(pos);
 	physicsObject[currProj]->Velocity = direction * s;
@@ -73,17 +71,12 @@ void Projectiles::update(float deltaT) {
 }
 
 void Projectiles::kill(int projectile) {
-	log(Info, "kill %d", projectile);
 	timeToLife[projectile] = timeToLife[currProj - 1];
 	timeToLife[currProj - 1] = -1;
 
 	damage[projectile] = damage[currProj - 1];
 	damage[currProj - 1] = 1;
-	log(Info, "currProj: %d", currProj);
-	log(Info, "physicsObject: %p", physicsObject);
-	log(Info, "physicsObject[...]: %p", &physicsObject[currProj-1]);
 	auto ctemp = physicsObject[currProj - 1]->callback;
-	log(Info, "bla");
 	PhysicsObject* physicsObjectTemp = physicsObject[projectile];
 	physicsObject[projectile] = physicsObject[currProj - 1];
 	physicsObject[projectile]->callback = physicsObjectTemp->callback;
