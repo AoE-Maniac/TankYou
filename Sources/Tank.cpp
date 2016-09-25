@@ -2,19 +2,22 @@
 #include "Kore/Math/Matrix.h"
 
 void Tank::setTurretTransform() {
-	Top->M = mat4::Translation(0,1,0) * Bottom->M * mat4::Rotation(turretAngle, 0, 0);
+	Top->M = mat4::Translation(0,1,0) * Bottom->M * mat4::Scale(1.7, 1.7, 1.7) *mat4::Rotation(turretAngle, 0, 0);
+    Flag->M = mat4::Translation(0,3,0) * Bottom->M * mat4::Scale(0.5, 0.5, 0.5)* mat4::Rotation(pi/4, 0, 0);
+
 }
 
-Tank::Tank(MeshObject* top, MeshObject* bottom) : PhysicsObject(10, true, true), Top(top), Bottom(bottom) {
+Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObject(10, true, true), Top(top), Bottom(bottom) , Flag(flag){
 	Mesh = bottom;
 	bottom->M = mat4::Identity();
 	turretAngle = 0;
 	setTurretTransform();
 }
 
-void Tank::render(TextureUnit tex) {
-	Top->render(tex);
-	Bottom->render(tex);
+void Tank::render(TextureUnit tex, mat4 V) {
+	Top->render(tex, V);
+	Bottom->render(tex, V);
+    Flag->render(tex, V);
 }
 
 void Tank::update(float deltaT) {

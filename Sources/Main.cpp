@@ -90,6 +90,7 @@ namespace {
 
 	MeshObject* tankTop;
 	MeshObject* tankBottom;
+    MeshObject* tankFlag;
 
 	std::vector<Tank*> tanks;
     
@@ -113,6 +114,7 @@ namespace {
 		program->set();
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
+		Graphics::setRenderState(BackfaceCulling, NoCulling);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -195,7 +197,7 @@ namespace {
 
             tank->Integrate(deltaT);
             tank->update(deltaT);
-            tank->render(tex);
+            tank->render(tex, View);
         }
 		
         // Update physics
@@ -211,13 +213,13 @@ namespace {
         for (int i = 0; i < physics.currentDynamicObjects; i++) {
             PhysicsObject** currentP = &physics.dynamicObjects[i];
             (*currentP)->UpdateMatrix();
-            (*currentP)->Mesh->render(tex);
+            (*currentP)->Mesh->render(tex, View);
         }
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
-			(*current)->mesh->render(tex);
+			(*current)->mesh->render(tex, View);
 		}
 		renderLandscape(tex);
 
@@ -294,10 +296,10 @@ namespace {
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
 
-		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = cameraPosition.x() - 0.0f; vertices[i++] = cameraPosition.y() - 100.0f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
 		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
@@ -373,7 +375,8 @@ namespace {
 
 		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
 		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
-        Tank* tank = new Tank(tankTop, tankBottom);
+        tankFlag = new MeshObject("flag.obj", "flag_eu_uv.png", structures, 10);
+        Tank* tank = new Tank(tankTop, tankBottom, tankFlag);
         tank->Collider.radius = 0.5f;
         //tank->Mass = 5;
         //tank->Mesh = tankBottom;
