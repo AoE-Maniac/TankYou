@@ -9,6 +9,12 @@ Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     currentState = Wandering;
     steer = new Steering;
     randomPosition = vec3(25, yPosition, 15);
+	maxVelocity = 50;
+    yPosition = 8.0f;
+    minDistToFollow = 50;
+    minDistToShoot = 10;
+	//callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
+	hp = 10;
     enemyTanks = new std::vector<Tank*>;
 }
 
@@ -126,6 +132,15 @@ void Tank::updateStateMachine(float deltaT) {
             
             break;
     }
+}
+    
+void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
+	switch(other) {
+	case COLLIDING_OBJECT::PROJECTILE:
+		float projDmg = *((int*) collisionData);
+		hp -= projDmg;
+		break;
+	}
 }
 
 void Tank::setProjectile(Projectiles& projectiles) {

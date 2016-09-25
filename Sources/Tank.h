@@ -32,6 +32,8 @@ public:
     
     void setProjectile(Projectiles& projectiles);
 
+	int hp;
+
 private:
 	float turretAngle;
     float Orientation;
@@ -52,6 +54,8 @@ private:
     
     void updateStateMachine(float deltaT);
     StateMachineState currentState;
+
+	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
     Projectiles* mProjectiles;
 };

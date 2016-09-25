@@ -3,13 +3,11 @@
 #include "MeshObject.h"
 #include "Quat.h"
 
-using namespace Kore;
-
 // A plane is defined as the plane's normal and the distance of the plane to the origin
 class PlaneCollider {
 public:
 	float d;
-	vec3 normal;
+	Kore::vec3 normal;
 };
 
 class BoxCollider {
@@ -22,33 +20,33 @@ public:
 	PlaneCollider negZ;
 
 	BoxCollider(Kore::vec3 center, Kore::vec3 fullExtents) {
-		posX.normal = vec3(1, 0, 0);
+		posX.normal = Kore::vec3(1, 0, 0);
 		posX.d = center.x() + fullExtents.x() * 0.5f;
 		posX.d *= -1.0f;
-		negX.normal = vec3(-1, 0, 0);
+		negX.normal = Kore::vec3(-1, 0, 0);
 		negX.d = center.x() - fullExtents.x() * 0.5f;
-		posY.normal = vec3(0, 1, 0);
+		posY.normal = Kore::vec3(0, 1, 0);
 		posY.d = center.y() + fullExtents.y() * 0.5f;
 		posY.d *= -1.0f;
-		negY.normal = vec3(0, -1, 0);
+		negY.normal = Kore::vec3(0, -1, 0);
 		negY.d = center.y() - fullExtents.y() * 0.5f;
-		posZ.normal = vec3(0, 0, 1);
+		posZ.normal = Kore::vec3(0, 0, 1);
 		posZ.d = center.z() + fullExtents.z() * 0.5f;
 		posZ.d *= -1.0f;
-		negZ.normal = vec3(0, 0, -1);
+		negZ.normal = Kore::vec3(0, 0, -1);
 		negZ.d = center.z() - fullExtents.z() * 0.5f;
 	}
 };
 
 class TriangleCollider {
-	void LoadVector(vec3& v, int index, float* vb) {
+	void LoadVector(Kore::vec3& v, int index, float* vb) {
 		v.set(vb[index*8 + 0], vb[index*8 + 1], vb[index*8 + 2]);
 	}
 
 public:
-	vec3 A;
-	vec3 B;
-	vec3 C;
+	Kore::vec3 A;
+	Kore::vec3 B;
+	Kore::vec3 C;
 
 	float Area() {
 		return 0.5f * ((B-A).cross(C-A)).getLength();
@@ -60,14 +58,14 @@ public:
 		LoadVector(C, ib[index * 3 + 2], vb);
 	}
 
-	vec3 GetNormal() {
-		vec3 n = (B-A).cross(C-A);
+	Kore::vec3 GetNormal() {
+		Kore::vec3 n = (B-A).cross(C-A);
 		n.normalize();
 		return n;
 	}
 
 	PlaneCollider GetPlane() {
-		vec3 n = GetNormal();
+		Kore::vec3 n = GetNormal();
 		float d = n.dot(A);
 
 		PlaneCollider p;
@@ -90,7 +88,7 @@ public:
 	SphereCollider() {
 	}
 
-	vec3 center;
+	Kore::vec3 center;
 	float radius;
 
 	// Return true iff there is an intersection with the other sphere
@@ -100,8 +98,8 @@ public:
 	}
 
 	// Collision normal is the normal vector pointing towards the other sphere
-	vec3 GetCollisionNormal(const SphereCollider& other) {
-		vec3 n = other.center - center;
+	Kore::vec3 GetCollisionNormal(const SphereCollider& other) {
+		Kore::vec3 n = other.center - center;
 		n = n.normalize();
 		return n;
 	}
@@ -111,7 +109,7 @@ public:
 		return other.radius + radius - (other.center - center).getLength();
 	}
 
-	vec3 GetCollisionNormal(const PlaneCollider& other) {
+	Kore::vec3 GetCollisionNormal(const PlaneCollider& other) {
 		return other.normal;
 	}
 
@@ -191,9 +189,9 @@ public:
 		return IsInside(other) || IntersectsWithSides(other);
 	}
 
-	vec3 GetCollisionNormal(const TriangleCollider& other) {
+	Kore::vec3 GetCollisionNormal(const TriangleCollider& other) {
 		// Use the normal of the triangle plane
-		vec3 n = (other.B - other.A).cross(other.C - other.A);
+		Kore::vec3 n = (other.B - other.A).cross(other.C - other.A);
 		n.normalize();
 		return n;
 	}
@@ -214,7 +212,7 @@ public:
 			if (coll.Area() < 0.1f) continue;
 			if (IntersectsWith(coll)) {
 				other.lastCollision = i;
-				vec3 normal;
+				Kore::vec3 normal;
 				if (coll.GetNormal().x() < -0.8f)
 					normal = coll.GetNormal();
 				// Kore::log(Warning, "Intersected with triangle: %f, %f, %f", coll.GetNormal().x(), coll.GetNormal().y(), coll.GetNormal().z());
@@ -224,7 +222,7 @@ public:
 		return false;
 	}
 
-	vec3 GetCollisionNormal(const TriangleMeshCollider& other) {
+	Kore::vec3 GetCollisionNormal(const TriangleMeshCollider& other) {
 		TriangleCollider coll;
 		coll.LoadFromBuffers(other.lastCollision, other.mesh->mesh->indices, other.mesh->mesh->vertices);
 		return coll.GetNormal();
@@ -241,24 +239,24 @@ public:
 	}
 	
 	// Find the point where the sphere collided with the triangle mesh
-	vec3 GetCollisionPoint(const TriangleMeshCollider& other) {
+	Kore::vec3 GetCollisionPoint(const TriangleMeshCollider& other) {
 		// We take the point on the sphere that is closest to the triangle
-		vec3 result = center - GetCollisionNormal(other) * radius;
+		Kore::vec3 result = center - GetCollisionNormal(other) * radius;
 		return result;
 	}
 
 	// Find a set of basis vectors such that the provided collision normal x is the first column of the basis matrix,
 	// and the other two vectors are perpendicular to the collision normal
-	mat3 GetCollisonBasis(vec3 x) {
+	Kore::mat3 GetCollisonBasis(Kore::vec3 x) {
 		x.normalize();
-		mat3 basis;
+		Kore::mat3 basis;
 		basis.Set(0, 0, x.x());
 		basis.Set(1, 0, x.y());
 		basis.Set(2, 0, x.z());
 
 		// Find a y-vector
 		// x will often be the global y-axis, so don't use this -> use global z instead
-		vec3 y(0, 0, 1);
+		Kore::vec3 y(0, 0, 1);
 		y = x.cross(y);
 		y = y.normalize();
 
@@ -266,7 +264,7 @@ public:
 		basis.Set(1, 1, y.y());
 		basis.Set(2, 1, y.z());
 
-		vec3 z = x.cross(y);
+		Kore::vec3 z = x.cross(y);
 		z.normalize();
 
 		basis.Set(0, 2, z.x());
@@ -312,11 +310,11 @@ public:
 		// 3 Edges
 		// No overlap if all of the resulting axes are not touching
 
-		vec3 A = other.A - center;
-		vec3 B = other.B - center;
-		vec3 C = other.C - center;
+		Kore::vec3 A = other.A - center;
+		Kore::vec3 B = other.B - center;
+		Kore::vec3 C = other.C - center;
 		float rr = radius * radius;
-		vec3 V = (B - A).cross(C - A);
+		Kore::vec3 V = (B - A).cross(C - A);
 		float d = A.dot(V);
 		float e = V.dot(V);
 		bool sepPlane = d * d > rr * e;
@@ -326,21 +324,21 @@ public:
 		float bb = B.dot(B);
 		float bc = B.dot(C);
 		float cc = C.dot(C);
-		vec3 AB = B - A;
-		vec3 BC = C - B;
-		vec3 CA = A - C;
+		Kore::vec3 AB = B - A;
+		Kore::vec3 BC = C - B;
+		Kore::vec3 CA = A - C;
 		float d1 = ab - aa;
 		float d2 = bc - bb;
 		float d3 = ac - cc;
 		float e1 = AB.dot(AB);
 		float e2 = BC.dot(BC);
 		float e3 = CA.dot(CA);
-		vec3 Q1 = A * e1 - d1 * AB;
-		vec3 Q2 = B * e2 - d2 * BC;
-		vec3 Q3 = C * e3 - d3 * CA;
-		vec3 QC = C * e1 - Q1;
-		vec3 QA = A * e2 - Q2;
-		vec3 QB = B * e3 - Q3;
+		Kore::vec3 Q1 = A * e1 - d1 * AB;
+		Kore::vec3 Q2 = B * e2 - d2 * BC;
+		Kore::vec3 Q3 = C * e3 - d3 * CA;
+		Kore::vec3 QC = C * e1 - Q1;
+		Kore::vec3 QA = A * e2 - Q2;
+		Kore::vec3 QB = B * e3 - Q3;
 		bool sepEdge1 = (Q1.dot(Q1) > rr * e1 * e1) & (Q1.dot(QC) > 0);
 		bool sepEdge2 = (Q2.dot(Q2) > rr * e2 * e2) & (Q2.dot(QA) > 0);
 		bool sepEdge3 = (Q3.dot(Q3) > rr * e3 * e3) & (Q3.dot(QB) > 0);
@@ -355,11 +353,11 @@ public:
 	}
 
 	// from the internetz, guaranteed to work
-	bool IntersectsWith(vec3 orig, vec3 dir) const {
+	bool IntersectsWith(Kore::vec3 orig, Kore::vec3 dir) const {
 		float radius = this->radius * 5; // size hack
 		float t0, t1; // solutions for t if the ray intersects 
 		// geometric solution
-		vec3 L = center - orig;
+		Kore::vec3 L = center - orig;
 		float tca = L * dir;
 		// if (tca < 0) return false;
 		float d2 = L * L - tca * tca;
