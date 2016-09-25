@@ -47,24 +47,14 @@ public:
 			indices[i] = mesh->indices[i];
 		}
 		indexBuffer->unlock();
-
-		M = mat4::Identity();
 	}
 
-	void render(TextureUnit tex, mat4 V) {
-		// TODO: Actually render instanced
-		float* data = vertexBuffers[1]->lock();
-		setMatrix(data, 0, 0, M);
-		setMatrix(data, 0, 1, calculateN(M * V));
-		vertexBuffers[1]->unlock();
-		
+	void render(TextureUnit tex, int instances) {
 		Graphics::setTexture(tex, image);
 		Graphics::setVertexBuffers(vertexBuffers, 2);
 		Graphics::setIndexBuffer(*indexBuffer);
-		Graphics::drawIndexedVerticesInstanced(1);
+		Graphics::drawIndexedVerticesInstanced(instances);
 	}
-
-	mat4 M;
 
 	VertexBuffer** vertexBuffers;
 	IndexBuffer* indexBuffer;

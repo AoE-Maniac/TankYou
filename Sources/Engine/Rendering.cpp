@@ -20,6 +20,17 @@ void setVertex(float* vertices, int index, float x, float y, float z, float u, f
 	vertices[index * 8 + 7] = -1.0f;
 }
 
+void setVertexFromMesh(float* vertices, int i, Mesh* mesh, float scale = 1.0) {
+	vertices[i * 8 + 0] = mesh->vertices[i * 8 + 0] * scale;
+	vertices[i * 8 + 1] = mesh->vertices[i * 8 + 1] * scale;
+	vertices[i * 8 + 2] = mesh->vertices[i * 8 + 2] * scale;
+	vertices[i * 8 + 3] = mesh->vertices[i * 8 + 3];
+	vertices[i * 8 + 4] = 1.0f - mesh->vertices[i * 8 + 4];
+	vertices[i * 8 + 5] = mesh->vertices[i * 8 + 5];
+	vertices[i * 8 + 6] = mesh->vertices[i * 8 + 6];
+	vertices[i * 8 + 7] = mesh->vertices[i * 8 + 7];
+}
+
 void setMatrix(float* data, int instanceIndex, int matIndex, mat4 m) {
 	int offset = (instanceIndex * 2 + matIndex) * 16;
 	data[offset +  0] = m[0][0];

@@ -16,6 +16,7 @@
 #include <Kore/Log.h>
 
 #include "Engine/Collision.h"
+#include "Engine/InstancedMeshObject.h"
 #include "Engine/ObjLoader.h"
 #include "Engine/Particles.h"
 #include "Engine/PhysicsObject.h"
@@ -25,11 +26,15 @@
 #include "Landscape.h"
 
 #include "Projectiles.h"
-#include "Steering.h"
+//#include "Steering.h"
+#include "TankSystem.h"
 
 #include "Tank.h"
 
 using namespace Kore;
+
+const int MAP_SIZE_INNER = 200;
+const int MAP_SIZE_OUTER = 300;
 
 namespace {
 	const int width = 800;
@@ -52,7 +57,7 @@ namespace {
 	
 	mat4 P;
 	mat4 View;
-	mat4 PV;
+	//mat4 PV;
 
 	vec3 cameraPosition;
 	//vec3 targetCameraPosition;
@@ -86,21 +91,27 @@ namespace {
 	ParticleSystem* particleSystem;
     Explosion* explosionSystem;
     
-    Steering* steer;
+//    Steering* steer;
 
 	double lastTime;
 
-	MeshObject* tankTop;
-	MeshObject* tankBottom;
-    MeshObject* tankFlag;
+	InstancedMeshObject* tankTop;
+	InstancedMeshObject* tankBottom;
+    InstancedMeshObject* tankFlag;
+	TankSystem* tankTics;
 
-	std::vector<Tank*> tanks;
-    
-    vec3 targetPosition = vec3(25, 0.5f, 15);
+	vec3 screenToWorld(vec2 screenPos) {
+		vec4 pos((2 * screenPos.x()) / width - 1.0f, -((2 * screenPos.y()) / height - 1.0f), 0.0f, 1.0f);
 
-	vec3 pickDir;
-	VertexBuffer** pickVBs;
-	IndexBuffer* pickIB;
+		mat4 projection = P;
+		mat4 view = View;
+
+		projection = projection.Invert();
+		view = view.Invert();
+
+		vec4 worldPos = view * projection * pos;
+		return vec3(worldPos.x() / worldPos.w(), worldPos.y() / worldPos.w(), worldPos.z() / worldPos.w());
+	}
 
 	void update() {
 		double t = System::time() - startTime;
@@ -148,11 +159,11 @@ namespace {
 			lookAt.x() -= cameraSpeed;
 		}
 
-		cameraPosition = lookAt + vec3(-10, 5, 10);
+		cameraPosition = lookAt + vec3(0, 80, -40);
 		
 		// Follow the ball with the camera
-		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 100);
-		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0));
+		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
+		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 0, 1));
 
 		Graphics::setMatrix(pLocation, P);
 		Graphics::setMatrix(vLocation, View);
@@ -175,32 +186,12 @@ namespace {
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
 		spherePO->ApplyForceToCenter(force);
-        
-        //vec3 currentPos = tank.getPosition();
-        //vec3 velocity = move->Seek(currentPos, enemy->GetPosition(), maxVelocity);
-        //vec3 velocity = move->PursueTarget(currentPos, enemy->GetPosition(), spherePO->Velocity, enemy->Velocity, 0.1f);
-        //targetPosition = spherePO->GetPosition();
 
         // Update physics
         physics.Update(deltaT);
     
-        for (int i = 0; i < tanks.size(); i++) {
-            Tank* tank = tanks[i];
-            
-            //float max = 50;
-            //vec3 maxVelocity(max,max,max);
-            //vec3 velocity = steer->Wander(tank->getPosition(), targetPosition, maxVelocity);
-            //log(Info, "%f %f %f", targetPosition.x(), targetPosition.y(), targetPosition.z());
-            
-            // Track the enemy
-            vec3 velocity = steer->PursueTarget(tank->GetPosition(), spherePO->GetPosition(), tank->Velocity, spherePO->Velocity, 20);
-            
-            tank->Move(velocity);
-
-            tank->Integrate(deltaT);
-            tank->update(deltaT);
-            tank->render(tex, View);
-        }
+		tankTics->update(deltaT);
+		tankTics->render(tex, View);
 		
         // Update physics
         physics.Update(deltaT);
@@ -212,7 +203,7 @@ namespace {
 		}
         
         // Render dynamic objects
-        for (int i = 0; i < physics.currentDynamicObjects; i++) {
+        /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
             PhysicsObject** currentP = &physics.dynamicObjects[i];
             (*currentP)->UpdateMatrix();
             (*currentP)->Mesh->render(tex, View);
@@ -222,21 +213,14 @@ namespace {
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
-		}
+		}*/
 		renderLandscape(tex);
 
 		// Update and render particles
-		//particleSystem->setPosition(spherePO->GetPosition());
-		//particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
-		//particleSystem->update(deltaT);
-		//particleSystem->render(tex, vLocation, tintLocation, View);
-        
-        explosionSystem->update(deltaT);
-        explosionSystem->render(tex, vLocation, tintLocation, View);
-		
-		Graphics::setVertexBuffers(pickVBs, 2);
-		Graphics::setIndexBuffer(*pickIB);
-		Graphics::drawIndexedVerticesInstanced(1);
+		particleSystem->setPosition(spherePO->GetPosition());
+		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
+		particleSystem->update(deltaT);
+		particleSystem->render(tex, vLocation, tintLocation, View);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -280,56 +264,26 @@ namespace {
 		mouseX = x;
 		mouseY = y;
 
-		float screenX = (x / (float)width - 0.5f) * 2.0f;
-		float screenY = (y / (float)height - 0.5f) * 2.0f;
-
-		vec4 position = PV.Invert() * vec4(screenX, screenY, -1, 1);
-
-		pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
+		vec3 position = screenToWorld(vec2(mouseX, mouseY));
+		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-
-		int i = 0;
-		float* vertices = pickVBs[0]->lock();
-		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vec3 aim = cameraPosition + pickDir * 50.0f;
-		vertices[i++] = aim.x(); vertices[i++] = aim.y(); vertices[i++] = aim.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-
-		vertices[i++] = cameraPosition.x() - 0.0f; vertices[i++] = cameraPosition.y() - 100.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		pickVBs[0]->unlock();
-		
+				
 		static int pick = 0;
-		for (int j = 0; j < physics.currentDynamicObjects; j++) {
-			PhysicsObject* p = physics.dynamicObjects[j];
-
-			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
+		/*for (unsigned i = 0; i < tanks.size(); ++i) {
+			if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
-		}
+		}*/
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
 		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
-		if(!tanks.empty()) {
+		/*if(!tanks.empty()) {
 			vec3 p = tanks.front()->getPosition();
 			vec3 l = tanks.front()->getTurretLookAt();
 			projectiles->fire(p, l, 10);
 			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
-		}
+		}*/
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -378,16 +332,10 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
-		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
-        tankFlag = new MeshObject("flag.obj", "flag_eu_uv.png", structures, 10);
-        Tank* tank = new Tank(tankTop, tankBottom, tankFlag);
-        tank->Collider.radius = 0.5f;
-        //tank->Mass = 5;
-        //tank->Mesh = tankBottom;
-        tank->SetPosition(vec3(0, 6, 0)); //vec3(7.5f, 5, -7.5f)
-        //physics.AddDynamicObject(tank);
-        tanks.push_back(tank);
+		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
+		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
+        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -409,26 +357,11 @@ namespace {
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
         
-        steer = new Steering;
+//        steer = new Steering;
         
         Random::init(123);
 
-		createLandscape(structures);
-
-		pickVBs = new VertexBuffer*[2];
-		pickVBs[0] = new VertexBuffer(6, *structures[0], 0);
-		pickVBs[0]->lock(); pickVBs[0]->unlock();
-		pickVBs[1] = new VertexBuffer(1, *structures[1], 1);
-		float* data = pickVBs[1]->lock();
-		setMatrix(data, 0, 0, mat4::Identity());
-		setMatrix(data, 0, 1, mat4::Identity());
-		pickVBs[1]->unlock();
-
-		pickIB = new IndexBuffer(6);
-		int* indices = pickIB->lock();
-		indices[0] = 0; indices[1] = 1; indices[2] = 2;
-		indices[3] = 3; indices[4] = 4; indices[5] = 5;
-		pickIB->unlock();
+		createLandscape(structures, MAP_SIZE_OUTER);
 	}
 }
 
