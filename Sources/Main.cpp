@@ -90,11 +90,12 @@ namespace {
 
 	MeshObject* tankTop;
 	MeshObject* tankBottom;
+    MeshObject* tankFlag;
 
 	std::vector<Tank*> tanks;
 
 	vec3 pickDir;
-	VertexBuffer* pickVB;
+	VertexBuffer** pickVBs;
 	IndexBuffer* pickIB;
 
 	void update() {
@@ -111,6 +112,7 @@ namespace {
 		program->set();
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
+		Graphics::setRenderState(BackfaceCulling, NoCulling);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -177,7 +179,7 @@ namespace {
             Tank* tank = tanks[i];
             tank->Integrate(deltaT);
             tank->update(deltaT);
-            tank->render(tex);
+            tank->render(tex, View);
         }
 		
         // Update physics
@@ -193,13 +195,13 @@ namespace {
         for (int i = 0; i < physics.currentDynamicObjects; i++) {
             PhysicsObject** currentP = &physics.dynamicObjects[i];
             (*currentP)->UpdateMatrix();
-            (*currentP)->Mesh->render(tex);
+            (*currentP)->Mesh->render(tex, View);
         }
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
-			(*current)->mesh->render(tex);
+			(*current)->mesh->render(tex, View);
 		}
 		renderLandscape(tex);
 
@@ -209,11 +211,9 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, tintLocation, View);
 		
-		//Graphics::setMatrix(mLocation, mat4::Identity());
-		//Graphics::setMatrix(nLocation, mat4::Identity());
-		//Graphics::setVertexBuffer(*pickVB);
-		//Graphics::setIndexBuffer(*pickIB);
-		//Graphics::drawIndexedVertices();
+		Graphics::setVertexBuffers(pickVBs, 2);
+		Graphics::setIndexBuffer(*pickIB);
+		Graphics::drawIndexedVerticesInstanced(1);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -266,7 +266,7 @@ namespace {
 		pickDir.normalize();
 
 		int i = 0;
-		/*float* vertices = pickVB->lock();
+		float* vertices = pickVBs[0]->lock();
 		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
@@ -278,16 +278,16 @@ namespace {
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
 
-		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = cameraPosition.x() - 0.0f; vertices[i++] = cameraPosition.y() - 100.0f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
 		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		pickVB->unlock();
+		pickVBs[0]->unlock();
 		
 		static int pick = 0;
 		for (int j = 0; j < physics.currentDynamicObjects; j++) {
@@ -296,7 +296,7 @@ namespace {
 			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
-		}*/
+		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -344,7 +344,7 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(5, true, false);
+		spherePO = new PhysicsObject(TANK, 5, true, false);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
@@ -357,8 +357,9 @@ namespace {
 
 		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
 		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
+        tankFlag = new MeshObject("flag.obj", "flag_eu_uv.png", structures, 10);
         for(int i = 0; i < 2; i++) {
-            Tank* tank = new Tank(tankTop, tankBottom);
+            Tank* tank = new Tank(tankTop, tankBottom, tankFlag);
             tank->Collider.radius = 0.5f;
             //tank->Mass = 5;
             //tank->Mesh = tankBottom;
@@ -393,12 +394,20 @@ namespace {
 
 		createLandscape(structures);
 
-		/*pickVB = new VertexBuffer(6, structure);
+		pickVBs = new VertexBuffer*[2];
+		pickVBs[0] = new VertexBuffer(6, *structures[0], 0);
+		pickVBs[0]->lock(); pickVBs[0]->unlock();
+		pickVBs[1] = new VertexBuffer(1, *structures[1], 1);
+		float* data = pickVBs[1]->lock();
+		setMatrix(data, 0, 0, mat4::Identity());
+		setMatrix(data, 0, 1, mat4::Identity());
+		pickVBs[1]->unlock();
+
 		pickIB = new IndexBuffer(6);
 		int* indices = pickIB->lock();
 		indices[0] = 0; indices[1] = 1; indices[2] = 2;
 		indices[3] = 3; indices[4] = 4; indices[5] = 5;
-		pickIB->unlock();*/
+		pickIB->unlock();
 	}
 }
 

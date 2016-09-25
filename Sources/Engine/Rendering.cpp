@@ -5,8 +5,8 @@
 
 using namespace Kore;
 
-mat4 calculateN(mat4 M) {
-	return M.Invert().Transpose();
+mat4 calculateN(mat4 MV) {
+	return MV.Invert().Transpose();
 }
 
 void setVertex(float* vertices, int index, float x, float y, float z, float u, float v) {
