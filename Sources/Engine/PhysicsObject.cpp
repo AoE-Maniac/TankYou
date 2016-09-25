@@ -4,7 +4,7 @@
 
 using namespace Kore;
 
-PhysicsObject::PhysicsObject(float mass, bool ignoreGravity, bool ignoreRotation) : Mass(mass), IgnoreGravity(ignoreGravity), IgnoreRotation(ignoreRotation) {
+PhysicsObject::PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation) : Mass(mass), IgnoreGravity(ignoreGravity), IgnoreRotation(ignoreRotation), type(type) {
 	Accumulator = vec3(0, 0, 0);
 	Velocity = vec3(0, 0, 0);
 	Collider.radius = 0.5f;

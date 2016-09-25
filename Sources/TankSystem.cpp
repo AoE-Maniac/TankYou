@@ -1,3 +1,4 @@
+#include "Kore/pch.h"
 #include "TankSystem.h"
 
 TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay) :
