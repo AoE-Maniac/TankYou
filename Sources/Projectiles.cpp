@@ -52,9 +52,6 @@ void Projectiles::fire(vec3 pos, vec3 dir, float s) {
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < currProj; i++) {
 		if (timeToLife[i] > 0) {
-			
-			physicsObject[i]->UpdateMatrix();
-
 			particles[i]->setPosition(physicsObject[i]->GetPosition());
 			particles[i]->setDirection(vec3(0, 1, 0));
 			particles[i]->update(deltaT);

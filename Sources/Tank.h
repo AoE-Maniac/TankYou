@@ -4,21 +4,19 @@
 
 class Tank : public PhysicsObject {
 public:
-	Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag);
-	void render(TextureUnit tex, mat4 V);
+	Tank();
 	void rotateTurret(float angle);
 	void update(float deltaT);
 	vec3 getTurretLookAt();
 	vec3 getPosition();
     void Move(vec3 velocity);
     vec3 Velocity;
-
+	
+	mat4 Tank::GetBottomM();
+	mat4 Tank::GetTopM(mat4 bottomM);
+	mat4 Tank::GetFlagM(mat4 bottomM);
 private:
-	MeshObject* Top;
-	MeshObject* Bottom;
-    MeshObject* Flag;
 	float turretAngle;
-	void setTurretTransform();
     float Orientation;
     void SetOrientationFromVelocity();
     void SetTankOrientation(float deltaT);

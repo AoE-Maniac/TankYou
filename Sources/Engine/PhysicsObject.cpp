@@ -208,11 +208,6 @@ void PhysicsObject::Integrate(float deltaT) {
 	Accumulator = vec3(0, 0, 0);
 }
 
-void PhysicsObject::UpdateMatrix() {
-	// Update the Mesh matrix
-	Mesh->M = GetMatrix();
-}
-
 mat4 PhysicsObject::GetMatrix() {
 	Rotation.normalise();
 	return mat4::Translation(Position.x(), Position.y(), Position.z()) * mat4::Scale(0.5f, 0.5f, 0.5f) * Rotation.getMatrix();

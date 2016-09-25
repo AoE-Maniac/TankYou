@@ -16,6 +16,7 @@
 #include <Kore/Log.h>
 
 #include "Engine/Collision.h"
+#include "Engine/InstancedMeshObject.h"
 #include "Engine/ObjLoader.h"
 #include "Engine/Particles.h"
 #include "Engine/PhysicsObject.h"
@@ -25,6 +26,7 @@
 
 #include "Projectiles.h"
 #include "Steering.h"
+#include "TankSystem.h"
 
 #include "Tank.h"
 
@@ -88,11 +90,10 @@ namespace {
 
 	double lastTime;
 
-	MeshObject* tankTop;
-	MeshObject* tankBottom;
-    MeshObject* tankFlag;
-
-	std::vector<Tank*> tanks;
+	InstancedMeshObject* tankTop;
+	InstancedMeshObject* tankBottom;
+    InstancedMeshObject* tankFlag;
+	TankSystem* tankTics;
     
     vec3 targetPosition = vec3(25, 0.5f, 15);
 
@@ -182,23 +183,8 @@ namespace {
         // Update physics
         physics.Update(deltaT);
     
-        for (int i = 0; i < tanks.size(); i++) {
-            Tank* tank = tanks[i];
-            
-            //float max = 50;
-            //vec3 maxVelocity(max,max,max);
-            //vec3 velocity = steer->Wander(tank->getPosition(), targetPosition, maxVelocity);
-            //log(Info, "%f %f %f", targetPosition.x(), targetPosition.y(), targetPosition.z());
-            
-            // Track the enemy
-            vec3 velocity = steer->PursueTarget(tank->GetPosition(), spherePO->GetPosition(), tank->Velocity, spherePO->Velocity, 20);
-            
-            tank->Move(velocity);
-
-            tank->Integrate(deltaT);
-            tank->update(deltaT);
-            tank->render(tex, View);
-        }
+		tankTics->update(deltaT);
+		tankTics->render(tex, View);
 		
         // Update physics
         physics.Update(deltaT);
@@ -210,7 +196,7 @@ namespace {
 		}
         
         // Render dynamic objects
-        for (int i = 0; i < physics.currentDynamicObjects; i++) {
+        /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
             PhysicsObject** currentP = &physics.dynamicObjects[i];
             (*currentP)->UpdateMatrix();
             (*currentP)->Mesh->render(tex, View);
@@ -220,7 +206,7 @@ namespace {
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
-		}
+		}*/
 		renderLandscape(tex);
 
 		// Update and render particles
@@ -302,7 +288,7 @@ namespace {
 		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
+		vertices[i++] = spherePO->GetPosition().x(); vertices[i++] = spherePO->GetPosition().y(); vertices[i++] = spherePO->GetPosition().z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
 		pickVBs[0]->unlock();
@@ -319,12 +305,12 @@ namespace {
 	
 	void mousePress(int windowId, int button, int x, int y) {
 		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
-		if(!tanks.empty()) {
+		/*if(!tanks.empty()) {
 			vec3 p = tanks.front()->getPosition();
 			vec3 l = tanks.front()->getTurretLookAt();
 			projectiles->fire(p, l, 10);
 			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
-		}
+		}*/
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -373,16 +359,10 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
-		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
-        tankFlag = new MeshObject("flag.obj", "flag_eu_uv.png", structures, 10);
-        Tank* tank = new Tank(tankTop, tankBottom, tankFlag);
-        tank->Collider.radius = 0.5f;
-        //tank->Mass = 5;
-        //tank->Mesh = tankBottom;
-        tank->SetPosition(vec3(0, 6, 0)); //vec3(7.5f, 5, -7.5f)
-        //physics.AddDynamicObject(tank);
-        tanks.push_back(tank);
+		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
+		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
+        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(0, 6, 0), vec3(12, 6, 12), 3);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");

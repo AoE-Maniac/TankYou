@@ -17,12 +17,13 @@
 
 using namespace Kore;
 
-InstancedMeshObject::InstancedMeshObject(int maxCount, const char* meshFile, const char* textureFile, const VertexStructure& structure, float scale) : maxInstanceCount(maxCount) {
+InstancedMeshObject::InstancedMeshObject(const char* meshFile, const char* textureFile, VertexStructure** structures, int maxCount, float scale) {
 	mesh = loadObj(meshFile);
 	image = new Texture(textureFile, true);
-
-	vertexBuffer = new VertexBuffer(mesh->numVertices, structure, 0);
-	float* vertices = vertexBuffer->lock();
+		
+	vertexBuffers = new VertexBuffer*[2];
+	vertexBuffers[0] = new VertexBuffer(mesh->numVertices, *structures[0], 0);
+	float* vertices = vertexBuffers[0]->lock();
 	for (int i = 0; i < mesh->numVertices; ++i) {
 		vertices[i * 8 + 0] = mesh->vertices[i * 8 + 0] * scale;
 		vertices[i * 8 + 1] = mesh->vertices[i * 8 + 1] * scale;
@@ -33,7 +34,9 @@ InstancedMeshObject::InstancedMeshObject(int maxCount, const char* meshFile, con
 		vertices[i * 8 + 6] = mesh->vertices[i * 8 + 6];
 		vertices[i * 8 + 7] = mesh->vertices[i * 8 + 7];
 	}
-	vertexBuffer->unlock();
+	vertexBuffers[0]->unlock();
+		
+	vertexBuffers[1] = new VertexBuffer(maxCount, *structures[1], 1);
 
 	indexBuffer = new IndexBuffer(mesh->numFaces * 3);
 	int* indices = indexBuffer->lock();
@@ -41,31 +44,11 @@ InstancedMeshObject::InstancedMeshObject(int maxCount, const char* meshFile, con
 		indices[i] = mesh->indices[i];
 	}
 	indexBuffer->unlock();
-
-	instances = new PhysicsObject*[maxInstanceCount];
-	for (int i = 0; i < maxInstanceCount; i++) {
-		instances[i] = nullptr;
-	}
-
-	currInstanceCount = 0;
 }
 
-void InstancedMeshObject::addInstance(PhysicsObject* instance) {
-	assert(currInstanceCount + 1 < maxInstanceCount);
-	instances[currInstanceCount] = instance;
-	currInstanceCount++;
-}
-
-void InstancedMeshObject::render(ConstantLocation mLocation, ConstantLocation nLocation, TextureUnit tex) {
-	for (int i = 0; i < currInstanceCount; ++i) {
-		mat4 M = instances[i]->GetMatrix();
-
-		Graphics::setMatrix(mLocation, M);
-		Graphics::setMatrix(nLocation, calculateN(M));
-			
-		Graphics::setTexture(tex, image);
-		Graphics::setVertexBuffer(*vertexBuffer);
-		Graphics::setIndexBuffer(*indexBuffer);
-		Graphics::drawIndexedVertices();
-	}
+void InstancedMeshObject::render(TextureUnit tex, int instances) {
+	Graphics::setTexture(tex, image);
+	Graphics::setVertexBuffers(vertexBuffers, 2);
+	Graphics::setIndexBuffer(*indexBuffer);
+	Graphics::drawIndexedVerticesInstanced(instances);
 }
