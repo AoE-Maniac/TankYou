@@ -31,8 +31,16 @@ void setVertexFromMesh(float* vertices, int i, Mesh* mesh, float scale = 1.0) {
 	vertices[i * 8 + 7] = mesh->vertices[i * 8 + 7];
 }
 
-void setMatrix(float* data, int instanceIndex, int matIndex, mat4 m) {
-	int offset = (instanceIndex * 2 + matIndex) * 16;
+void setVec4(float* data, int instanceIndex, int off, int size, vec4 v) {
+	int offset = off + instanceIndex * size;
+	data[offset +  0] = v.x();
+	data[offset +  1] = v.y();
+	data[offset +  2] = v.z();
+	data[offset +  3] = v.w();
+}
+
+void setMatrix(float* data, int instanceIndex, int off, int size, mat4 m) {
+	int offset = off + instanceIndex * size;
 	data[offset +  0] = m[0][0];
 	data[offset +  1] = m[1][0];
 	data[offset +  2] = m[2][0];

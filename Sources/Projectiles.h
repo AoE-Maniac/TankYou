@@ -12,7 +12,7 @@ public:
 	Projectiles(int maxProjectiles, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
 	void fire(vec3 pos, vec3 dir, float s, int dmg);
 	void update(float deltaT);
-	void render(Kore::ConstantLocation vLocation, Kore::ConstantLocation tintLocation, Kore::TextureUnit tex, Kore::mat4 view);
+	void render(Kore::ConstantLocation vLocation, Kore::TextureUnit tex, Kore::mat4 view);
 private:
 	int maxProj;
 	int currProj;

@@ -11,7 +11,7 @@ public:
 	void setPosition(Kore::vec3 position);
 	void setDirection(Kore::vec3 direction);
 	void update(float deltaTime);
-	void render(Kore::TextureUnit tex, Kore::ConstantLocation vLocation, Kore::ConstantLocation tintLocation, Kore::mat4 V);
+	void render(Kore::TextureUnit tex, Kore::ConstantLocation vLocation, Kore::mat4 V);
 
 //private:
 	Kore::VertexBuffer** vbs;

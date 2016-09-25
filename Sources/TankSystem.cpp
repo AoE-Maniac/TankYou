@@ -56,16 +56,19 @@ void TankSystem::render(TextureUnit tex, mat4 View) {
     for (int i = 0; i < tanks.size(); i++) {
         Tank* tank = tanks[i];
 		mat4 botM = tank->GetBottomM();
-		setMatrix(dataB, i, 0, botM);
-		setMatrix(dataB, i, 1, calculateN(botM * View));
+		setMatrix(dataB, i, 0, 36, botM);
+		setMatrix(dataB, i, 16, 36, calculateN(botM * View));
+		setVec4(dataB, i, 32, 36, vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1));
 		
 		mat4 topM = tank->GetTopM(botM);
-		setMatrix(dataT, i, 0, topM);
-		setMatrix(dataT, i, 1, calculateN(topM * View));
+		setMatrix(dataT, i, 0, 36, topM);
+		setMatrix(dataT, i, 16, 36, calculateN(topM * View));
+		setVec4(dataT, i, 32, 36, vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1));
 		
 		mat4 flagM = tank->GetFlagM(botM);
-		setMatrix(dataF, i, 0, flagM);
-		setMatrix(dataF, i, 1, calculateN(flagM * View));
+		setMatrix(dataF, i, 0, 36, flagM);
+		setMatrix(dataF, i, 16, 36, calculateN(flagM * View));
+		setVec4(dataF, i, 32, 36, vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1));
 	}
 	meshBottom->vertexBuffers[1]->unlock();
 	meshTop->vertexBuffers[1]->unlock();

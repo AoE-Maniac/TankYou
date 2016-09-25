@@ -101,13 +101,13 @@ void Projectiles::kill(int projectile) {
 	--currProj;
 }
 
-void Projectiles::render(ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
-	Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
+void Projectiles::render(ConstantLocation vLocation, TextureUnit tex, mat4 view) {
 	float* data = vertexBuffers[1]->lock();
 	for (int i = 0; i < currProj; i++) {
 		mat4 M = physicsObject[i]->GetMatrix();
-		setMatrix(data, i, 0, M);
-		setMatrix(data, i, 1, calculateN(M));
+		setMatrix(data, i, 0, 36, M);
+		setMatrix(data, i, 16, 36, calculateN(M));
+		setVec4(data, i, 32, 36, vec4(1, 1, 1, 1));
 	}
 	vertexBuffers[1]->unlock();
 	
@@ -117,6 +117,6 @@ void Projectiles::render(ConstantLocation vLocation, ConstantLocation tintLocati
 	Graphics::drawIndexedVerticesInstanced(currProj);
 
 	for (int i = 0; i < currProj; i++) {
-		particles[i]->render(tex, vLocation, tintLocation, view);
+		particles[i]->render(tex, vLocation, view);
 	}
 }

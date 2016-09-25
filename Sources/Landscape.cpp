@@ -41,7 +41,6 @@ void createLandscape(VertexStructure** structures, float size) {
 	landscapeVertices[0]->unlock();
 	
 	landscapeVertices[1] = new VertexBuffer(1, *structures[1], 1);
-	
 	landscapeIndices = new IndexBuffer(w * h * 6);
 	int* indices = landscapeIndices->lock();
 	i = 0;
@@ -64,8 +63,9 @@ void renderLandscape(Kore::TextureUnit tex) {
 	Graphics::setTexture(tex, landscapeTexture);
 
 	float* data = landscapeVertices[1]->lock();
-	setMatrix(data, 0, 0, mat4::Identity());
-	setMatrix(data, 0, 1, mat4::Identity());
+	setMatrix(data, 0, 0, 36, mat4::Identity());
+	setMatrix(data, 0, 16, 36, mat4::Identity());
+	setVec4(data, 0, 32, 36, vec4(1, 1, 1, 1));
 	landscapeVertices[1]->unlock();
 	
 	Graphics::setVertexBuffers(landscapeVertices, 2);

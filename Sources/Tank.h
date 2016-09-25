@@ -34,6 +34,7 @@ public:
     void setProjectile(Projectiles* projectiles);
 
 	int hp;
+    int mFrac;
 
 private:
 	float turretAngle;
@@ -59,6 +60,4 @@ private:
 	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
     Projectiles* mProj;
-    
-    int mFrac;
 };
