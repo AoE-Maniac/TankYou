@@ -6,6 +6,7 @@
 
 #include "Engine/Collision.h"
 #include "Engine/PhysicsObject.h"
+#include "Projectiles.h"
 
 enum StateMachineState {
     Wandering,
@@ -24,7 +25,9 @@ public:
     vec3 Velocity;
     
     void SetEnemy(std::vector<Tank*>& enemyTanks);
-    std::vector<Tank*> GetEnemy() const;
+    std::vector<Tank*>* GetEnemy() const;
+    
+    void setProjectile(Projectiles& projectiles);
 
 private:
 	MeshObject* Top;
@@ -36,7 +39,7 @@ private:
     void SetOrientationFromVelocity();
     void SetTankOrientation(float deltaT);
     
-    std::vector<Tank*> enemyTanks;
+    std::vector<Tank*>* enemyTanks;
     Tank* enemyTank;
     
     Steering* steer;
@@ -45,10 +48,11 @@ private:
     
     float yPosition = 8.0f;
     
-    float minDistToFollow = 50;
-    float minDistToShoot = 10;
+    float minDistToFollow = 100;
+    float minDistToShoot = 20;
     
-    void updateStateMachine();
+    void updateStateMachine(float deltaT);
     StateMachineState currentState;
     
+    Projectiles* mProjectiles;
 };

@@ -3,7 +3,7 @@
 #include "Kore/Math/Matrix.h"
 
 void Tank::setTurretTransform() {
-	Top->M = mat4::Translation(0,1,0) * Bottom->M * mat4::Scale(1.7, 1.7, 1.7) *mat4::Rotation(turretAngle, 0, 0);
+	Top->M = mat4::Translation(0,1,0) * Bottom->M * mat4::Scale(1.7, 1.7, 1.7) * mat4::Rotation(turretAngle, 0, 0);
     Flag->M = mat4::Translation(0,3,0) * Bottom->M * mat4::Scale(0.5, 0.5, 0.5)* mat4::Rotation(pi/4, 0, 0);
 
 }
@@ -16,6 +16,7 @@ Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObjec
     currentState = Wandering;
     steer = new Steering;
     randomPosition = vec3(25, yPosition, 15);
+    enemyTanks = new std::vector<Tank*>;
 }
 
 void Tank::render(TextureUnit tex, mat4 V) {
@@ -25,10 +26,10 @@ void Tank::render(TextureUnit tex, mat4 V) {
 }
 
 void Tank::update(float deltaT) {
-    updateStateMachine();
-	rotateTurret(deltaT * pi / 10);
+    updateStateMachine(deltaT);
+	//rotateTurret(deltaT * pi / 10);
 	UpdateMatrix();
-	setTurretTransform();
+    setTurretTransform();
     SetTankOrientation(deltaT);
 }
 
@@ -63,32 +64,36 @@ void Tank::SetTankOrientation(float deltaT) {
 
 
 void Tank::SetEnemy(std::vector<Tank*>& tanks) {
-    enemyTanks = tanks;
+    enemyTanks = &tanks;
 }
 
-std::vector<Tank*> Tank::GetEnemy() const {
+std::vector<Tank*>* Tank::GetEnemy() const {
     return enemyTanks;
 }
 
-void Tank::updateStateMachine() {
+void Tank::updateStateMachine(float deltaT) {
     
     switch (currentState) {
         case Wandering:
             //log(Info, "Wandering");
             
-            // Wander TODO
+            // Wander
             randomPosition.y() = yPosition;
             Move(steer->Wander(getPosition(), randomPosition, maxVelocity));
             
             // Follow the target
-            for (int i = 0; i < enemyTanks.size(); i++) {
-                Tank* tank = enemyTanks[i];
-                //log(Info, "%i: %f %f", i, tank->GetPosition().y(), tank->GetPosition().y());
-                float distance = (GetPosition() - tank->GetPosition()).getLength();
-                
-                if (distance < minDistToFollow) {
-                    enemyTank = tank;
-                    //currentState = Following;
+            for (int i = 0; i < enemyTanks->size(); i++) {
+                Tank* tank = (*enemyTanks)[i];
+                if(tank != this) {
+                    
+                    //setTurrentTransform();
+                    
+                    
+                    float distance = (GetPosition() - tank->GetPosition()).getLength();
+                    if (distance < minDistToFollow) {
+                        enemyTank = tank;
+                        currentState = Following;
+                    }
                 }
             }
             
@@ -98,18 +103,31 @@ void Tank::updateStateMachine() {
             //log(Info, "Following");
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
-            //if (distance > 10) {
-                // Track the enemy
-                //vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
-                //Move(velocity);
-            //} else {
-                // Shoot and Kill
+            if (distance < minDistToShoot) {
+                //log(Info, "Shoot");
                 
-            //}
+                vec3 pos = getTurretLookAt();
+                vec3 to = enemyTank->getPosition();
+                float angle = Kore::atan2(pos.z(), pos.x()) - Kore::atan2(to.z(), to.x());
+                rotateTurret(deltaT * angle);
+                
+                // Shoot and Kill
+                vec3 p = GetPosition();
+                vec3 l = getTurretLookAt();
+                //mProjectiles->fire(p, l, 1);
+                
+                Move(vec3(0,0,0));
+            } else {
+                // Track the enemy
+                vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
+                Move(velocity);
+            }
             
             
             break;
     }
-    
-    
+}
+
+void Tank::setProjectile(Projectiles& projectiles) {
+    mProjectiles = &projectiles;
 }
