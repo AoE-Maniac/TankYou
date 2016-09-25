@@ -10,7 +10,7 @@ Kore::VertexBuffer** landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 Kore::Texture* landscapeTexture;
 
-void createLandscape(VertexStructure** structures, int size) {
+void createLandscape(VertexStructure** structures, float size) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);

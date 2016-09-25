@@ -16,7 +16,7 @@
 #include "PhysicsObject.h"
 
 #define MAX_STATIC_MESHES 10
-#define MAX_DYNAMIC_MESHES 1000
+#define MAX_DYNAMIC_MESHES 10000
 
 class PhysicsObject;
 

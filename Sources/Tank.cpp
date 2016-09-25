@@ -136,6 +136,7 @@ void Tank::updateStateMachine(float deltaT) {
 }
     
 void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
+	log(Info, "Tank collided with %d", other);
 	switch(other) {
 	case COLLIDING_OBJECT::PROJECTILE:
 		float projDmg = *((int*) collisionData);

@@ -12,10 +12,10 @@ varying vec3 eyeCoord;
 
 void kore() {
 	
-	const float amb = 0.2;
-	const float diff = 1.0;
-	const float spec = 2.0;
-	const float n = 16.0;
+	const float amb = 0.4;
+	const float diff = 0.5;
+	const float spec = 0.5;
+	const float n = 0.5;
 
 	vec4 ambient = vec4(amb, amb, amb, 1.0);
 
