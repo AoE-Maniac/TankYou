@@ -12,8 +12,6 @@
 #include <Kore/Log.h>
 #include "ObjLoader.h"
 
-using namespace Kore;
-
 #include "Collision.h"
 #include "PhysicsObject.h"
 

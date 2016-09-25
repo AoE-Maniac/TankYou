@@ -124,7 +124,7 @@ public:
 	*
 	* @param scale The amount of the vector to add.
 	*/
-	void addScaledVector(const vec3& vector, float scale)
+	void addScaledVector(const Kore::vec3& vector, float scale)
 	{
 		Quat q(0,
 			vector.x() * scale,
@@ -137,15 +137,15 @@ public:
 		k += q.k * ((float)0.5);
 	}
 
-	void rotateByVector(const vec3& vector)
+	void rotateByVector(const Kore::vec3& vector)
 	{
 		Quat q(0, vector.x(), vector.y(), vector.z());
 		(*this) *= q;
 	}
 
-	mat4 getMatrix()
+	Kore::mat4 getMatrix()
 	{
-		mat4 result = mat4::Identity();
+		Kore::mat4 result = Kore::mat4::Identity();
 
 		result.data[0] = 1 - (2 * j*j + 2 * k*k);
 		result.data[1] = 2 * i*j + 2 * k*r;
