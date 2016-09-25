@@ -210,7 +210,7 @@ Mesh* loadObj(const char* filename) {
 	FileReader fileReader(filename, FileReader::Asset);
 	void* data = fileReader.readAll();
 	int length = fileReader.size() + 1;
-	char* source = new char[length];
+	char* source = new char[length + 1];
 	for (int i = 0; i < length; ++i) source[i] = reinterpret_cast<char*>(data)[i];
 	source[length] = 0;
 	
