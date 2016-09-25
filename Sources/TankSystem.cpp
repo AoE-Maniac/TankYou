@@ -77,7 +77,7 @@ void TankSystem::kill(int i) {
     }
 }
 
-void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation, ConstantLocation tintLocation) {
+void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) {
 	float* dataB = meshBottom->vertexBuffers[1]->lock();
 	float* dataT = meshTop->vertexBuffers[1]->lock();
 	float* dataF = meshFlag->vertexBuffers[1]->lock();
@@ -88,18 +88,20 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation, 
         {
 			Tank* tank = tanks[i];
 			mat4 botM = tank->GetBottomM();
+			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
 			setMatrix(dataB, j, 0, 36, botM);
 			setMatrix(dataB, j, 16, 36, calculateN(botM * View));
-			setVec4(dataB, j, 32, 36, vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1));
+			setVec4(dataB, j, 32, 36, col);
 		
 			mat4 topM = tank->GetTopM(botM);
 			setMatrix(dataT, j, 0, 36, topM);
 			setMatrix(dataT, j, 16, 36, calculateN(topM * View));
-			setVec4(dataT, j, 32, 36, vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1));
+			setVec4(dataT, j, 32, 36, col);
 		
 			mat4 flagM = tank->GetFlagM(botM);
 			setMatrix(dataF, j, 0, 36, flagM);
 			setMatrix(dataF, j, 16, 36, calculateN(flagM * View));
+			setVec4(dataF, j, 32, 36, col);
             ++j;
         }
 	}

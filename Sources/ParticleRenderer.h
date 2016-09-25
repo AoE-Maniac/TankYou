@@ -21,7 +21,7 @@ class ParticleRenderer
 {
 public:
     ParticleRenderer(Kore::VertexStructure** structures);
-    void render(TextureUnit tex, mat4 View, ConstantLocation vLocation, ConstantLocation tintLocation);
+    void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
     
     void addParticleSystem(ParticleSystem* system);
     void removeParticleSystem(ParticleSystem* system);

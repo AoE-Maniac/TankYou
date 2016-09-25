@@ -197,7 +197,7 @@ namespace {
 		tankTics->update(deltaT);
 
 		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View, vLocation, tintLocation);
+		tankTics->render(tex, View, vLocation);
 		
         // Update physics
         physics.Update(deltaT);
@@ -234,7 +234,7 @@ namespace {
 		projectiles->update(deltaT);
 		projectiles->render(vLocation, tex, View);
         
-        particleRenderer->render(tex, View, vLocation, tintLocation);
+        particleRenderer->render(tex, View, vLocation);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -352,7 +352,7 @@ namespace {
 
 		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
-		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
 
         tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
         
