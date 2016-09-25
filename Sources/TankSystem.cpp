@@ -1,24 +1,29 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay) :
+TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay, Projectiles* projectiles) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
 		spawnPos1(spawn1),
 		spawnPos2(spawn2),
-		spawnDelay(delay) {
+		spawnDelay(delay),
+        mProjectiles(projectiles) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
 }
 
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		Tank* t1 = new Tank();
+		Tank* t1 = new Tank(0);
+        t1->SetEnemy(tanks);
+        t1->setProjectile(mProjectiles);
 		tanks.push_back(t1);
 		t1->SetPosition(spawnPos1);
 		
-		Tank* t2 = new Tank();
+		Tank* t2 = new Tank(1);
+        t2->SetEnemy(tanks);
+        t2->setProjectile(mProjectiles);
 		tanks.push_back(t2);
 		t2->SetPosition(spawnPos2);
 		

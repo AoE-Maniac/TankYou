@@ -13,7 +13,7 @@ using namespace Kore;
 
 class TankSystem {
 public:
-	TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay);
+	TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay, Projectiles* projectiles);
 	void update(float dt);
 	void render(TextureUnit tex, mat4 View);
 
@@ -26,5 +26,6 @@ private:
 	InstancedMeshObject* meshTop;
 	InstancedMeshObject* meshFlag;
 	std::vector<Tank*> tanks;
+    Projectiles* mProjectiles;
 	void kill(int i);
 };
