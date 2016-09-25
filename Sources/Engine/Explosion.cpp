@@ -20,6 +20,11 @@ Explosion::Explosion(Kore::vec3 pos, float spawnArea, float grav, int maxParticl
 	exploded = false;
 }
 
+void Explosion::explode()
+{
+    exploded = false;
+}
+
 void Explosion::pulse()
 {
     if(!exploded)

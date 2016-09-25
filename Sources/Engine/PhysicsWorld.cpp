@@ -16,6 +16,8 @@ PhysicsWorld::PhysicsWorld() {
 void PhysicsWorld::Update(float deltaT) {
 	for (int i = 0; i < currentDynamicObjects; i++) {
 		PhysicsObject** currentP = &dynamicObjects[i];
+		if(!(*currentP)->active)
+			continue;
 
 		// Apply gravity (= constant accceleration, so we multiply with the mass and divide in the integration step.
 		// The alternative would be to add gravity during the integration as a constant.
@@ -26,6 +28,9 @@ void PhysicsWorld::Update(float deltaT) {
 		// Check for collisions with the other objects
 		for (int j = i + 1; j < currentDynamicObjects; j++) {
 			PhysicsObject** currentCollision = &dynamicObjects[j];
+			if(!(*currentCollision)->active)
+				continue;
+
 			(*currentP)->HandleCollision(*currentCollision, deltaT);
 		}
 

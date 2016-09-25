@@ -3,7 +3,7 @@
 #include "Kore/Math/Matrix.h"
 
 
-Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
+Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	Collider.radius = 0.5f;
 	turretAngle = 0;
     currentState = Wandering;
@@ -13,9 +13,10 @@ Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     yPosition = 8.0f;
     minDistToFollow = 50;
     minDistToShoot = 10;
-	//callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
+	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = 10;
     enemyTanks = new std::vector<Tank*>;
+    mFrac = frac;
 }
 
 void Tank::update(float deltaT) {
@@ -24,8 +25,6 @@ void Tank::update(float deltaT) {
     SetTankOrientation(deltaT);
 	maxVelocity = 50;
     yPosition = 8.0f;
-    minDistToFollow = 50;
-    minDistToShoot = 10;
 }
 
 void Tank::rotateTurret(float angle) {
@@ -90,10 +89,9 @@ void Tank::updateStateMachine(float deltaT) {
             // Follow the target
             for (int i = 0; i < enemyTanks->size(); i++) {
                 Tank* tank = (*enemyTanks)[i];
-                if(tank != this) {
+                if(mFrac != tank->mFrac) {
                     
                     //setTurrentTransform();
-                    
                     
                     float distance = (GetPosition() - tank->GetPosition()).getLength();
                     if (distance < minDistToFollow) {
@@ -110,7 +108,10 @@ void Tank::updateStateMachine(float deltaT) {
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance < minDistToShoot) {
-                //log(Info, "Shoot");
+                log(Info, "Shoot");
+                
+                Move(vec3(0,0,0));
+                
                 
                 vec3 pos = getTurretLookAt();
                 vec3 to = enemyTank->getPosition();
@@ -120,9 +121,8 @@ void Tank::updateStateMachine(float deltaT) {
                 // Shoot and Kill
                 vec3 p = GetPosition();
                 vec3 l = getTurretLookAt();
-                //mProjectiles->fire(p, l, 1);
+                mProj->fire(p, l, 1, 1);
                 
-                Move(vec3(0,0,0));
             } else {
                 // Track the enemy
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
@@ -143,6 +143,6 @@ void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
 	}
 }
 
-void Tank::setProjectile(Projectiles& projectiles) {
-    mProjectiles = &projectiles;
+void Tank::setProjectile(Projectiles* projectiles) {
+    mProj = projectiles;
 }

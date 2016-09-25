@@ -1,7 +1,7 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay) :
+TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
@@ -9,7 +9,8 @@ TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, I
 		spawnPos1b(spawn1b),
 		spawnPos2a(spawn2a),
 		spawnPos2b(spawn2b),
-		spawnDelay(delay) {
+		spawnDelay(delay),
+        mProjectiles(projectiles) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
 }
@@ -17,6 +18,8 @@ TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, I
 void spawnTank(std::vector<Tank*>* tanks, vec3 spawnPosa, vec3 spawnPosb) {
 	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
 	Tank* t1 = new Tank();
+	t1->SetEnemy(tanks);
+    t1->setProjectile(mProjectiles);
 	tanks->push_back(t1);
 	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
 }

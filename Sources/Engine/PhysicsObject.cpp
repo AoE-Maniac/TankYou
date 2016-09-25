@@ -15,6 +15,8 @@ PhysicsObject::PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravi
 	MomentOfInertia.Set(2, 2, I);
 
 	InverseMomentOfInertia = MomentOfInertia.Invert();
+
+	active = true;
 }
 
 void SetSkewSymmetric(mat3& matrix, vec3& v) {
