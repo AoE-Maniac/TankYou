@@ -210,8 +210,12 @@ void PhysicsObject::Integrate(float deltaT) {
 
 void PhysicsObject::UpdateMatrix() {
 	// Update the Mesh matrix
+	Mesh->M = GetMatrix();
+}
+
+mat4 PhysicsObject::GetMatrix() {
 	Rotation.normalise();
-	Mesh->M = mat4::Translation(Position.x(), Position.y(), Position.z()) * mat4::Scale(0.5f, 0.5f, 0.5f) * Rotation.getMatrix();
+	return mat4::Translation(Position.x(), Position.y(), Position.z()) * mat4::Scale(0.5f, 0.5f, 0.5f) * Rotation.getMatrix();
 }
 
 
