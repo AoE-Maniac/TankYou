@@ -14,7 +14,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 	for (int i = 0; i < maxProjectiles; i++) {
 		timeToLife[i] = 0;
 
-		physicsObject[i] = new PhysicsObject(0.001f, true, true);
+		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
 		physics->AddDynamicObject(physicsObject[i]);

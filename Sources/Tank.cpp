@@ -7,7 +7,7 @@ void Tank::setTurretTransform() {
 
 }
 
-Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObject(10, true, true), Top(top), Bottom(bottom) , Flag(flag){
+Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObject(TANK, 10, true, true), Top(top), Bottom(bottom) , Flag(flag){
 	Mesh = bottom;
 	bottom->M = mat4::Identity();
 	turretAngle = 0;

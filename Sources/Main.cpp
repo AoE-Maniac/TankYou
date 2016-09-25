@@ -362,7 +362,7 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(5, true, false);
+		spherePO = new PhysicsObject(TANK, 5, true, false);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
