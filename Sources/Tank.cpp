@@ -38,7 +38,7 @@ vec3 Tank::getPosition() {
 
 void Tank::SetOrientationFromVelocity() {
     if (Velocity.getLength() > 0) {
-        Orientation = atan2(Velocity.x(), Velocity.z());
+        Orientation = Kore::atan2(Velocity.x(), Velocity.z());
     }
 }
 

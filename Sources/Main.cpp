@@ -179,13 +179,6 @@ namespace {
 
         // Update physics
         physics.Update(deltaT);
-        
-        // Render dynamic objects
-        for (int i = 0; i < physics.currentDynamicObjects; i++) {
-            PhysicsObject** currentP = &physics.dynamicObjects[i];
-            (*currentP)->UpdateMatrix();
-            (*currentP)->Mesh->render(mLocation, nLocation, tex);
-        }
     
         for (int i = 0; i < tanks.size(); i++) {
             Tank* tank = tanks[i];
@@ -212,7 +205,15 @@ namespace {
 		bool result = spherePO->Collider.IntersectsWith(boxCollider);
 		if (result) {
 			// ...
-		renderLandscape(mLocation, nLocation, tex);
+		}
+        
+        // Render dynamic objects
+        for (int i = 0; i < physics.currentDynamicObjects; i++) {
+            PhysicsObject** currentP = &physics.dynamicObjects[i];
+            (*currentP)->UpdateMatrix();
+            (*currentP)->Mesh->render(tex);
+        }
+
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
@@ -226,11 +227,11 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, tintLocation, View);
 		
-		Graphics::setMatrix(mLocation, mat4::Identity());
-		Graphics::setMatrix(nLocation, mat4::Identity());
-		Graphics::setVertexBuffer(*pickVB);
-		Graphics::setIndexBuffer(*pickIB);
-		Graphics::drawIndexedVertices();
+		//Graphics::setMatrix(mLocation, mat4::Identity());
+		//Graphics::setMatrix(nLocation, mat4::Identity());
+		//Graphics::setVertexBuffer(*pickVB);
+		//Graphics::setIndexBuffer(*pickIB);
+		//Graphics::drawIndexedVertices();
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -283,7 +284,7 @@ namespace {
 		pickDir.normalize();
 
 		int i = 0;
-		float* vertices = pickVB->lock();
+		/*float* vertices = pickVB->lock();
 		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
@@ -313,7 +314,7 @@ namespace {
 			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
-		}
+		}*/
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -406,12 +407,12 @@ namespace {
 
 		createLandscape(structures);
 
-		pickVB = new VertexBuffer(6, structure);
+		/*pickVB = new VertexBuffer(6, structure);
 		pickIB = new IndexBuffer(6);
 		int* indices = pickIB->lock();
 		indices[0] = 0; indices[1] = 1; indices[2] = 2;
 		indices[3] = 3; indices[4] = 4; indices[5] = 5;
-		pickIB->unlock();
+		pickIB->unlock();*/
 	}
 }
 
