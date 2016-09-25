@@ -10,7 +10,7 @@
 #include "Explosion.h"
 
 Explosion::Explosion(Kore::vec3 pos, float spawnArea, float grav, int maxParticles, Kore::VertexStructure** structures, Kore::Texture* image) :
-    ParticleSystem(pos, Kore::vec3(0,1,0), 7.f, 2.3f, Kore::vec4(1.f, 1.f, 0.f, 1), Kore::vec4(1.f, 0.f, 0.f, 1), grav, maxParticles, structures, image)
+    ParticleSystem(pos, Kore::vec3(0,1,0), 7.f, 1.f, Kore::vec4(1.f, 1.f, 0.f, 1), Kore::vec4(1.f, 0.f, 0.f, 1), grav, maxParticles, structures, image)
 {
     this->spawnArea = spawnArea;
     setPosition(pos);
@@ -18,6 +18,12 @@ Explosion::Explosion(Kore::vec3 pos, float spawnArea, float grav, int maxParticl
         
     }
 	exploded = false;
+    ready = false;
+}
+
+bool Explosion::isReady()
+{
+    return ready;
 }
 
 void Explosion::explode()
@@ -40,12 +46,14 @@ void Explosion::update(float deltaTime) {
     // Do we need to spawn a particle?
     
     pulse();
+    bool ready = true;
     for (int i = 0; i < numParticles; i++) {
-        
+        ready = ready && particleTTL[i] <= 0;
         particleTTL[i] -= deltaTime;
         particleVel[i] += Kore::vec3(0, -gravity * deltaTime, 0);
         particlePos[i] += particleVel[i] * deltaTime;
     }
+    this->ready = ready;
 }
 
 void Explosion::emitParticle(int index) {
