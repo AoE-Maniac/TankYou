@@ -21,7 +21,7 @@ public:
 	void update(float deltaT);
 	vec3 getTurretLookAt();
 	vec3 getPosition();
-    void Move(vec3 velocity);
+    void Move(float deltaT, vec3 velocity);
     vec3 Velocity;
 	
 	mat4 GetBottomM();
@@ -38,7 +38,7 @@ public:
 private:
 	float turretAngle;
     float Orientation;
-    void SetOrientationFromVelocity();
+    void SetOrientationFromVelocity(float deltaT);
     void SetTankOrientation(float deltaT);
     
     std::vector<Tank*>* enemyTanks;
