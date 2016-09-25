@@ -76,8 +76,6 @@ namespace {
 	TextureUnit tex;
 	ConstantLocation pLocation;
 	ConstantLocation vLocation;
-	ConstantLocation mLocation;
-	ConstantLocation nLocation;
 	ConstantLocation lightPosLocation;
 	ConstantLocation tintLocation;
 
@@ -109,7 +107,6 @@ namespace {
 
 		// Important: We need to set the program before we set a uniform
 		program->set();
-		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 
@@ -147,7 +144,7 @@ namespace {
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 100);
-		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0)); 
+		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0));
 
 		Graphics::setMatrix(pLocation, P);
 		Graphics::setMatrix(vLocation, View);
@@ -188,7 +185,7 @@ namespace {
             tank->ApplyForceToCenter(force);
             tank->Integrate(deltaT);
             tank->update(deltaT);
-            tank->render(mLocation, nLocation, tex);
+            //tank->render(mLocation, nLocation, tex);
         }
 
 		// Check for game over
@@ -201,30 +198,27 @@ namespace {
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject** currentP = &physics.dynamicObjects[i];
 			(*currentP)->UpdateMatrix();
-			(*currentP)->Mesh->render(mLocation, nLocation, tex);
+//			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
 		
-        // Update physics
-        physics.Update(deltaT);
 		
-		renderLandscape(mLocation, nLocation, tex);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
-			(*current)->mesh->render(mLocation, nLocation, tex);
+//			(*current)->mesh->render(mLocation, nLocation, tex);
 		}
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
+		particleSystem->render(tex, vLocation, tintLocation, View);
 		
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		projectiles->update(deltaT);
-		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+		projectiles->render(vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -282,13 +276,7 @@ namespace {
 	void mousePress(int windowId, int button, int x, int y) {
 		if(tanks.empty()) {
 			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
-		} else {
-			vec3 p = tanks.front()->getPosition();
-			vec3 l = tanks.front()->getTurretLookAt();
-			projectiles->fire(p, l, 10);
-			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
-		}
-	}
+		}	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
 		
@@ -301,26 +289,29 @@ namespace {
 		fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 
 		// This defines the structure of your Vertex Buffer
-		VertexStructure structure;
-		structure.add("pos", Float3VertexData);
-		structure.add("tex", Float2VertexData);
-		structure.add("nor", Float3VertexData);
+		VertexStructure** structures = new VertexStructure*[2];
+		structures[0] = new VertexStructure();
+		structures[0]->add("pos", Float3VertexData);
+		structures[0]->add("tex", Float2VertexData);
+		structures[0]->add("nor", Float3VertexData);
+		
+		structures[1] = new VertexStructure();
+		structures[1]->add("M", Float4x4VertexData);
+		structures[1]->add("N", Float4x4VertexData);
 
 		program = new Program;
 		program->setVertexShader(vertexShader);
 		program->setFragmentShader(fragmentShader);
-		program->link(structure);
+		program->link(structures, 2);
 
 		tex = program->getTextureUnit("tex");
 		pLocation = program->getConstantLocation("P");
 		vLocation = program->getConstantLocation("V");
-		mLocation = program->getConstantLocation("M");
-		nLocation = program->getConstantLocation("N");
 		lightPosLocation = program->getConstantLocation("lightPos");
 		tintLocation = program->getConstantLocation("tint");
 		
-		sphereMesh = new MeshObject("cube.obj", "cube.png", structure);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structure, PROJECTILE_SIZE);
+		sphereMesh = new MeshObject("cube.obj", "cube.png", *structures[0]);
+		projectileMesh = new MeshObject("projectile.obj", "projectile.png", *structures[0], PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(5, true, false);
 		spherePO->Collider.radius = 0.5f;
@@ -330,11 +321,11 @@ namespace {
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
+		tmc->mesh = new MeshObject("level.obj", "level.png", *structures[0]);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", structure, 10);
-		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structure, 10);
+		tankTop = new MeshObject("tank_top.obj", "cube.png", *structures[0], 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", *structures[0], 10);
         Tank* tank = new Tank(tankTop, tankBottom);
         tank->Collider.radius = 0.5f;
         tank->SetPosition(vec3(7.5f, 5, -7.5f));
@@ -352,9 +343,9 @@ namespace {
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
 		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structure, particleImage);
+		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
 
-		projectiles = new Projectiles(100, particleImage, projectileMesh, structure, &physics);
+		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
@@ -363,7 +354,7 @@ namespace {
         
         Random::init(123);
 
-		createLandscape();
+		createLandscape(structures);
 	}
 }
 

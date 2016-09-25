@@ -2,13 +2,15 @@
 #include "Landscape.h"
 #include <Kore/Math/Random.h>
 
+#include "Engine\Rendering.h"
+
 using namespace Kore;
 
-Kore::VertexBuffer* landscapeVertices;
+Kore::VertexBuffer** landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 Kore::Texture* landscapeTexture;
 
-void createLandscape() {
+void createLandscape(VertexStructure** structures) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
@@ -16,14 +18,10 @@ void createLandscape() {
 	const float size = 50;
 	const int w = 50;
 	const int h = 50;
-
-	VertexStructure structure;
-	structure.add("pos", Float3VertexData);
-	structure.add("tex", Float2VertexData);
-	structure.add("nor", Float3VertexData);
-	landscapeVertices = new Kore::VertexBuffer((w + 1) * (h + 1), structure);
-
-	float* vertices = landscapeVertices->lock();
+	
+	landscapeVertices = new VertexBuffer*[2];
+	landscapeVertices[0] = new VertexBuffer((w + 1) * (h + 1), *structures[0], 0);
+	float* vertices = landscapeVertices[0]->lock();
 	int i = 0;
 	for (int y = 0; y <= h; ++y) {
 		for (int x = 0; x <= w; ++x) {
@@ -41,8 +39,10 @@ void createLandscape() {
 			vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
 		}
 	}
-	landscapeVertices->unlock();
-
+	landscapeVertices[0]->unlock();
+	
+	landscapeVertices[1] = new VertexBuffer(1, *structures[1], 1);
+	
 	landscapeIndices = new IndexBuffer(w * h * 6);
 	int* indices = landscapeIndices->lock();
 	i = 0;
@@ -61,12 +61,15 @@ void createLandscape() {
 	landscapeIndices->unlock();
 }
 
-void renderLandscape(Kore::ConstantLocation mLocation, Kore::ConstantLocation nLocation, Kore::TextureUnit tex) {
-	Graphics::setMatrix(mLocation, mat4::Identity());
-	Graphics::setMatrix(nLocation, mat4::Identity());
-	
+void renderLandscape(Kore::TextureUnit tex) {
 	Graphics::setTexture(tex, landscapeTexture);
-	Graphics::setVertexBuffer(*landscapeVertices);
+
+	float* data = landscapeVertices[1]->lock();
+	setMatrix(data, 0, 0, mat4::Identity());
+	setMatrix(data, 0, 1, mat4::Identity());
+	landscapeVertices[1]->unlock();
+	
+	Graphics::setVertexBuffers(landscapeVertices, 2);
 	Graphics::setIndexBuffer(*landscapeIndices);
-	Graphics::drawIndexedVertices();
+	Graphics::drawIndexedVerticesInstanced(1);
 }

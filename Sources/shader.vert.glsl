@@ -1,12 +1,14 @@
 uniform mat4 P;
 uniform mat4 V;
-uniform mat4 M;
-uniform mat4 N;
 uniform vec3 lightPos;
 
 attribute vec3 pos;
 attribute vec2 tex;
 attribute vec3 nor;
+
+attribute mat4 M;
+attribute mat4 N;
+
 varying vec2 texCoord;
 varying vec3 normal;
 varying vec3 lightDirection;
