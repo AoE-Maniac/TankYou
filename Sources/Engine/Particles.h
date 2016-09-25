@@ -15,7 +15,7 @@ public:
 	void update(float deltaTime);
 	void render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V);
 
-private:
+//private:
 	VertexBuffer** vbs;
 	IndexBuffer* ib;
 	Texture* texture;
@@ -52,6 +52,7 @@ private:
 
 	// The number of particles
 	float gravity;
+    float spawnArea = 0.1;
 
 	void init(float halfSize, int maxParticles, VertexStructure** structures);
 	void emitParticle(int index);

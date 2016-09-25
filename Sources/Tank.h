@@ -15,14 +15,17 @@ enum StateMachineState {
 
 class Tank : public PhysicsObject {
 public:
-	Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag);
-	void render(TextureUnit tex, mat4 V);
+	Tank();
 	void rotateTurret(float angle);
 	void update(float deltaT);
 	vec3 getTurretLookAt();
 	vec3 getPosition();
     void Move(vec3 velocity);
     vec3 Velocity;
+	
+	mat4 GetBottomM();
+	mat4 GetTopM(mat4 bottomM);
+	mat4 GetFlagM(mat4 bottomM);
     
     void SetEnemy(std::vector<Tank*>& enemyTanks);
     std::vector<Tank*>* GetEnemy() const;
@@ -30,11 +33,7 @@ public:
     void setProjectile(Projectiles& projectiles);
 
 private:
-	MeshObject* Top;
-	MeshObject* Bottom;
-    MeshObject* Flag;
 	float turretAngle;
-	void setTurretTransform();
     float Orientation;
     void SetOrientationFromVelocity();
     void SetTankOrientation(float deltaT);
@@ -44,12 +43,12 @@ private:
     
     Steering* steer;
     vec3 randomPosition;
-    float maxVelocity = 50;
+    float maxVelocity;
     
-    float yPosition = 8.0f;
+    float yPosition;
     
-    float minDistToFollow = 100;
-    float minDistToShoot = 20;
+    float minDistToFollow;
+    float minDistToShoot;
     
     void updateStateMachine(float deltaT);
     StateMachineState currentState;

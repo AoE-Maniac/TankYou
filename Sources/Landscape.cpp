@@ -10,12 +10,11 @@ Kore::VertexBuffer** landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 Kore::Texture* landscapeTexture;
 
-void createLandscape(VertexStructure** structures) {
+void createLandscape(VertexStructure** structures, int size) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
 
-	const float size = 50;
 	const int w = 50;
 	const int h = 50;
 	

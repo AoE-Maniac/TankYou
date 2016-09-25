@@ -2,35 +2,24 @@
 #include "Tank.h"
 #include "Kore/Math/Matrix.h"
 
-void Tank::setTurretTransform() {
-	Top->M = mat4::Translation(0,1,0) * Bottom->M * mat4::Scale(1.7, 1.7, 1.7) * mat4::Rotation(turretAngle, 0, 0);
-    Flag->M = mat4::Translation(0,3,0) * Bottom->M * mat4::Scale(0.5, 0.5, 0.5)* mat4::Rotation(pi/4, 0, 0);
 
-}
-
-Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObject(TANK, 10, true, true), Top(top), Bottom(bottom) , Flag(flag){
-	Mesh = bottom;
-	bottom->M = mat4::Identity();
+Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
+	Collider.radius = 0.5f;
 	turretAngle = 0;
-	setTurretTransform();
     currentState = Wandering;
     steer = new Steering;
     randomPosition = vec3(25, yPosition, 15);
     enemyTanks = new std::vector<Tank*>;
 }
 
-void Tank::render(TextureUnit tex, mat4 V) {
-	Top->render(tex, V);
-	Bottom->render(tex, V);
-    Flag->render(tex, V);
-}
-
 void Tank::update(float deltaT) {
     updateStateMachine(deltaT);
 	//rotateTurret(deltaT * pi / 10);
-	UpdateMatrix();
-    setTurretTransform();
     SetTankOrientation(deltaT);
+	maxVelocity = 50;
+    yPosition = 8.0f;
+    minDistToFollow = 50;
+    minDistToShoot = 10;
 }
 
 void Tank::rotateTurret(float angle) {
@@ -58,8 +47,19 @@ void Tank::Move(vec3 velocity) {
 }
 
 void Tank::SetTankOrientation(float deltaT) {
+}
+
+mat4 Tank::GetBottomM() {
     vec3 pos = GetPosition();
-    Bottom->M = mat4::Translation(pos.x(),pos.y(),pos.z()) * mat4::RotationY(Orientation);
+	return mat4::Translation(pos.x(), pos.y(), pos.z()) * mat4::RotationY(Orientation);
+}
+
+mat4 Tank::GetTopM(mat4 bottomM) {
+	return mat4::Translation(0,1,0) * bottomM * mat4::Rotation(turretAngle, 0, 0);
+}
+
+mat4 Tank::GetFlagM(mat4 bottomM) {
+	return mat4::Translation(0,3,0) * bottomM * mat4::Rotation(pi/4, 0, 0);
 }
 
 
