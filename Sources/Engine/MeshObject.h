@@ -51,11 +51,11 @@ public:
 		M = mat4::Identity();
 	}
 
-	void render(TextureUnit tex) {
+	void render(TextureUnit tex, mat4 V) {
 		// TODO: Actually render instanced
 		float* data = vertexBuffers[1]->lock();
 		setMatrix(data, 0, 0, M);
-		setMatrix(data, 0, 1, calculateN(M));
+		setMatrix(data, 0, 1, calculateN(M * V));
 		vertexBuffers[1]->unlock();
 		
 		Graphics::setTexture(tex, image);
