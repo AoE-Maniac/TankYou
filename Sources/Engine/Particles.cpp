@@ -54,7 +54,7 @@ void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** st
 }
 
 void ParticleSystem::setPosition(vec3 position) {
-	float b = 0.1f;
+	float b = spawnArea;
 	emitMin = position + vec3(-b, -b, -b);
 	emitMax = position + vec3(b, b, b);
 }
