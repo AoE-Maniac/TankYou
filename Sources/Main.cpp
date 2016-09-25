@@ -21,6 +21,7 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 #include "Engine/Rendering.h"
+#include "Engine/Explosion.h"
 #include "Landscape.h"
 
 #include "Projectiles.h"
@@ -83,6 +84,7 @@ namespace {
 
 	Texture* particleImage;
 	ParticleSystem* particleSystem;
+    Explosion* explosionSystem;
     
     Steering* steer;
 
@@ -224,10 +226,13 @@ namespace {
 		renderLandscape(tex);
 
 		// Update and render particles
-		particleSystem->setPosition(spherePO->GetPosition());
-		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
-		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, tintLocation, View);
+		//particleSystem->setPosition(spherePO->GetPosition());
+		//particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
+		//particleSystem->update(deltaT);
+		//particleSystem->render(tex, vLocation, tintLocation, View);
+        
+        explosionSystem->update(deltaT);
+        explosionSystem->render(tex, vLocation, tintLocation, View);
 		
 		Graphics::setVertexBuffers(pickVBs, 2);
 		Graphics::setIndexBuffer(*pickIB);
@@ -396,6 +401,8 @@ namespace {
 
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
+        
+        explosionSystem = new Explosion(vec3(2,6,0), 2.f, 10.f, 300, structures, particleImage);
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 
