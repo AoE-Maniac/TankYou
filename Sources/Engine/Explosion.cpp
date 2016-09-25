@@ -19,6 +19,11 @@ Explosion::Explosion(vec3 pos, float spawnArea, float grav, int maxParticles, Ve
     }
 }
 
+void Explosion::explode()
+{
+    exploded = false;
+}
+
 void Explosion::pulse()
 {
     if(!exploded)

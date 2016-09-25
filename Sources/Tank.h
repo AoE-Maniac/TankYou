@@ -6,6 +6,7 @@
 
 #include "Engine/Collision.h"
 #include "Engine/PhysicsObject.h"
+#include "Engine/Explosion.h"
 
 enum StateMachineState {
     Wandering,
@@ -22,9 +23,9 @@ public:
     void Move(vec3 velocity);
     vec3 Velocity;
 	
-	mat4 Tank::GetBottomM();
-	mat4 Tank::GetTopM(mat4 bottomM);
-	mat4 Tank::GetFlagM(mat4 bottomM);
+	mat4 GetBottomM();
+	mat4 GetTopM(mat4 bottomM);
+	mat4 GetFlagM(mat4 bottomM);
     
     void SetEnemy(std::vector<Tank*>& enemyTanks);
     std::vector<Tank*> GetEnemy() const;
