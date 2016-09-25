@@ -51,7 +51,7 @@ namespace {
 	
 	mat4 P;
 	mat4 View;
-	mat4 PV;
+	//mat4 PV;
 
 	vec3 cameraPosition;
 	//vec3 targetCameraPosition;
@@ -99,6 +99,20 @@ namespace {
 	vec3 pickDir;
 	VertexBuffer** pickVBs;
 	IndexBuffer* pickIB;
+	vec3 initialCameraPosition;
+
+	vec3 screenToWorld(vec2 screenPos) {
+		vec4 pos((2 * screenPos.x()) / width - 1.0f, -((2 * screenPos.y()) / height - 1.0f), 0.0f, 1.0f);
+
+		mat4 projection = P;
+		mat4 view = View;
+
+		projection = projection.Invert();
+		view = view.Invert();
+
+		vec4 worldPos = view * projection * pos;
+		return vec3(worldPos.x() / worldPos.w(), worldPos.y() / worldPos.w(), worldPos.z() / worldPos.w());
+	}
 
 	void update() {
 		double t = System::time() - startTime;
@@ -221,17 +235,68 @@ namespace {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
 		}
-		renderLandscape(tex);
+//		renderLandscape(tex);
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, tintLocation, View);
+//		particleSystem->render(tex, vLocation, tintLocation, View);
+
+		float screenX = (mouseX / (float)width - 0.5f) * 2.0f;
+		float screenY = (mouseY / (float)height - 0.5f) * -2.0f;
+		//screenX *= 50;
+		//screenY *= 50;
+
+		//mat4 matrix = PV;
+		mat4 matrix = View * P;
+		//vec4 position = matrix.Invert() * vec4(screenX, screenY, -1, 1);
+		vec3 position = screenToWorld(vec2(mouseX, mouseY));
+
+		vec3 pos = initialCameraPosition;
+
+		pickDir = vec3(position.x(), position.y(), position.z()) - pos;
+		pickDir.normalize();
 		
+		int i = 0;
+		float* vertices = pickVBs[0]->lock();
+		vertices[i++] = pos.x() - 0.0f; vertices[i++] = pos.y() - 1.0f; vertices[i++] = pos.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = pos.x(); vertices[i++] = pos.y() + 1.0f; vertices[i++] = pos.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vec3 aim = pos + pickDir * 50.0f;
+		vertices[i++] = aim.x(); vertices[i++] = aim.y(); vertices[i++] = aim.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+
+		/*vertices[i++] = pos.x() - 0.0f; vertices[i++] = pos.y() - 1.f; vertices[i++] = pos.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = pos.x(); vertices[i++] = pos.y() + 1.f; vertices[i++] = pos.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;*/
+
+		/*vertices[i++] = -20.0f; vertices[i++] = 20.0f; vertices[i++] = 0.0f;
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = 20.0f; vertices[i++] = 20.0f; vertices[i++] = 0.0f;
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = -20.0f; vertices[i++] = -20.0f; vertices[i++] = 0.0f;
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;*/
+
+		pickVBs[0]->unlock();
+
+		Graphics::setTexture(tex, landscapeTexture);
 		Graphics::setVertexBuffers(pickVBs, 2);
 		Graphics::setIndexBuffer(*pickIB);
-		Graphics::drawIndexedVerticesInstanced(1);
+		//Graphics::drawIndexedVerticesInstanced(1);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -278,42 +343,22 @@ namespace {
 		float screenX = (x / (float)width - 0.5f) * 2.0f;
 		float screenY = (y / (float)height - 0.5f) * 2.0f;
 
-		vec4 position = PV.Invert() * vec4(screenX, screenY, -1, 1);
+		//vec4 position = (P * View).Invert() * vec4(screenX, screenY, -1, 1);
+		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 
 		pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-
-		int i = 0;
-		float* vertices = pickVBs[0]->lock();
-		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vec3 aim = cameraPosition + pickDir * 50.0f;
-		vertices[i++] = aim.x(); vertices[i++] = aim.y(); vertices[i++] = aim.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-
-		vertices[i++] = cameraPosition.x() - 0.0f; vertices[i++] = cameraPosition.y() - 100.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		pickVBs[0]->unlock();
 		
 		static int pick = 0;
-		for (int j = 0; j < physics.currentDynamicObjects; j++) {
+		/*for (int j = 0; j < physics.currentDynamicObjects; j++) {
 			PhysicsObject* p = physics.dynamicObjects[j];
 
 			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
+		}*/
+		if (tanks[0]->Collider.IntersectsWith(cameraPosition, pickDir)) {
+			log(Info, "Picky %i", pick++);
 		}
 	}
 	
@@ -399,7 +444,7 @@ namespace {
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 
-		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
+		initialCameraPosition = cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
         
         steer = new Steering;

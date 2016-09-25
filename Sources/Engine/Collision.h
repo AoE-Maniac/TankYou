@@ -356,6 +356,7 @@ public:
 	}
 
 	bool IntersectsWith(vec3 orig, vec3 dir) const {
+		float radius = this->radius * 5;
 		float t0, t1; // solutions for t if the ray intersects 
 		// geometric solution
 		vec3 L = center - orig;
