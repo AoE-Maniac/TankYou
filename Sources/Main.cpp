@@ -86,7 +86,7 @@ namespace {
 	Texture* particleImage;
 	ParticleSystem* particleSystem;
     
-    Steering* move;
+    Steering* steer;
 
 	double lastTime;
 
@@ -96,7 +96,7 @@ namespace {
 	std::vector<Tank*> tanks;
     
     vec3 targetPosition = vec3(25, 0.5f, 15);
-
+    
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -169,23 +169,37 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		//spherePO->ApplyForceToCenter(force);
+		spherePO->ApplyForceToCenter(force);
         
-//        Tank tank = tanks[0];
-//        vec3 currentPos = tank.getPosition();
-//        vec3 maxVelocity = vec3(1.1f,1.1f,1.1f);
+        //vec3 currentPos = tank.getPosition();
         //vec3 velocity = move->Seek(currentPos, enemy->GetPosition(), maxVelocity);
         //vec3 velocity = move->PursueTarget(currentPos, enemy->GetPosition(), spherePO->Velocity, enemy->Velocity, 0.1f);
-//        targetPosition = spherePO->GetPosition();
-//        vec3 velocity = move->Wander(currentPos, targetPosition, maxVelocity);
-//        log(Info, "%f %f %f", velocity.x(), velocity.y(), velocity.z());
+        //targetPosition = spherePO->GetPosition();
 
-		
         
+        // Update physics
+        physics.Update(deltaT);
+        
+        // Render dynamic objects
+        for (int i = 0; i < physics.currentDynamicObjects; i++) {
+            PhysicsObject** currentP = &physics.dynamicObjects[i];
+            (*currentP)->UpdateMatrix();
+            (*currentP)->Mesh->render(mLocation, nLocation, tex);
+        }
+    
         for (int i = 0; i < tanks.size(); i++) {
             Tank* tank = tanks[i];
-            //tank.SetPosition(spherePO->GetPosition());
-            tank->ApplyForceToCenter(force);
+            
+            //float max = 50;
+            //vec3 maxVelocity(max,max,max);
+            //vec3 velocity = steer->Wander(tank->getPosition(), targetPosition, maxVelocity);
+            //log(Info, "%f %f %f", targetPosition.x(), targetPosition.y(), targetPosition.z());
+            
+            // Track the enemy
+            vec3 velocity = steer->PursueTarget(tank->GetPosition(), spherePO->GetPosition(), tank->Velocity, spherePO->Velocity, 20);
+            
+            tank->Move(velocity);
+
             tank->Integrate(deltaT);
             tank->update(deltaT);
             tank->render(mLocation, nLocation, tex);
@@ -195,18 +209,7 @@ namespace {
 		bool result = spherePO->Collider.IntersectsWith(boxCollider);
 		if (result) {
 			// ...
-		}
-
-		// Render dynamic objects
-		for (int i = 0; i < physics.currentDynamicObjects; i++) {
-			PhysicsObject** currentP = &physics.dynamicObjects[i];
-			//(*currentP)->UpdateMatrix();
-			//(*currentP)->Mesh->render(mLocation, nLocation, tex);
-		}
-		
-        
-        // Update physics
-        //physics.Update(deltaT);
+        }
 		
 
 		//renderLandscape(mLocation, nLocation);
@@ -231,8 +234,8 @@ namespace {
 	}
 
 	void ResetSphere(vec3 Position, vec3 Velocity) {
-		//spherePO->SetPosition(Position);
-		//spherePO->Velocity = Velocity;
+		spherePO->SetPosition(Position);
+		spherePO->Velocity = Velocity;
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -328,7 +331,7 @@ namespace {
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
 
-		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
+		ResetSphere(vec3(-10, 5.5f, 10), vec3(0, 0, 0));
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structure);
@@ -340,8 +343,8 @@ namespace {
         tank->Collider.radius = 0.5f;
         //tank->Mass = 5;
         //tank->Mesh = tankBottom;
-        tank->SetPosition(vec3(0, 1, 0));
-        physics.AddDynamicObject(tank);
+        tank->SetPosition(vec3(0, 6, 0));
+        //physics.AddDynamicObject(tank);
         tanks.push_back(tank);
         
 		/*Sound* winSound;
@@ -362,7 +365,7 @@ namespace {
 		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
 		lookAt = spherePO->GetPosition();
         
-        move = new Steering;
+        steer = new Steering;
         
         Random::init(123);
 

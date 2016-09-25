@@ -1,6 +1,8 @@
 #include <Kore/Math/Vector.h>
 #include <Kore/Math/Random.h>
 
+//#include "Engine/MeshObject.h"
+
 using namespace Kore;
 
 class Steering {
@@ -29,3 +31,28 @@ public:
     bool Arrive(vec3 characterPos, vec3 targetPos);
     
 };
+
+/*
+class AICharacter {
+    
+private:
+    
+    float Orientation;
+    
+    float Rotation;
+    
+    MeshObject* meshObject;
+    
+    
+public:
+    
+    AICharacter();
+    
+    vec3 Position;
+    vec3 Velocity;
+
+    void SetOrientationFromVelocity();
+    
+    float GetOrientation();
+    
+};*/
