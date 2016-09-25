@@ -130,7 +130,7 @@ namespace {
 		Kore::Audio::update();
 		
 		Graphics::begin();
-		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag, 0xff9999FF, 1.0f);
+		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag | Graphics::ClearStencilFlag, 0xff9999FF, 1.0f, 0);
 
 		// Important: We need to set the program before we set a uniform
 		program->set();
@@ -198,6 +198,8 @@ namespace {
         physics.Update(deltaT);
     
 		tankTics->update(deltaT);
+
+		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
 		tankTics->render(tex, View);
 		
         // Update physics
@@ -221,8 +223,11 @@ namespace {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
 		}*/
+
+		Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
 
+		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
