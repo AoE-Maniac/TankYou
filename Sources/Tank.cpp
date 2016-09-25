@@ -21,7 +21,6 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 
 void Tank::update(float deltaT) {
     updateStateMachine(deltaT);
-	//rotateTurret(deltaT * pi / 10);
     SetTankOrientation(deltaT);
 	maxVelocity = 50;
     yPosition = 8.0f;
@@ -81,6 +80,8 @@ void Tank::updateStateMachine(float deltaT) {
     switch (currentState) {
         case Wandering:
             //log(Info, "Wandering");
+            
+            rotateTurret(deltaT * pi / 10);
             
             // Wander
             randomPosition.y() = yPosition;
