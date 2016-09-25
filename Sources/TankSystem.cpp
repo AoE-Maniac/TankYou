@@ -15,19 +15,19 @@ TankSystem::TankSystem(InstancedMeshObject* meshB, InstancedMeshObject* meshT, I
 	spawnTimer = spawnDelay;
 }
 
-void spawnTank(std::vector<Tank*>* tanks, vec3 spawnPosa, vec3 spawnPosb) {
+void spawnTank(std::vector<Tank*>* tanks, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
 	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
-	Tank* t1 = new Tank();
-	t1->SetEnemy(tanks);
-    t1->setProjectile(mProjectiles);
+	Tank* t1 = new Tank(frac);
+	t1->SetEnemy(*tanks);
+    t1->setProjectile(projectiles);
 	tanks->push_back(t1);
 	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
 }
 
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		spawnTank(&tanks, spawnPos1a, spawnPos1b);
-		spawnTank(&tanks, spawnPos2a, spawnPos2b);
+		spawnTank(&tanks, spawnPos1a, spawnPos1b, 0, mProjectiles);
+		spawnTank(&tanks, spawnPos2a, spawnPos2b, 1, mProjectiles);
 		
 		spawnTimer = spawnDelay;
 	}
