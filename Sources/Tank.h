@@ -5,7 +5,7 @@
 class Tank : public PhysicsObject {
 public:
 	Tank(MeshObject* top, MeshObject* bottom);
-	void render(ConstantLocation mLocation, ConstantLocation nLocation, TextureUnit tex);
+	void render(TextureUnit tex);
 	void rotateTurret(float angle);
 	void update(float deltaT);
 	vec3 getTurretLookAt();

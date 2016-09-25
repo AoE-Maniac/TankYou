@@ -177,16 +177,17 @@ namespace {
 //        vec3 velocity = move->Wander(currentPos, targetPosition, maxVelocity);
 //        log(Info, "%f %f %f", velocity.x(), velocity.y(), velocity.z());
 
-		
-        
         for (int i = 0; i < tanks.size(); i++) {
             Tank* tank = tanks[i];
             //tank.SetPosition(spherePO->GetPosition());
             tank->ApplyForceToCenter(force);
             tank->Integrate(deltaT);
             tank->update(deltaT);
-            //tank->render(mLocation, nLocation, tex);
+            tank->render(tex);
         }
+		
+        // Update physics
+        physics.Update(deltaT);
 
 		// Check for game over
 		bool result = spherePO->Collider.IntersectsWith(boxCollider);
@@ -198,16 +199,15 @@ namespace {
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject** currentP = &physics.dynamicObjects[i];
 			(*currentP)->UpdateMatrix();
-//			(*currentP)->Mesh->render(mLocation, nLocation, tex);
+			(*currentP)->Mesh->render(tex);
 		}
 		
-		
-
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
-//			(*current)->mesh->render(mLocation, nLocation, tex);
+			(*current)->mesh->render(tex);
 		}
+		renderLandscape(tex);
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
@@ -274,9 +274,14 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		if(tanks.empty()) {
-			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
-		}	}
+		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		if(!tanks.empty()) {
+			vec3 p = tanks.front()->getPosition();
+			vec3 l = tanks.front()->getTurretLookAt();
+			projectiles->fire(p, l, 10);
+			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
+		}
+	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
 		
@@ -310,8 +315,8 @@ namespace {
 		lightPosLocation = program->getConstantLocation("lightPos");
 		tintLocation = program->getConstantLocation("tint");
 		
-		sphereMesh = new MeshObject("cube.obj", "cube.png", *structures[0]);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", *structures[0], PROJECTILE_SIZE);
+		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
+		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(5, true, false);
 		spherePO->Collider.radius = 0.5f;
@@ -321,11 +326,11 @@ namespace {
 		ResetSphere(vec3(10, 5.5f, -10), vec3(0, 0, 0));
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		tmc->mesh = new MeshObject("level.obj", "level.png", *structures[0]);
+		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		physics.AddStaticCollider(tmc);
 
-		tankTop = new MeshObject("tank_top.obj", "cube.png", *structures[0], 10);
-		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", *structures[0], 10);
+		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
+		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
         Tank* tank = new Tank(tankTop, tankBottom);
         tank->Collider.radius = 0.5f;
         tank->SetPosition(vec3(7.5f, 5, -7.5f));

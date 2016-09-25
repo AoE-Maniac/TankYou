@@ -12,7 +12,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 	}
 	
 	vertexBuffers = new VertexBuffer*[2];
-	vertexBuffers[0] = mesh->vertexBuffer;
+	vertexBuffers[0] = mesh->vertexBuffers[0];
 	vertexBuffers[1] = new VertexBuffer(maxProjectiles, *structures[1], 1);
 
 	currProj = 0;

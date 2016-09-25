@@ -20,12 +20,13 @@ using namespace Kore;
 
 class MeshObject {
 public:
-	MeshObject(const char* meshFile, const char* textureFile, const VertexStructure& structure, float scale = 1.0f) {
+	MeshObject(const char* meshFile, const char* textureFile, VertexStructure** structures, float scale = 1.0f) {
 		mesh = loadObj(meshFile);
 		image = new Texture(textureFile, true);
-
-		vertexBuffer = new VertexBuffer(mesh->numVertices, structure, 0);
-		float* vertices = vertexBuffer->lock();
+		
+		vertexBuffers = new VertexBuffer*[2];
+		vertexBuffers[0] = new VertexBuffer(mesh->numVertices, *structures[0], 0);
+		float* vertices = vertexBuffers[0]->lock();
 		for (int i = 0; i < mesh->numVertices; ++i) {
 			vertices[i * 8 + 0] = mesh->vertices[i * 8 + 0] * scale;
 			vertices[i * 8 + 1] = mesh->vertices[i * 8 + 1] * scale;
@@ -36,7 +37,9 @@ public:
 			vertices[i * 8 + 6] = mesh->vertices[i * 8 + 6];
 			vertices[i * 8 + 7] = mesh->vertices[i * 8 + 7];
 		}
-		vertexBuffer->unlock();
+		vertexBuffers[0]->unlock();
+		
+		vertexBuffers[1] = new VertexBuffer(1, *structures[1], 1);
 
 		indexBuffer = new IndexBuffer(mesh->numFaces * 3);
 		int* indices = indexBuffer->lock();
@@ -48,22 +51,22 @@ public:
 		M = mat4::Identity();
 	}
 
-	void render(ConstantLocation mLocation, ConstantLocation nLocation, TextureUnit tex) {
-		Graphics::setMatrix(mLocation, M);
-		Graphics::setMatrix(nLocation, calculateN(M));
+	void render(TextureUnit tex) {
+		// TODO: Actually render instanced
+		float* data = vertexBuffers[1]->lock();
+		setMatrix(data, 0, 0, M);
+		setMatrix(data, 0, 1, calculateN(M));
+		vertexBuffers[1]->unlock();
 		
-		//image->_set(tex);
 		Graphics::setTexture(tex, image);
-		//vertexBuffer->_set();
-		Graphics::setVertexBuffer(*vertexBuffer);
-		//indexBuffer->_set();
+		Graphics::setVertexBuffers(vertexBuffers, 2);
 		Graphics::setIndexBuffer(*indexBuffer);
-		Graphics::drawIndexedVertices();
+		Graphics::drawIndexedVerticesInstanced(1);
 	}
 
 	mat4 M;
 
-	VertexBuffer* vertexBuffer;
+	VertexBuffer** vertexBuffers;
 	IndexBuffer* indexBuffer;
 
 	Mesh* mesh;
