@@ -90,6 +90,7 @@ namespace {
 
 	MeshObject* tankTop;
 	MeshObject* tankBottom;
+    MeshObject* tankFlag;
 
 	std::vector<Tank*> tanks;
     
@@ -374,7 +375,8 @@ namespace {
 
 		tankTop = new MeshObject("tank_top.obj", "cube.png", structures, 10);
 		tankBottom = new MeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, 10);
-        Tank* tank = new Tank(tankTop, tankBottom);
+        tankFlag = new MeshObject("flag.obj", "flag_eu_uv.png", structures, 10);
+        Tank* tank = new Tank(tankTop, tankBottom, tankFlag);
         tank->Collider.radius = 0.5f;
         //tank->Mass = 5;
         //tank->Mesh = tankBottom;
