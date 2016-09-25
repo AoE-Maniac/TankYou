@@ -4,7 +4,7 @@
 
 class Tank : public PhysicsObject {
 public:
-	Tank(MeshObject* top, MeshObject* bottom);
+	Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag);
 	void render(TextureUnit tex);
 	void rotateTurret(float angle);
 	void update(float deltaT);
@@ -16,6 +16,7 @@ public:
 private:
 	MeshObject* Top;
 	MeshObject* Bottom;
+    MeshObject* Flag;
 	float turretAngle;
 	void setTurretTransform();
     float Orientation;
