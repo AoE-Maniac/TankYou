@@ -100,6 +100,7 @@ namespace {
 	InstancedMeshObject* tankBottom;
     InstancedMeshObject* tankFlag;
 	TankSystem* tankTics;
+    ParticleRenderer* particleRenderer;
 
 	vec3 screenToWorld(vec2 screenPos) {
 		vec4 pos((2 * screenPos.x()) / width - 1.0f, -((2 * screenPos.y()) / height - 1.0f), 0.0f, 1.0f);
@@ -200,7 +201,7 @@ namespace {
 		tankTics->update(deltaT);
 
 		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View);
+		tankTics->render(tex, View, vLocation, tintLocation);
 		
         // Update physics
         physics.Update(deltaT);
@@ -238,6 +239,8 @@ namespace {
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		projectiles->update(deltaT);
 		projectiles->render(vLocation, tintLocation, tex, View);
+        
+        particleRenderer->render(tex, View, vLocation, tintLocation);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -289,7 +292,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10, 1);
+		//projectiles->fire(cameraPosition, lookAt - cameraPosition, 10, 1);
 		/*if(!tanks.empty()) {
 			vec3 p = tanks.front()->getPosition();
 			vec3 l = tanks.front()->getTurretLookAt();
@@ -346,8 +349,8 @@ namespace {
         
         particleImage = new Texture("particle.png", true);
         particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
-        
-        projectiles = new Projectiles(1000, particleImage, projectileMesh, structures, &physics);
+        particleRenderer = new ParticleRenderer(structures);
+        projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
@@ -356,7 +359,8 @@ namespace {
 		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
-        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
+
+        tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");

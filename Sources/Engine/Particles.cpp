@@ -54,6 +54,15 @@ void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** st
 	ib->unlock();
 }
 
+ParticleSystem::~ParticleSystem()
+{
+    delete vbs;
+    delete ib;
+    delete particlePos;
+    delete particleVel;
+    delete particleTTL;
+}
+
 void ParticleSystem::setPosition(vec3 position) {
 	float b = spawnArea;
 	emitMin = position + vec3(-b, -b, -b);
