@@ -16,6 +16,10 @@ Tank::Tank(MeshObject* top, MeshObject* bottom, MeshObject* flag) : PhysicsObjec
     currentState = Wandering;
     steer = new Steering;
     randomPosition = vec3(25, yPosition, 15);
+	maxVelocity = 50;
+    yPosition = 8.0f;
+    minDistToFollow = 50;
+    minDistToShoot = 10;
 }
 
 void Tank::render(TextureUnit tex, mat4 V) {

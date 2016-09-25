@@ -41,12 +41,12 @@ private:
     
     Steering* steer;
     vec3 randomPosition;
-    float maxVelocity = 50;
+    float maxVelocity;
     
-    float yPosition = 8.0f;
+    float yPosition;
     
-    float minDistToFollow = 50;
-    float minDistToShoot = 10;
+    float minDistToFollow;
+    float minDistToShoot;
     
     void updateStateMachine();
     StateMachineState currentState;
