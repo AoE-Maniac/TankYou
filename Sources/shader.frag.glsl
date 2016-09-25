@@ -3,12 +3,12 @@ precision mediump float;
 #endif
 
 uniform sampler2D tex;
-uniform vec4 tint;
 
 varying vec2 texCoord;
 varying vec3 normal;
 varying vec3 lightDirection;
 varying vec3 eyeCoord;
+varying vec4 tintCol;
 
 void kore() {
 	
@@ -28,5 +28,5 @@ void kore() {
 
 	vec4 light = ambient + diffuse + specular;
 
-	gl_FragColor = light * texture2D(tex, texCoord) * tint;
+	gl_FragColor = light * texture2D(tex, texCoord) * tintCol;
 }

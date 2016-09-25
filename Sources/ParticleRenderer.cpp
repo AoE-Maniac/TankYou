@@ -13,14 +13,13 @@ ParticleRenderer::ParticleRenderer(Kore::VertexStructure** structures) :
 {
 }
 
-void ParticleRenderer::render(TextureUnit tex, mat4 View, ConstantLocation vLocation, ConstantLocation tintLocation)
+void ParticleRenderer::render(TextureUnit tex, mat4 View, ConstantLocation vLocation)
 {
     std::set<ParticleSystem*>::iterator it;
     for( it = particlesystems.begin(); it != particlesystems.end(); ++it)
     {
-        (*it)->render(tex, vLocation, tintLocation, View);
+        (*it)->render(tex, vLocation, View);
     }
-    Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 }
 
 void ParticleRenderer::addParticleSystem( ParticleSystem* system )

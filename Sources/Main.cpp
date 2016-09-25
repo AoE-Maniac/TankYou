@@ -84,7 +84,6 @@ namespace {
 	ConstantLocation pLocation;
 	ConstantLocation vLocation;
 	ConstantLocation lightPosLocation;
-	ConstantLocation tintLocation;
 
 	BoxCollider boxCollider(vec3(-46.0f, -4.0f, 44.0f), vec3(10.6f, 4.4f, 4.0f));
 
@@ -138,9 +137,6 @@ namespace {
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 		Graphics::setRenderState(BackfaceCulling, NoCulling);
-
-		// Reset tint for objects that should not be tinted
-		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 
 		// set the camera
 		cameraAngle += 0.3f * deltaT;
@@ -201,7 +197,7 @@ namespace {
 		tankTics->update(deltaT);
 
 		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View, vLocation, tintLocation);
+		tankTics->render(tex, View, vLocation);
 		
         // Update physics
         physics.Update(deltaT);
@@ -233,14 +229,12 @@ namespace {
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, tintLocation, View);
+		particleSystem->render(tex, vLocation, View);
 
-		// Reset tint for objects that should not be tinted
-		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		projectiles->update(deltaT);
-		projectiles->render(vLocation, tintLocation, tex, View);
+		projectiles->render(vLocation, tex, View);
         
-        particleRenderer->render(tex, View, vLocation, tintLocation);
+        particleRenderer->render(tex, View, vLocation);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -325,6 +319,7 @@ namespace {
 		structures[1] = new VertexStructure();
 		structures[1]->add("M", Float4x4VertexData);
 		structures[1]->add("N", Float4x4VertexData);
+		structures[1]->add("tint", Float4VertexData);
 
 		program = new Program;
 		program->setVertexShader(vertexShader);
@@ -335,7 +330,6 @@ namespace {
 		pLocation = program->getConstantLocation("P");
 		vLocation = program->getConstantLocation("V");
 		lightPosLocation = program->getConstantLocation("lightPos");
-		tintLocation = program->getConstantLocation("tint");
 		
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
@@ -356,9 +350,9 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		//physics.AddStaticCollider(tmc);
 
-		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
+		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
-		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
 
         tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
         

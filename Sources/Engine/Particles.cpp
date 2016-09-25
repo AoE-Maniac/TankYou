@@ -97,7 +97,7 @@ void ParticleSystem::update(float deltaTime) {
 	}
 }
 
-void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V) {
+void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, mat4 V) {
 	Graphics::setRenderState(RenderState::DepthWrite, false);
 	Graphics::setRenderState(RenderState::DepthTest, false);
 
@@ -111,15 +111,16 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 	for (int i = 0; i < numParticles; i++) {
 		// Skip dead particles
 		if (particleTTL[i] <= 0.0f) continue;
-
-		// Interpolate linearly between the two colors
-		float interpolation = particleTTL[i] / totalTimeToLive;
-		Graphics::setFloat4(tintLocation, colorStart * interpolation + colorEnd * (1.0f - interpolation));
-
+			
 		mat4 M = mat4::Translation(particlePos[i].x(), particlePos[i].y(), particlePos[i].z()) * mat4::Scale(0.2f, 0.2f, 0.2f);
 		
-		setMatrix(data, alive, 0, M * view);
-		setMatrix(data, alive, 1, calculateN(M * view));
+		setMatrix(data, alive, 0, 36, M * view);
+		setMatrix(data, alive, 16, 36, calculateN(M * view));
+		
+		// Interpolate linearly between the two colors
+		float interpolation = particleTTL[i] / totalTimeToLive;
+		vec4 col = colorStart * interpolation + colorEnd * (1.0f - interpolation);
+		setVec4(data, alive, 32, 36, col);
 
 		++alive;
 	}

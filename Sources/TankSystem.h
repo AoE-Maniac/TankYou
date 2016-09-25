@@ -17,7 +17,7 @@ class TankSystem {
 public:
 	TankSystem(ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles);
 	void update(float dt);
-	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation, ConstantLocation tintLocation);
+	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
 
 private:
     ParticleRenderer* particleRenderer;

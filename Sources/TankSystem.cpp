@@ -77,32 +77,32 @@ void TankSystem::kill(int i) {
     }
 }
 
-void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation, ConstantLocation tintLocation) {
+void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) {
 	float* dataB = meshBottom->vertexBuffers[1]->lock();
 	float* dataT = meshTop->vertexBuffers[1]->lock();
 	float* dataF = meshFlag->vertexBuffers[1]->lock();
     
-    int unrenderedTanks = 0;
     int j = 0;
     for (int i = 0; i < tanks.size(); i++) {
         if(explosions[i] == nullptr)
         {
-            Tank* tank = tanks[i];
-            mat4 botM = tank->GetBottomM();
-            setMatrix(dataB, j, 0, botM);
-            setMatrix(dataB, j, 1, calculateN(botM * View));
+			Tank* tank = tanks[i];
+			mat4 botM = tank->GetBottomM();
+			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
+			setMatrix(dataB, j, 0, 36, botM);
+			setMatrix(dataB, j, 16, 36, calculateN(botM * View));
+			setVec4(dataB, j, 32, 36, col);
 		
-            mat4 topM = tank->GetTopM(botM);
-            setMatrix(dataT, j, 0, topM);
-            setMatrix(dataT, j, 1, calculateN(topM * View));
+			mat4 topM = tank->GetTopM(botM);
+			setMatrix(dataT, j, 0, 36, topM);
+			setMatrix(dataT, j, 16, 36, calculateN(topM * View));
+			setVec4(dataT, j, 32, 36, col);
 		
-            mat4 flagM = tank->GetFlagM(botM);
-            setMatrix(dataF, j, 0, flagM);
-            setMatrix(dataF, j, 1, calculateN(flagM * View));
+			mat4 flagM = tank->GetFlagM(botM);
+			setMatrix(dataF, j, 0, 36, flagM);
+			setMatrix(dataF, j, 16, 36, calculateN(flagM * View));
+			setVec4(dataF, j, 32, 36, col);
             ++j;
-        } else
-        {
-            ++unrenderedTanks;
         }
 	}
     
@@ -110,7 +110,7 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation, 
 	meshTop->vertexBuffers[1]->unlock();
 	meshFlag->vertexBuffers[1]->unlock();
 	
-	meshBottom->render(tex, tanks.size()-unrenderedTanks);
-	meshTop->render(tex, tanks.size()-unrenderedTanks);
-	meshFlag->render(tex, tanks.size()-unrenderedTanks);
+	meshBottom->render(tex, j);
+	meshTop->render(tex, j);
+	meshFlag->render(tex, j);
 }
