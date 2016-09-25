@@ -262,40 +262,13 @@ namespace {
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-
-		int i = 0;
-		float* vertices = pickVBs[0]->lock();
-		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vec3 aim = cameraPosition + pickDir * 50.0f;
-		vertices[i++] = aim.x(); vertices[i++] = aim.y(); vertices[i++] = aim.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-
-		vertices[i++] = cameraPosition.x() - 0.0f; vertices[i++] = cameraPosition.y() - 100.0f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 100.f; vertices[i++] = cameraPosition.z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		vertices[i++] = spherePO->GetPosition().x(); vertices[i++] = spherePO->GetPosition().y(); vertices[i++] = spherePO->GetPosition().z();
-		vertices[i++] = 0; vertices[i++] = 0;
-		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		pickVBs[0]->unlock();
-		
+				
 		static int pick = 0;
-		for (unsigned i = 0; i < tanks.size(); ++i) {
+		/*for (unsigned i = 0; i < tanks.size(); ++i) {
 			if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
 		}*/
-		if (spherePO->Collider.IntersectsWith(cameraPosition, pickDir)) {
-			log(Info, "Picky %i", pick++);
-		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
