@@ -10,7 +10,7 @@ using namespace Kore;
 
 class Projectiles {
 public:
-	Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** particleStructures, PhysicsWorld* physics);
+	Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics);
 	void fire(vec3 pos, vec3 dir, float s);
 	void update(float deltaT);
 	void render(ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view);
@@ -18,5 +18,6 @@ private:
 	int maxProj;
 	int currProj;
 	MeshObject* sharedMesh;
+	VertexBuffer** vertexBuffers;
 	Projectile** projectiles;
 };
