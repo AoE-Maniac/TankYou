@@ -22,6 +22,7 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 #include "Engine/Rendering.h"
+#include "Engine/Explosion.h"
 #include "Landscape.h"
 
 #include "Projectiles.h"
@@ -88,6 +89,7 @@ namespace {
 
 	Texture* particleImage;
 	ParticleSystem* particleSystem;
+    Explosion* explosionSystem;
     
 //    Steering* steer;
 
@@ -326,6 +328,11 @@ namespace {
 
 		ResetSphere(vec3(-10, 5.5f, 10), vec3(0, 0, 0));
         
+        particleImage = new Texture("particle.png", true);
+        particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
+        
+        projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
+        
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		physics.AddStaticCollider(tmc);
@@ -347,6 +354,8 @@ namespace {
 
 		particleImage = new Texture("particle.png", true);
 		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
+        
+        explosionSystem = new Explosion(vec3(2,6,0), 2.f, 10.f, 300, structures, particleImage);
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 

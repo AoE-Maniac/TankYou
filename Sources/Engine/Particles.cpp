@@ -23,6 +23,7 @@ ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive,
 	
 	spawnRate = 0.05f;
 	nextSpawn = spawnRate;
+	spawnArea = 0.1;
 
 	init(size / 2, maxParticles, structures);
 	setPosition(pos);
@@ -54,7 +55,7 @@ void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** st
 }
 
 void ParticleSystem::setPosition(vec3 position) {
-	float b = 0.1f;
+	float b = spawnArea;
 	emitMin = position + vec3(-b, -b, -b);
 	emitMax = position + vec3(b, b, b);
 }

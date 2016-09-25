@@ -2,6 +2,7 @@
 #include "Tank.h"
 #include "Kore/Math/Matrix.h"
 
+
 Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	Collider.radius = 0.5f;
 	turretAngle = 0;
@@ -14,12 +15,17 @@ Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     minDistToShoot = 10;
 	//callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = 10;
+    enemyTanks = new std::vector<Tank*>;
 }
 
 void Tank::update(float deltaT) {
-    updateStateMachine();
-	rotateTurret(deltaT * pi / 10);
+    updateStateMachine(deltaT);
+	//rotateTurret(deltaT * pi / 10);
     SetTankOrientation(deltaT);
+	maxVelocity = 50;
+    yPosition = 8.0f;
+    minDistToFollow = 50;
+    minDistToShoot = 10;
 }
 
 void Tank::rotateTurret(float angle) {
@@ -64,32 +70,36 @@ mat4 Tank::GetFlagM(mat4 bottomM) {
 
 
 void Tank::SetEnemy(std::vector<Tank*>& tanks) {
-    enemyTanks = tanks;
+    enemyTanks = &tanks;
 }
 
-std::vector<Tank*> Tank::GetEnemy() const {
+std::vector<Tank*>* Tank::GetEnemy() const {
     return enemyTanks;
 }
 
-void Tank::updateStateMachine() {
+void Tank::updateStateMachine(float deltaT) {
     
     switch (currentState) {
         case Wandering:
             //log(Info, "Wandering");
             
-            // Wander TODO
+            // Wander
             randomPosition.y() = yPosition;
             Move(steer->Wander(getPosition(), randomPosition, maxVelocity));
             
             // Follow the target
-            for (int i = 0; i < enemyTanks.size(); i++) {
-                Tank* tank = enemyTanks[i];
-                //log(Info, "%i: %f %f", i, tank->GetPosition().y(), tank->GetPosition().y());
-                float distance = (GetPosition() - tank->GetPosition()).getLength();
-                
-                if (distance < minDistToFollow) {
-                    enemyTank = tank;
-                    //currentState = Following;
+            for (int i = 0; i < enemyTanks->size(); i++) {
+                Tank* tank = (*enemyTanks)[i];
+                if(tank != this) {
+                    
+                    //setTurrentTransform();
+                    
+                    
+                    float distance = (GetPosition() - tank->GetPosition()).getLength();
+                    if (distance < minDistToFollow) {
+                        enemyTank = tank;
+                        currentState = Following;
+                    }
                 }
             }
             
@@ -99,14 +109,25 @@ void Tank::updateStateMachine() {
             //log(Info, "Following");
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
-            //if (distance > 10) {
-                // Track the enemy
-                //vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
-                //Move(velocity);
-            //} else {
-                // Shoot and Kill
+            if (distance < minDistToShoot) {
+                //log(Info, "Shoot");
                 
-            //}
+                vec3 pos = getTurretLookAt();
+                vec3 to = enemyTank->getPosition();
+                float angle = Kore::atan2(pos.z(), pos.x()) - Kore::atan2(to.z(), to.x());
+                rotateTurret(deltaT * angle);
+                
+                // Shoot and Kill
+                vec3 p = GetPosition();
+                vec3 l = getTurretLookAt();
+                //mProjectiles->fire(p, l, 1);
+                
+                Move(vec3(0,0,0));
+            } else {
+                // Track the enemy
+                vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
+                Move(velocity);
+            }
             
             
             break;
@@ -120,4 +141,8 @@ void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
 		hp -= projDmg;
 		break;
 	}
+}
+
+void Tank::setProjectile(Projectiles& projectiles) {
+    mProjectiles = &projectiles;
 }
