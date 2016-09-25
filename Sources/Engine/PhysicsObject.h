@@ -72,5 +72,5 @@ public:
 
 	// Update the matrix of the mesh
 	void UpdateMatrix();
-
+	mat4 GetMatrix();
 };
