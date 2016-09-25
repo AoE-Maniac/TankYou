@@ -32,6 +32,9 @@
 
 using namespace Kore;
 
+const int MAP_SIZE_INNER = 200;
+const int MAP_SIZE_OUTER = 300;
+
 namespace {
 	const int width = 800;
 	const int height = 600;
@@ -154,11 +157,11 @@ namespace {
 			lookAt.x() -= cameraSpeed;
 		}
 
-		cameraPosition = lookAt + vec3(-10, 5, 10);
+		cameraPosition = lookAt + vec3(0, 80, -40);
 		
 		// Follow the ball with the camera
-		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 100);
-		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0));
+		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
+		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 0, 1));
 
 		Graphics::setMatrix(pLocation, P);
 		Graphics::setMatrix(vLocation, View);
@@ -330,7 +333,7 @@ namespace {
 		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
-        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(0, 6, 0), vec3(12, 6, 12), 3);
+        tankTics = new TankSystem(tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -354,7 +357,7 @@ namespace {
         
         Random::init(123);
 
-		createLandscape(structures);
+		createLandscape(structures, MAP_SIZE_OUTER);
 	}
 }
 

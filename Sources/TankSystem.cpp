@@ -28,10 +28,6 @@ void TankSystem::update(float dt) {
     for (int i = 0; i < tanks.size(); i++) {
         Tank* tank = tanks[i];
 
-        //vec3 velocity = steer->PursueTarget(tank->GetPosition(), spherePO->GetPosition(), tank->Velocity, spherePO->Velocity, 20);
-		
-        //tank->Move(velocity);
-
         tank->Integrate(dt);
         tank->update(dt);
 	}
