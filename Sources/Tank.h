@@ -10,10 +10,15 @@ public:
 	void update(float deltaT);
 	vec3 getTurretLookAt();
 	vec3 getPosition();
+    void Move(vec3 velocity);
+    vec3 Velocity;
 
 private:
 	MeshObject* Top;
 	MeshObject* Bottom;
 	float turretAngle;
 	void setTurretTransform();
+    float Orientation;
+    void SetOrientationFromVelocity();
+    void SetTankOrientation(float deltaT);
 };
