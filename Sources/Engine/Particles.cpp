@@ -30,6 +30,7 @@ ParticleSystem::ParticleSystem(vec3 pos, vec3 dir, float size, float timeToLive,
 }
 
 void ParticleSystem::init(float halfSize, int maxParticles, VertexStructure** structures) {
+	vbs = new VertexBuffer*[2];
 	vbs[0] = new VertexBuffer(4, *structures[0], 0);
 	float* vertices = vbs[0]->lock();
 	setVertex(vertices, 0, -1 * halfSize, -1 * halfSize, 0, 0, 0);
@@ -117,7 +118,7 @@ void ParticleSystem::update(float deltaTime) {
 	}
 }
 
-void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V) {
+void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V) {
 	Graphics::setBlendingMode(BlendingOperation::SourceAlpha, BlendingOperation::InverseSourceAlpha);
 	Graphics::setRenderState(RenderState::DepthWrite, false);
 	Graphics::setRenderState(RenderState::DepthTest, false);
@@ -151,7 +152,7 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 	Graphics::setTexture(tex, texture);
 	Graphics::setVertexBuffers(vbs, 2);
 	Graphics::setIndexBuffer(*ib);
-	Graphics::drawIndexedVertices();
+	//Graphics::drawIndexedVertices();
 	Graphics::drawIndexedVerticesInstanced(alive);
 
 	Graphics::setRenderState(RenderState::DepthWrite, true);

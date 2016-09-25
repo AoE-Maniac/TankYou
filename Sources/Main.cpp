@@ -185,31 +185,31 @@ namespace {
 		for (int i = 0; i < physics.currentDynamicObjects; i++) {
 			PhysicsObject** currentP = &physics.dynamicObjects[i];
 			(*currentP)->UpdateMatrix();
-			(*currentP)->Mesh->render(mLocation, nLocation, tex);
+//			(*currentP)->Mesh->render(mLocation, nLocation, tex);
 		}
 		
 		std::for_each(tanks.begin(), tanks.end(), [=](Tank& tank) {
 			tank.update(deltaT);
-			tank.render(mLocation, nLocation, tex);
+//			tank.render(mLocation, nLocation, tex);
 		});
 		
 
-		renderLandscape(mLocation, nLocation);
+//		renderLandscape(mLocation, nLocation);
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
-			(*current)->mesh->render(mLocation, nLocation, tex);
+//			(*current)->mesh->render(mLocation, nLocation, tex);
 		}
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
+		particleSystem->render(tex, vLocation, tintLocation, View);
 
 		projectiles->update(deltaT);
-		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+//		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -286,7 +286,7 @@ namespace {
 		fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 
 		// This defines the structure of your Vertex Buffer
-		VertexStructure** structures;
+		VertexStructure** structures = new VertexStructure*[2];
 		structures[0] = new VertexStructure();
 		structures[0]->add("pos", Float3VertexData);
 		structures[0]->add("tex", Float2VertexData);

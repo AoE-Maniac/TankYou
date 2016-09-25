@@ -42,5 +42,5 @@ void Projectile::update(float deltaT) {
 
 void Projectile::render(ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
 	physicsObject->Mesh->render(mLocation, nLocation, tex);
-	particles->render(tex, vLocation, mLocation, nLocation, tintLocation, view);
+	particles->render(tex, vLocation, tintLocation, view);
 }

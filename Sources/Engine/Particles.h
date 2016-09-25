@@ -13,7 +13,7 @@ public:
 	void setPosition(vec3 position);
 	void setDirection(vec3 direction);
 	void update(float deltaTime);
-	void render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation tintLocation, mat4 V);
+	void render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V);
 
 private:
 	VertexBuffer** vbs;
