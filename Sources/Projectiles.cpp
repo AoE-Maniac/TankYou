@@ -71,6 +71,7 @@ void Projectiles::update(float deltaT) {
 
 void Projectiles::kill(int projectile) {
 	timeToLife[projectile] = timeToLife[currProj - 1];
+	timeToLife[currProj - 1] = -1;
 			
 	PhysicsObject* physicsObjectTemp = physicsObject[projectile];
 	physicsObject[projectile] = physicsObject[currProj - 1];
