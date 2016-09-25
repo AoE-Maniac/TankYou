@@ -9,13 +9,14 @@
 
 class Projectiles {
 public:
-	Projectiles(int maxProjectiles, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
-	void fire(vec3 pos, vec3 dir, float s, int dmg);
+	Projectiles(int maxProjectiles, float hitDistance, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
+	void fire(vec3 pos, PhysicsObject* target, float s, int dmg);
 	void update(float deltaT);
 	void render(Kore::ConstantLocation vLocation, Kore::TextureUnit tex, Kore::mat4 view);
 private:
 	int maxProj;
 	int currProj;
+	float hitDist;
 	MeshObject* sharedMesh;
 	Kore::VertexBuffer** vertexBuffers;
 
@@ -24,5 +25,7 @@ private:
 	int* damage;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
+	PhysicsObject** targets;
+
 	void kill(int projectile);
 };

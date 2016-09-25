@@ -21,7 +21,6 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 
 void Tank::update(float deltaT) {
     updateStateMachine(deltaT);
-	//rotateTurret(deltaT * pi / 10);
     SetTankOrientation(deltaT);
 	maxVelocity = 50;
     yPosition = 8.0f;
@@ -39,16 +38,27 @@ vec3 Tank::getPosition() {
 	return GetPosition() + vec3(0,1,0) + vec3((mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-3,1)));
 }
 
-void Tank::SetOrientationFromVelocity() {
+void Tank::SetOrientationFromVelocity(float deltaT) {
     if (Velocity.getLength() > 0) {
-        Orientation = Kore::atan2(Velocity.x(), Velocity.z());
+        float orient = Kore::atan2(Velocity.x(), Velocity.z());
+        log(Info, "%f", abs(orient-Orientation));
+        
+        if (abs(orient-Orientation) > 0.1f) {
+            float o = deltaT * pi;
+            if (orient < Orientation)
+                Orientation -= o;
+            else
+                Orientation += o;
+        } else {
+            Orientation = orient;
+        }
     }
 }
 
-void Tank::Move(vec3 velocity) {
+void Tank::Move(float deltaT, vec3 velocity) {
     Velocity = velocity;
-    SetOrientationFromVelocity();
-    ApplyForceToCenter(velocity);
+    SetOrientationFromVelocity(deltaT);
+    ApplyForceToCenter(Velocity);
 }
 
 void Tank::SetTankOrientation(float deltaT) {
@@ -82,9 +92,11 @@ void Tank::updateStateMachine(float deltaT) {
         case Wandering:
             //log(Info, "Wandering");
             
+            rotateTurret(deltaT * pi / 10);
+            
             // Wander
             randomPosition.y() = yPosition;
-            Move(steer->Wander(getPosition(), randomPosition, maxVelocity));
+            Move(deltaT, steer->Wander(getPosition(), randomPosition, maxVelocity));
             
             // Follow the target
             for (int i = 0; i < enemyTanks->size(); i++) {
@@ -110,7 +122,7 @@ void Tank::updateStateMachine(float deltaT) {
             if (distance < minDistToShoot) {
                 log(Info, "Shoot");
                 
-                Move(vec3(0,0,0));
+                Move(deltaT, vec3(0,0,0));
                 
                 
                 vec3 pos = getTurretLookAt();
@@ -121,12 +133,12 @@ void Tank::updateStateMachine(float deltaT) {
                 // Shoot and Kill
                 vec3 p = GetPosition();
                 vec3 l = getTurretLookAt();
-                mProj->fire(p, l, 1, 1);
+                mProj->fire(p, enemyTank, 1, 1);
                 
             } else {
                 // Track the enemy
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
-                Move(velocity);
+                Move(deltaT, velocity);
             }
             
             
@@ -135,6 +147,7 @@ void Tank::updateStateMachine(float deltaT) {
 }
     
 void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
+	log(Info, "Tank collided with %d", other);
 	switch(other) {
 	case COLLIDING_OBJECT::PROJECTILE:
 		float projDmg = *((int*) collisionData);

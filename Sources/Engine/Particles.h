@@ -8,6 +8,7 @@ class ParticleSystem {
 public:
 	ParticleSystem(Kore::vec3 pos, Kore::vec3 dir, float size, float timeToLive, Kore::vec4 colorS, Kore::vec4 colorE, float grav, int maxParticles, Kore::VertexStructure** structures, Kore::Texture* image);
 
+    ~ParticleSystem();
 	void setPosition(Kore::vec3 position);
 	void setDirection(Kore::vec3 direction);
 	void update(float deltaTime);
