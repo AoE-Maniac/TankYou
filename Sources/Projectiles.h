@@ -4,9 +4,10 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 
-#include "Projectile.h"
-
 using namespace Kore;
+
+#define PROJECTILE_SIZE 0.1f
+#define PROJECTILE_LIFETIME 3;
 
 class Projectiles {
 public:
@@ -19,5 +20,9 @@ private:
 	int currProj;
 	MeshObject* sharedMesh;
 	VertexBuffer** vertexBuffers;
-	Projectile** projectiles;
+
+	// Projectiles
+	float* timeToLife;
+	PhysicsObject** physicsObject;
+	ParticleSystem** particles;
 };
