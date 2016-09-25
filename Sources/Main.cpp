@@ -193,8 +193,9 @@ namespace {
 //			tank.render(mLocation, nLocation, tex);
 		});
 		
-
-//		renderLandscape(mLocation, nLocation);
+		
+		Graphics::setTexture(tex, particleImage);
+		renderLandscape();
 
 		// Render static objects
 		for (int i = 0; i < physics.currentStaticColliders; i++) {
@@ -206,7 +207,7 @@ namespace {
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, tintLocation, View);
+		//particleSystem->render(tex, vLocation, tintLocation, View);
 
 		projectiles->update(deltaT);
 //		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
@@ -346,7 +347,7 @@ namespace {
         
         move = new Steering;
 
-		createLandscape();
+		createLandscape(structures);
 	}
 }
 

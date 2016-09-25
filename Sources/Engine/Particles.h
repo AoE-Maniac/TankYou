@@ -54,8 +54,6 @@ private:
 	float gravity;
 
 	void init(float halfSize, int maxParticles, VertexStructure** structures);
-	void setVertex(float* vertices, int index, float x, float y, float z, float u, float v);
-	void setMatrix(float* data, int instanceIndex, int matIndex, mat4 m);
 	void emitParticle(int index);
 	float getRandom(float minValue, float maxValue);
 };
