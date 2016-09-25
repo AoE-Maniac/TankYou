@@ -1,30 +1,36 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1, vec3 spawn2, float delay) :
+TankSystem::TankSystem(ParticleRenderer* particleRenderer,InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
-		spawnPos1(spawn1),
-		spawnPos2(spawn2),
+		spawnPos1a(spawn1a),
+		spawnPos1b(spawn1b),
+		spawnPos2a(spawn2a),
+		spawnPos2b(spawn2b),
 		spawnDelay(delay),
-        particleRenderer(particleRenderer){
+        mProjectiles(projectiles),
+        particleRenderer(particleRenderer) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
 }
 
+void spawnTank(std::vector<Tank*>* tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
+	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
+	Tank* t1 = new Tank(frac);
+	t1->SetEnemy(*tanks);
+    t1->setProjectile(projectiles);
+	tanks->push_back(t1);
+    explosions->push_back(nullptr);
+	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
+}
+
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		Tank* t1 = new Tank();
-		tanks.push_back(t1);
-        explosions.push_back(nullptr);
-		t1->SetPosition(spawnPos1);
-		
-		Tank* t2 = new Tank();
-		tanks.push_back(t2);
-        explosions.push_back(nullptr);
-		t2->SetPosition(spawnPos2);
+		spawnTank(&tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
+		spawnTank(&tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
 		
 		spawnTimer = spawnDelay;
 	}

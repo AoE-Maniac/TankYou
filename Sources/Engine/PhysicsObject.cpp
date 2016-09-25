@@ -15,6 +15,8 @@ PhysicsObject::PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravi
 	MomentOfInertia.Set(2, 2, I);
 
 	InverseMomentOfInertia = MomentOfInertia.Invert();
+
+	active = true;
 }
 
 void SetSkewSymmetric(mat3& matrix, vec3& v) {
@@ -32,7 +34,6 @@ void SetSkewSymmetric(mat3& matrix, vec3& v) {
 void PhysicsObject::HandleCollision(TriangleMeshCollider& collider, float deltaT) {
 	// Check if we are colliding with the plane
 	if (Collider.IntersectsWith(collider)) {
-
 		// Calculate the contact velocity
 		///////////////
 
@@ -148,7 +149,7 @@ void PhysicsObject::HandleCollision(TriangleMeshCollider& collider, float deltaT
 		float penetrationDepth = Collider.PenetrationDepth(collider);
 		
 		SetPosition(Position - contactNormal * penetrationDepth * 1.05f);
-
+		
 		if(callback)
 			callback(type, collisionData);
 	}

@@ -16,8 +16,9 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		//physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
+		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
 		physicsObject[i]->collisionData = &damage[i];
+		physicsObject[i]->active = false;
 		physics->AddDynamicObject(physicsObject[i]);
 	
 		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
@@ -33,23 +34,26 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 void Projectiles::fire(vec3 pos, vec3 dir, float s, int dmg) {
 	assert(currProj + 1 < maxProj);
 
-	vec3 direction = dir.normalize();
-	physicsObject[currProj]->SetPosition(pos);
-	physicsObject[currProj]->Velocity = direction * s;
+	if (currProj + 1 < maxProj) {
+		vec3 direction = dir.normalize();
+		physicsObject[currProj]->SetPosition(pos);
+		physicsObject[currProj]->Velocity = direction * s;
+		physicsObject[currProj]->active = true;
 	
-	vec3 zneg = vec3(1, 0, 0);
-	vec3 a = zneg.cross(direction).normalize();
-	float ang = Kore::acos(zneg.dot(direction));
-	vec3 b = a.cross(zneg);
-	if (b.dot(direction) < 0) ang = -ang;
-	vec3 q = Kore::sin(ang/2) * a;
-	physicsObject[currProj]->SetRotation(Quat(Kore::cos(ang/2), q.x(), q.y(), q.z()));
+		vec3 zneg = vec3(1, 0, 0);
+		vec3 a = zneg.cross(direction).normalize();
+		float ang = Kore::acos(zneg.dot(direction));
+		vec3 b = a.cross(zneg);
+		if (b.dot(direction) < 0) ang = -ang;
+		vec3 q = Kore::sin(ang/2) * a;
+		physicsObject[currProj]->SetRotation(Quat(Kore::cos(ang/2), q.x(), q.y(), q.z()));
 
-	timeToLife[currProj] = PROJECTILE_LIFETIME;
+		timeToLife[currProj] = PROJECTILE_LIFETIME;
 
-	damage[currProj] = dmg;
+		damage[currProj] = dmg;
 
-	currProj++;
+		currProj++;
+	}
 }
 
 void Projectiles::update(float deltaT) {
@@ -62,6 +66,7 @@ void Projectiles::update(float deltaT) {
 			timeToLife[i] -= deltaT;
 		}
 		else {
+			log(Info, "ttl over, killing.");
 			kill(i);
 			i--;
 		}
@@ -69,13 +74,11 @@ void Projectiles::update(float deltaT) {
 }
 
 void Projectiles::kill(int projectile) {
-	log(Info, "kill %d", projectile);
 	timeToLife[projectile] = timeToLife[currProj - 1];
 	timeToLife[currProj - 1] = -1;
 
 	damage[projectile] = damage[currProj - 1];
 	damage[currProj - 1] = 1;
-			
 	auto ctemp = physicsObject[currProj - 1]->callback;
 	PhysicsObject* physicsObjectTemp = physicsObject[projectile];
 	physicsObject[projectile] = physicsObject[currProj - 1];
@@ -83,6 +86,7 @@ void Projectiles::kill(int projectile) {
 
 	physicsObject[currProj - 1] = physicsObjectTemp;
 	physicsObject[currProj - 1]->callback = ctemp;
+	physicsObject[currProj - 1]->active = false;
 
 	ParticleSystem* temp = particles[projectile];
 	particles[projectile] = particles[currProj - 1];

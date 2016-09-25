@@ -49,6 +49,7 @@ namespace {
 	Program* program;
 
 	float cameraAngle = 0.0f;
+	float cameraZoom = 0.5f;
 
 	bool left;
 	bool right;
@@ -114,6 +115,14 @@ namespace {
 		return vec3(worldPos.x() / worldPos.w(), worldPos.y() / worldPos.w(), worldPos.z() / worldPos.w());
 	}
 
+	float inline clamp(float min, float max, float val) {
+		return Kore::max(min, Kore::min(max, val));
+	}
+
+	float inline clamp01(float val) {
+		return Kore::max(0.0f, Kore::min(1.0f, val));
+	}
+
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -122,7 +131,7 @@ namespace {
 		Kore::Audio::update();
 		
 		Graphics::begin();
-		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag, 0xff9999FF, 1.0f);
+		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag | Graphics::ClearStencilFlag, 0xff9999FF, 1.0f, 0);
 
 		// Important: We need to set the program before we set a uniform
 		program->set();
@@ -142,25 +151,23 @@ namespace {
 		// Interpolate the camera to not follow small physics movements
 		float alpha = 0.3f;
 
-		const float cameraSpeed = 0.5f;
+		const float cameraSpeed = 1.5f;
 		if (mouseY < 50) {
-			lookAt.z() -= cameraSpeed;
-			lookAt.x() += cameraSpeed;
+			cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
 		}
 		if (mouseY > height - 50) {
-			lookAt.z() += cameraSpeed;
-			lookAt.x() -= cameraSpeed;
+			cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
 		}
 		if (mouseX < 50) {
-			lookAt.z() += cameraSpeed;
-			lookAt.x() += cameraSpeed;
+			cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
 		}
 		if (mouseX > width - 50) {
-			lookAt.z() -= cameraSpeed;
-			lookAt.x() -= cameraSpeed;
+			cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
 		}
-
-		cameraPosition = lookAt + vec3(0, 80, -40);
+		
+		cameraPosition.y() = cameraZoom * 150 + (1 - cameraZoom) * 10;
+		vec3 off = vec3(0, -1, 0) * cameraZoom + (1 - cameraZoom) * vec3(0, -1, 1);
+		lookAt = cameraPosition + off;
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
@@ -170,9 +177,9 @@ namespace {
 		Graphics::setMatrix(vLocation, View);
 
 		// update light pos
-		lightPosX = 20 * Kore::sin(2 * t);
-		lightPosY = 10;
-		lightPosZ = 20 * Kore::cos(2 * t);
+		lightPosX = 100; //20 * Kore::sin(2 * t);
+		lightPosY = 100; // 10;
+		lightPosZ = 100; //20 * Kore::cos(2 * t);
 		Graphics::setFloat3(lightPosLocation, lightPosX, lightPosY, lightPosZ);
 
 		// Handle inputs
@@ -192,6 +199,8 @@ namespace {
         physics.Update(deltaT);
     
 		tankTics->update(deltaT);
+
+		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
 		tankTics->render(tex, View, vLocation, tintLocation);
 		
         // Update physics
@@ -215,8 +224,11 @@ namespace {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
 		}*/
+
+		Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
 
+		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
@@ -293,6 +305,10 @@ namespace {
 		
 	}
 
+	void mouseScroll(int windowId, int delta) {
+		cameraZoom = clamp(0.0f, 1.0f, cameraZoom + delta * 0.05f);
+	}
+	
 	void init() {
 		FileReader vs("shader.vert");
 		FileReader fs("shader.frag");
@@ -333,19 +349,20 @@ namespace {
         
         particleImage = new Texture("particle.png", true);
         particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
-        
+
         particleRenderer = new ParticleRenderer(structures);
-        
         projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
+        projectiles = new Projectiles(1000, particleImage, projectileMesh, structures, &physics);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
-		physics.AddStaticCollider(tmc);
+		//physics.AddStaticCollider(tmc);
 
 		tankTop = new InstancedMeshObject("tank_top.obj", "cube.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_eu_uv.png", structures, MAX_TANKS, 2);
-        tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3);
+
+        tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
         
 		/*Sound* winSound;
 		winSound = new Sound("sound.wav");
@@ -357,14 +374,11 @@ namespace {
 		Graphics::setTextureAddressing(tex, U, Repeat);
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
-		particleImage = new Texture("particle.png", true);
-		particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
         
         explosionSystem = new Explosion(vec3(2,6,0), 2.f, 10.f, 300, structures, particleImage);
 
-		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
-
-		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
+		cameraPosition = vec3(0, 0.5f, 0);
+		cameraZoom = 0.5f;
 		lookAt = spherePO->GetPosition();
         
 //        steer = new Steering;
@@ -407,6 +421,7 @@ int kore(int argc, char** argv) {
 	Mouse::the()->Move = mouseMove;
 	Mouse::the()->Press = mousePress;
 	Mouse::the()->Release = mouseRelease;
+	Mouse::the()->Scroll = mouseScroll;
 
 	Kore::System::start();
 

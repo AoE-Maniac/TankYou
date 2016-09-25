@@ -16,7 +16,7 @@ enum StateMachineState {
 
 class Tank : public PhysicsObject {
 public:
-	Tank();
+	Tank(int frac);
 	void rotateTurret(float angle);
 	void update(float deltaT);
 	vec3 getTurretLookAt();
@@ -31,7 +31,7 @@ public:
     void SetEnemy(std::vector<Tank*>& enemyTanks);
     std::vector<Tank*>* GetEnemy() const;
     
-    void setProjectile(Projectiles& projectiles);
+    void setProjectile(Projectiles* projectiles);
 
 	int hp;
 
@@ -58,5 +58,7 @@ private:
 
 	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
-    Projectiles* mProjectiles;
+    Projectiles* mProj;
+    
+    int mFrac;
 };
