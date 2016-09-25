@@ -96,7 +96,7 @@ namespace {
     vec3 targetPosition = vec3(25, 0.5f, 15);
 
 	vec3 pickDir;
-	VertexBuffer* pickVB;
+	VertexBuffer** pickVBs;
 	IndexBuffer* pickIB;
 
 	void update() {
@@ -227,11 +227,9 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, tintLocation, View);
 		
-		//Graphics::setMatrix(mLocation, mat4::Identity());
-		//Graphics::setMatrix(nLocation, mat4::Identity());
-		//Graphics::setVertexBuffer(*pickVB);
-		//Graphics::setIndexBuffer(*pickIB);
-		//Graphics::drawIndexedVertices();
+		Graphics::setVertexBuffers(pickVBs, 2);
+		Graphics::setIndexBuffer(*pickIB);
+		Graphics::drawIndexedVerticesInstanced(1);
 
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
@@ -284,7 +282,7 @@ namespace {
 		pickDir.normalize();
 
 		int i = 0;
-		/*float* vertices = pickVB->lock();
+		float* vertices = pickVBs[0]->lock();
 		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
@@ -305,7 +303,7 @@ namespace {
 		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
 		vertices[i++] = 0; vertices[i++] = 0;
 		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
-		pickVB->unlock();
+		pickVBs[0]->unlock();
 		
 		static int pick = 0;
 		for (int j = 0; j < physics.currentDynamicObjects; j++) {
@@ -314,7 +312,7 @@ namespace {
 			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
 				log(Info, "Picky %i", pick++);
 			}
-		}*/
+		}
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -407,12 +405,19 @@ namespace {
 
 		createLandscape(structures);
 
-		/*pickVB = new VertexBuffer(6, structure);
+		pickVBs = new VertexBuffer*[2];
+		pickVBs[0] = new VertexBuffer(6, *structures[0], 0);
+		pickVBs[1] = new VertexBuffer(1, *structures[1], 1);
+		float* data = pickVBs[1]->lock();
+		setMatrix(data, 0, 0, mat4::Identity());
+		setMatrix(data, 0, 1, mat4::Identity());
+		pickVBs[1]->unlock();
+
 		pickIB = new IndexBuffer(6);
 		int* indices = pickIB->lock();
 		indices[0] = 0; indices[1] = 1; indices[2] = 2;
 		indices[3] = 3; indices[4] = 4; indices[5] = 5;
-		pickIB->unlock();*/
+		pickIB->unlock();
 	}
 }
 
