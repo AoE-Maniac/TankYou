@@ -214,13 +214,13 @@ namespace {
 			TriangleMeshCollider** current = &physics.staticColliders[i];
 			(*current)->mesh->render(tex, View);
 		}*/
-//		renderLandscape(tex);
+		renderLandscape(tex);
 
 		// Update and render particles
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-//		particleSystem->render(tex, vLocation, tintLocation, View);
+		particleSystem->render(tex, vLocation, tintLocation, View);
 
 		float screenX = (mouseX / (float)width - 0.5f) * 2.0f;
 		float screenY = (mouseY / (float)height - 0.5f) * -2.0f;
@@ -360,7 +360,7 @@ namespace {
 				log(Info, "Picky %i", pick++);
 			}
 		}*/
-		if (tanks[0]->Collider.IntersectsWith(cameraPosition, pickDir)) {
+		if (spherePO->Collider.IntersectsWith(cameraPosition, pickDir)) {
 			log(Info, "Picky %i", pick++);
 		}
 	}

@@ -2,8 +2,7 @@
 #include "Tank.h"
 #include "Kore/Math/Matrix.h"
 
-Tank::Tank() : PhysicsObject(10, true, true) {
-	bottom->M = mat4::Identity();
+Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	Collider.radius = 0.5f;
 	turretAngle = 0;
     currentState = Wandering;
