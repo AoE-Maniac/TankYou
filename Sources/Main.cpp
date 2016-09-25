@@ -114,6 +114,14 @@ namespace {
 		return vec3(worldPos.x() / worldPos.w(), worldPos.y() / worldPos.w(), worldPos.z() / worldPos.w());
 	}
 
+	float inline clamp(float min, float max, float val) {
+		return Kore::max(min, Kore::min(max, val));
+	}
+
+	float inline clamp01(float val) {
+		return Kore::max(0.0f, Kore::min(1.0f, val));
+	}
+
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -144,19 +152,21 @@ namespace {
 
 		const float cameraSpeed = 1.5f;
 		if (mouseY < 50) {
-			lookAt.z() += cameraSpeed * (1 - mouseY / 50.0f);
+			cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
 		}
 		if (mouseY > height - 50) {
-			lookAt.z() -= cameraSpeed * ((mouseY - height + 50) / 50.0f);
+			cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
 		}
 		if (mouseX < 50) {
-			lookAt.x() -= cameraSpeed * (1 - mouseX / 50.0f);
+			cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
 		}
 		if (mouseX > width - 50) {
-			lookAt.x() += cameraSpeed * ((mouseX - width + 50) / 50.0f);
+			cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
 		}
-
-		cameraPosition = lookAt + vec3(0, 80, -40) * cameraZoom;
+		
+		cameraPosition.y() = cameraZoom * 150 + (1 - cameraZoom) * 10;
+		vec3 off = vec3(0, -1, 0) * cameraZoom + (1 - cameraZoom) * vec3(0, -1, 1);
+		lookAt = cameraPosition + off;
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
@@ -288,7 +298,7 @@ namespace {
 	}
 
 	void mouseScroll(int windowId, int delta) {
-		cameraZoom += delta * 0.1f;
+		cameraZoom = clamp(0.0f, 1.0f, cameraZoom + delta * 0.05f);
 	}
 	
 	void init() {
@@ -360,7 +370,8 @@ namespace {
 
 		projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
 
-		cameraPosition = spherePO->GetPosition() + vec3(-10, 5, 10);
+		cameraPosition = vec3(0, 0.5f, 0);
+		cameraZoom = 0.5f;
 		lookAt = spherePO->GetPosition();
         
 //        steer = new Steering;
