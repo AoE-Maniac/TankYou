@@ -148,13 +148,15 @@ void PhysicsObject::HandleCollision(TriangleMeshCollider& collider, float deltaT
 		float penetrationDepth = Collider.PenetrationDepth(collider);
 		
 		SetPosition(Position - contactNormal * penetrationDepth * 1.05f);
+
+		if(callback)
+			callback(type, collisionData);
 	}
 }
 
 void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
 	// Check if we are colliding with the plane
 	if (Collider.IntersectsWith(other->Collider)) {
-
 		float restitution = 0.8f;
 
 		vec3 collisionNormal = Collider.GetCollisionNormal(other->Collider);
@@ -177,6 +179,9 @@ void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
 
 		ApplyImpulse(impulse);
 		other->ApplyImpulse(-impulse);
+
+		if(callback)
+			callback(type, collisionData);
 	}
 }
 

@@ -26,4 +26,5 @@ private:
 	InstancedMeshObject* meshTop;
 	InstancedMeshObject* meshFlag;
 	std::vector<Tank*> tanks;
+	void kill(int i);
 };

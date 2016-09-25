@@ -12,7 +12,7 @@ using namespace Kore;
 class Projectiles {
 public:
 	Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics);
-	void fire(vec3 pos, vec3 dir, float s);
+	void fire(vec3 pos, vec3 dir, float s, int dmg);
 	void update(float deltaT);
 	void render(ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view);
 private:
@@ -23,6 +23,7 @@ private:
 
 	// Projectiles
 	float* timeToLife;
+	int* damage;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
 	void kill(int projectile);

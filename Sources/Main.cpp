@@ -275,7 +275,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10, 1);
 		/*if(!tanks.empty()) {
 			vec3 p = tanks.front()->getPosition();
 			vec3 l = tanks.front()->getTurretLookAt();

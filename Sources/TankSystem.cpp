@@ -28,11 +28,18 @@ void TankSystem::update(float dt) {
     for (int i = 0; i < tanks.size(); i++) {
         Tank* tank = tanks[i];
 
+		if(tank->hp <= 0)
+			kill(i);
+
         tank->Integrate(dt);
         tank->update(dt);
 	}
 	
 	spawnTimer -= dt;
+}
+
+void TankSystem::kill(int i) {
+	tanks.erase(tanks.begin() + i);
 }
 
 void TankSystem::render(TextureUnit tex, mat4 View) {

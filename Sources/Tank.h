@@ -29,6 +29,8 @@ public:
     void SetEnemy(std::vector<Tank*>& enemyTanks);
     std::vector<Tank*> GetEnemy() const;
 
+	int hp;
+
 private:
 	float turretAngle;
     float Orientation;
@@ -49,5 +51,7 @@ private:
     
     void updateStateMachine();
     StateMachineState currentState;
+
+	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
 };

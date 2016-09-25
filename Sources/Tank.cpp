@@ -12,6 +12,8 @@ Tank::Tank() : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     yPosition = 8.0f;
     minDistToFollow = 50;
     minDistToShoot = 10;
+	//callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
+	hp = 10;
 }
 
 void Tank::update(float deltaT) {
@@ -109,6 +111,13 @@ void Tank::updateStateMachine() {
             
             break;
     }
+}
     
-    
+void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
+	switch(other) {
+	case COLLIDING_OBJECT::PROJECTILE:
+		float projDmg = *((int*) collisionData);
+		hp -= projDmg;
+		break;
+	}
 }

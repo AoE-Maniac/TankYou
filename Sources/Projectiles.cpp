@@ -8,6 +8,7 @@ using namespace Kore;
 
 Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
 	timeToLife = new float[maxProjectiles];
+	damage = new int[maxProjectiles];
 	physicsObject = new PhysicsObject*[maxProjectiles];
 	particles = new ParticleSystem*[maxProjectiles];
 	
@@ -17,7 +18,8 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other) { kill(i); };
+		//physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
+		physicsObject[i]->collisionData = &damage[i];
 		physics->AddDynamicObject(physicsObject[i]);
 	
 		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
@@ -30,7 +32,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, vec3 dir, float s) {
+void Projectiles::fire(vec3 pos, vec3 dir, float s, int dmg) {
 	assert(currProj + 1 < maxProj);
 
 	vec3 direction = dir.normalize();
@@ -46,6 +48,8 @@ void Projectiles::fire(vec3 pos, vec3 dir, float s) {
 	physicsObject[currProj]->SetRotation(Quat(Kore::cos(ang/2), q.x(), q.y(), q.z()));
 
 	timeToLife[currProj] = PROJECTILE_LIFETIME;
+
+	damage[currProj] = dmg;
 
 	currProj++;
 }
@@ -67,12 +71,20 @@ void Projectiles::update(float deltaT) {
 }
 
 void Projectiles::kill(int projectile) {
+	log(Info, "kill %d", projectile);
 	timeToLife[projectile] = timeToLife[currProj - 1];
 	timeToLife[currProj - 1] = -1;
+
+	damage[projectile] = damage[currProj - 1];
+	damage[currProj - 1] = 1;
 			
+	auto ctemp = physicsObject[currProj - 1]->callback;
 	PhysicsObject* physicsObjectTemp = physicsObject[projectile];
 	physicsObject[projectile] = physicsObject[currProj - 1];
+	physicsObject[projectile]->callback = physicsObjectTemp->callback;
+
 	physicsObject[currProj - 1] = physicsObjectTemp;
+	physicsObject[currProj - 1]->callback = ctemp;
 
 	ParticleSystem* temp = particles[projectile];
 	particles[projectile] = particles[currProj - 1];
