@@ -12,11 +12,11 @@ Kore::Texture* landscapeTexture;
 
 void createLandscape(VertexStructure** structures, int size) {
 	Kore::Image* map = new Kore::Image("map.png", true);
-	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
+	Kore::Image* normalmap = new Kore::Image("mapnormals.jpg", true);
 	landscapeTexture = new Texture("sand.png", true);
 
-	const int w = 50;
-	const int h = 50;
+	const int w = 250;
+	const int h = 250;
 	
 	landscapeVertices = new VertexBuffer*[2];
 	landscapeVertices[0] = new VertexBuffer((w + 1) * (h + 1), *structures[0], 0);
