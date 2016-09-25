@@ -39,8 +39,3 @@ void Projectile::update(float deltaT) {
 
 	timeToLife -= deltaT;
 }
-
-void Projectile::render(ConstantLocation mLocation, ConstantLocation nLocation, ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
-	physicsObject->Mesh->render(mLocation, nLocation, tex);
-	particles->render(tex, vLocation, tintLocation, view);
-}

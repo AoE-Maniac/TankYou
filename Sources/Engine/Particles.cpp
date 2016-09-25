@@ -88,11 +88,8 @@ void ParticleSystem::update(float deltaTime) {
 }
 
 void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, ConstantLocation tintLocation, mat4 V) {
-	Graphics::setBlendingMode(BlendingOperation::SourceAlpha, BlendingOperation::InverseSourceAlpha);
 	Graphics::setRenderState(RenderState::DepthWrite, false);
 	Graphics::setRenderState(RenderState::DepthTest, false);
-	
-	Graphics::setMatrix(vLocation, V);
 
 	mat4 view = V.Invert();
 	view.Set(0, 3, 0.0f);
@@ -100,6 +97,7 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 	view.Set(2, 3, 0.0f);
 
 	int alive = 0;
+	float* data = vbs[1]->lock();
 	for (int i = 0; i < numParticles; i++) {
 		// Skip dead particles
 		if (particleTTL[i] <= 0.0f) continue;
@@ -110,13 +108,12 @@ void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, Constan
 
 		mat4 M = mat4::Translation(particlePos[i].x(), particlePos[i].y(), particlePos[i].z()) * mat4::Scale(0.2f, 0.2f, 0.2f);
 		
-		float* data = vbs[1]->lock();
 		setMatrix(data, alive, 0, M * view);
 		setMatrix(data, alive, 1, calculateN(M * view));
-		vbs[1]->unlock();
 
 		++alive;
 	}
+	vbs[1]->unlock();
 	
 	Graphics::setTexture(tex, texture);
 	Graphics::setVertexBuffers(vbs, 2);

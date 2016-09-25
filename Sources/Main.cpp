@@ -105,7 +105,6 @@ namespace {
 
 		// Important: We need to set the program before we set a uniform
 		program->set();
-		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 
@@ -143,7 +142,7 @@ namespace {
 		
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 100);
-		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0)); 
+		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 1, 0));
 
 		Graphics::setMatrix(pLocation, P);
 		Graphics::setMatrix(vLocation, View);
@@ -207,10 +206,10 @@ namespace {
 		particleSystem->setPosition(spherePO->GetPosition());
 		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
 		particleSystem->update(deltaT);
-		//particleSystem->render(tex, vLocation, tintLocation, View);
+		particleSystem->render(tex, vLocation, tintLocation, View);
 
 		projectiles->update(deltaT);
-//		projectiles->render(mLocation, nLocation, vLocation, tintLocation, tex, View);
+		projectiles->render(vLocation, tintLocation, tex, View);
 
 		Graphics::end();
 		Graphics::swapBuffers();
@@ -266,14 +265,14 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		if(tanks.empty()) {
+		//if(tanks.empty()) {
 			projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
-		} else {
-			vec3 p = tanks.front().getPosition();
-			vec3 l = tanks.front().getTurretLookAt();
-			projectiles->fire(p, l, 10);
-			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
-		}
+		//} else {
+			//vec3 p = tanks.front().getPosition();
+			//vec3 l = tanks.front().getTurretLookAt();
+			//projectiles->fire(p, l, 10);
+			//log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
+		//}
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
