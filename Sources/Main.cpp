@@ -277,7 +277,7 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10);
+		projectiles->fire(cameraPosition, lookAt - cameraPosition, 10, 1);
 		/*if(!tanks.empty()) {
 			vec3 p = tanks.front()->getPosition();
 			vec3 l = tanks.front()->getTurretLookAt();
@@ -327,6 +327,11 @@ namespace {
 		physics.AddDynamicObject(spherePO);
 
 		ResetSphere(vec3(-10, 5.5f, 10), vec3(0, 0, 0));
+        
+        particleImage = new Texture("particle.png", true);
+        particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
+        
+        projectiles = new Projectiles(100, particleImage, projectileMesh, structures, &physics);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);

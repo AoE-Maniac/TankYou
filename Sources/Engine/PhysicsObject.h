@@ -30,7 +30,7 @@ typedef enum
 } COLLIDING_OBJECT;
 
 
-typedef std::function<void(COLLIDING_OBJECT)> collision_callback;
+typedef std::function<void(COLLIDING_OBJECT, void*)> collision_callback;
 
 // A physically simulated object
 class PhysicsObject {
@@ -39,6 +39,8 @@ Quat Rotation;
 
 public:
     COLLIDING_OBJECT type;
+	void* collisionData;
+
 	bool IgnoreGravity;
 	bool IgnoreRotation;
 	float Mass;

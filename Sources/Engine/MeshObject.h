@@ -16,16 +16,14 @@
 #include "ObjLoader.h"
 #include "Rendering.h"
 
-using namespace Kore;
-
 class MeshObject {
 public:
-	MeshObject(const char* meshFile, const char* textureFile, VertexStructure** structures, float scale = 1.0f) {
+	MeshObject(const char* meshFile, const char* textureFile, Kore::VertexStructure** structures, float scale = 1.0f) {
 		mesh = loadObj(meshFile);
-		image = new Texture(textureFile, true);
+		image = new Kore::Texture(textureFile, true);
 		
-		vertexBuffers = new VertexBuffer*[2];
-		vertexBuffers[0] = new VertexBuffer(mesh->numVertices, *structures[0], 0);
+		vertexBuffers = new Kore::VertexBuffer*[2];
+		vertexBuffers[0] = new Kore::VertexBuffer(mesh->numVertices, *structures[0], 0);
 		float* vertices = vertexBuffers[0]->lock();
 		for (int i = 0; i < mesh->numVertices; ++i) {
 			vertices[i * 8 + 0] = mesh->vertices[i * 8 + 0] * scale;
@@ -39,9 +37,9 @@ public:
 		}
 		vertexBuffers[0]->unlock();
 		
-		vertexBuffers[1] = new VertexBuffer(1, *structures[1], 1);
+		vertexBuffers[1] = new Kore::VertexBuffer(1, *structures[1], 1);
 
-		indexBuffer = new IndexBuffer(mesh->numFaces * 3);
+		indexBuffer = new Kore::IndexBuffer(mesh->numFaces * 3);
 		int* indices = indexBuffer->lock();
 		for (int i = 0; i < mesh->numFaces * 3; i++) {
 			indices[i] = mesh->indices[i];
@@ -49,16 +47,16 @@ public:
 		indexBuffer->unlock();
 	}
 
-	void render(TextureUnit tex, int instances) {
-		Graphics::setTexture(tex, image);
-		Graphics::setVertexBuffers(vertexBuffers, 2);
-		Graphics::setIndexBuffer(*indexBuffer);
-		Graphics::drawIndexedVerticesInstanced(instances);
+	void render(Kore::TextureUnit tex, int instances) {
+		Kore::Graphics::setTexture(tex, image);
+		Kore::Graphics::setVertexBuffers(vertexBuffers, 2);
+		Kore::Graphics::setIndexBuffer(*indexBuffer);
+		Kore::Graphics::drawIndexedVerticesInstanced(instances);
 	}
 
-	VertexBuffer** vertexBuffers;
-	IndexBuffer* indexBuffer;
+	Kore::VertexBuffer** vertexBuffers;
+	Kore::IndexBuffer* indexBuffer;
 
 	Mesh* mesh;
-	Texture* image;
+	Kore::Texture* image;
 };

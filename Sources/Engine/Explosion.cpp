@@ -9,14 +9,15 @@
 #include "Particles.h"
 #include "Explosion.h"
 
-Explosion::Explosion(vec3 pos, float spawnArea, float grav, int maxParticles, VertexStructure** structures, Texture* image) :
-    ParticleSystem(pos, vec3(0,1,0), 7.f, 2.3f, vec4(1.f, 1.f, 0.f, 1), vec4(1.f, 0.f, 0.f, 1), grav, maxParticles, structures, image)
+Explosion::Explosion(Kore::vec3 pos, float spawnArea, float grav, int maxParticles, Kore::VertexStructure** structures, Kore::Texture* image) :
+    ParticleSystem(pos, Kore::vec3(0,1,0), 7.f, 2.3f, Kore::vec4(1.f, 1.f, 0.f, 1), Kore::vec4(1.f, 0.f, 0.f, 1), grav, maxParticles, structures, image)
 {
     this->spawnArea = spawnArea;
     setPosition(pos);
     for (int i = 0; i < numParticles; i++) {
         
     }
+	exploded = false;
 }
 
 void Explosion::explode()
@@ -42,7 +43,7 @@ void Explosion::update(float deltaTime) {
     for (int i = 0; i < numParticles; i++) {
         
         particleTTL[i] -= deltaTime;
-        particleVel[i] += vec3(0, -gravity * deltaTime, 0);
+        particleVel[i] += Kore::vec3(0, -gravity * deltaTime, 0);
         particlePos[i] += particleVel[i] * deltaTime;
     }
 }

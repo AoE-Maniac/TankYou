@@ -4,25 +4,24 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 
-using namespace Kore;
-
 #define PROJECTILE_SIZE 0.1f
 #define PROJECTILE_LIFETIME 3;
 
 class Projectiles {
 public:
-	Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics);
-	void fire(vec3 pos, vec3 dir, float s);
+	Projectiles(int maxProjectiles, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
+	void fire(vec3 pos, vec3 dir, float s, int dmg);
 	void update(float deltaT);
-	void render(ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view);
+	void render(Kore::ConstantLocation vLocation, Kore::ConstantLocation tintLocation, Kore::TextureUnit tex, Kore::mat4 view);
 private:
 	int maxProj;
 	int currProj;
 	MeshObject* sharedMesh;
-	VertexBuffer** vertexBuffers;
+	Kore::VertexBuffer** vertexBuffers;
 
 	// Projectiles
 	float* timeToLife;
+	int* damage;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
 	void kill(int projectile);

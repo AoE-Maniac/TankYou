@@ -7,6 +7,7 @@
 #include "Engine/Collision.h"
 #include "Engine/PhysicsObject.h"
 #include "Engine/Explosion.h"
+#include "Projectiles.h"
 
 enum StateMachineState {
     Wandering,
@@ -28,7 +29,11 @@ public:
 	mat4 GetFlagM(mat4 bottomM);
     
     void SetEnemy(std::vector<Tank*>& enemyTanks);
-    std::vector<Tank*> GetEnemy() const;
+    std::vector<Tank*>* GetEnemy() const;
+    
+    void setProjectile(Projectiles& projectiles);
+
+	int hp;
 
 private:
 	float turretAngle;
@@ -36,7 +41,7 @@ private:
     void SetOrientationFromVelocity();
     void SetTankOrientation(float deltaT);
     
-    std::vector<Tank*> enemyTanks;
+    std::vector<Tank*>* enemyTanks;
     Tank* enemyTank;
     
     Steering* steer;
@@ -48,7 +53,10 @@ private:
     float minDistToFollow;
     float minDistToShoot;
     
-    void updateStateMachine();
+    void updateStateMachine(float deltaT);
     StateMachineState currentState;
+
+	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
+    Projectiles* mProjectiles;
 };
