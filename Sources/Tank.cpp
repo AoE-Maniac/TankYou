@@ -13,7 +13,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     yPosition = 8.0f;
     minDistToFollow = 50;
     minDistToShoot = 10;
-	//callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
+	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = 10;
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
@@ -122,7 +122,6 @@ void Tank::updateStateMachine(float deltaT) {
                 vec3 p = GetPosition();
                 vec3 l = getTurretLookAt();
                 mProj->fire(p, l, 1, 1);
-                
                 
             } else {
                 // Track the enemy

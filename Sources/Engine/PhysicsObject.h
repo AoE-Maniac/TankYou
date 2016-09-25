@@ -41,6 +41,7 @@ public:
     COLLIDING_OBJECT type;
 	void* collisionData;
 
+	bool active;
 	bool IgnoreGravity;
 	bool IgnoreRotation;
 	float Mass;
