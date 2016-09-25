@@ -35,6 +35,7 @@ using namespace Kore;
 
 const int MAP_SIZE_INNER = 200;
 const int MAP_SIZE_OUTER = 300;
+const int STONE_COUNT = 64;
 
 namespace {
 	const int width = 800;
@@ -71,8 +72,9 @@ namespace {
 	float lightPosX;
 	float lightPosY;
 	float lightPosZ;
-
+	
 	MeshObject* sphereMesh;
+	InstancedMeshObject* stoneMesh;
 	MeshObject* projectileMesh;
 	PhysicsObject* spherePO;
 
@@ -332,6 +334,7 @@ namespace {
 		lightPosLocation = program->getConstantLocation("lightPos");
 		
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
+		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
 
 		spherePO = new PhysicsObject(TANK, 5, true, false);
@@ -377,7 +380,7 @@ namespace {
         
         Random::init(123);
 
-		createLandscape(structures, MAP_SIZE_OUTER);
+		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT);
 	}
 }
 

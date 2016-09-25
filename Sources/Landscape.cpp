@@ -3,6 +3,7 @@
 #include <Kore/Math/Random.h>
 
 #include "Engine/Rendering.h"
+#include "Engine/InstancedMeshObject.h"
 
 using namespace Kore;
 
@@ -10,7 +11,10 @@ Kore::VertexBuffer** landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 Kore::Texture* landscapeTexture;
 
-void createLandscape(VertexStructure** structures, float size) {
+int stoneCount;
+InstancedMeshObject* stoneMesh;
+
+void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
@@ -38,6 +42,21 @@ void createLandscape(VertexStructure** structures, float size) {
 			vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
 		}
 	}
+	
+
+	stoneCount = sCount;
+	stoneMesh = sMesh;
+	float* data = stoneMesh->vertexBuffers[1]->lock();
+    for (int i = 0; i < stoneCount; i++) {
+		int xr = Random::get(0, w);
+		int yr = Random::get(0, h);
+		mat4 M = mat4::Translation(vertices[(xr * (w + 1) + yr) * 8 + 0], vertices[(xr * (w + 1) + yr) * 8 + 1], vertices[(xr * (w + 1) + yr) * 8 + 2]) * mat4::Rotation(2 * pi * (Random::get(0, 1000) * 1.0f) / 1000, 2 * pi * (Random::get(0, 1000) * 1.0f) / 1000, 2 * pi * (Random::get(0, 1000) * 1.0f) / 1000);
+		setMatrix(data, i, 0, 36, M);
+		setMatrix(data, i, 16, 36, calculateN(M));
+		setVec4(data, i, 32, 36, vec4(1, 1, 1, 1));
+	}
+	stoneMesh->vertexBuffers[1]->unlock();
+
 	landscapeVertices[0]->unlock();
 	
 	landscapeVertices[1] = new VertexBuffer(1, *structures[1], 1);
@@ -71,4 +90,6 @@ void renderLandscape(Kore::TextureUnit tex) {
 	Graphics::setVertexBuffers(landscapeVertices, 2);
 	Graphics::setIndexBuffer(*landscapeIndices);
 	Graphics::drawIndexedVerticesInstanced(1);
+	
+	stoneMesh->render(tex, stoneCount);
 }
