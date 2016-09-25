@@ -97,6 +97,10 @@ namespace {
     
     vec3 targetPosition = vec3(25, 0.5f, 15);
 
+	vec3 pickDir;
+	VertexBuffer* pickVB;
+	IndexBuffer* pickIB;
+
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -221,6 +225,12 @@ namespace {
 		particleSystem->update(deltaT);
 		particleSystem->render(tex, vLocation, mLocation, nLocation, tintLocation, View);
 		
+		Graphics::setMatrix(mLocation, mat4::Identity());
+		Graphics::setMatrix(nLocation, mat4::Identity());
+		Graphics::setVertexBuffer(*pickVB);
+		Graphics::setIndexBuffer(*pickIB);
+		Graphics::drawIndexedVertices();
+
 		// Reset tint for objects that should not be tinted
 		Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 		projectiles->update(deltaT);
@@ -268,14 +278,40 @@ namespace {
 
 		vec4 position = PV.Invert() * vec4(screenX, screenY, -1, 1);
 
-		vec3 dir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
-		dir.normalize();
+		pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
+		pickDir.normalize();
 
-		for (int i = 0; i < physics.currentDynamicObjects; i++) {
-			PhysicsObject* p = physics.dynamicObjects[i];/*
-			if (p->Collider.IntersectsWith(cameraPosition, dir)) {
-				log(Info, "Picky");
-			}*/
+		int i = 0;
+		float* vertices = pickVB->lock();
+		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vec3 aim = cameraPosition + pickDir * 50.0f;
+		vertices[i++] = aim.x(); vertices[i++] = aim.y(); vertices[i++] = aim.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+
+		vertices[i++] = cameraPosition.x() - 10.0f; vertices[i++] = cameraPosition.y() - 10.0f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = cameraPosition.x(); vertices[i++] = cameraPosition.y() + 10.f; vertices[i++] = cameraPosition.z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		vertices[i++] = tanks[0]->getPosition().x(); vertices[i++] = tanks[0]->getPosition().y(); vertices[i++] = tanks[0]->getPosition().z();
+		vertices[i++] = 0; vertices[i++] = 0;
+		vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0;
+		pickVB->unlock();
+		
+		static int pick = 0;
+		for (int j = 0; j < physics.currentDynamicObjects; j++) {
+			PhysicsObject* p = physics.dynamicObjects[j];
+
+			if (p->Collider.IntersectsWith(cameraPosition, pickDir)) {
+				log(Info, "Picky %i", pick++);
+			}
 		}
 	}
 	
@@ -364,6 +400,13 @@ namespace {
         Random::init(123);
 
 		createLandscape();
+
+		pickVB = new VertexBuffer(6, structure);
+		pickIB = new IndexBuffer(6);
+		int* indices = pickIB->lock();
+		indices[0] = 0; indices[1] = 1; indices[2] = 2;
+		indices[3] = 3; indices[4] = 4; indices[5] = 5;
+		pickIB->unlock();
 	}
 }
 
