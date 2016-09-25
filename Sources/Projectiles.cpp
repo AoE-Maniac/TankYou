@@ -4,11 +4,22 @@
 #include <cassert>
 
 using namespace Kore;
+using namespace Kore;
 
 Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
-	projectiles = new Projectile*[maxProjectiles];
+	timeToLife = new float[maxProjectiles];
+	physicsObject = new PhysicsObject*[maxProjectiles];
+	particles = new ParticleSystem*[maxProjectiles];
+	
 	for (int i = 0; i < maxProjectiles; i++) {
-		projectiles[i] = new Projectile(particleTex, mesh, structures, physics);
+		timeToLife[i] = 0;
+
+		physicsObject[i] = new PhysicsObject(0.001f, true, true);
+		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
+		physicsObject[i]->Mesh = mesh;
+		physics->AddDynamicObject(physicsObject[i]);
+	
+		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
 	}
 	
 	vertexBuffers = new VertexBuffer*[2];
@@ -20,19 +31,46 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 
 void Projectiles::fire(vec3 pos, vec3 dir, float s) {
 	assert(currProj + 1 < maxProj);
-	projectiles[currProj]->fire(pos, dir, s);
+
+	vec3 direction = dir.normalize();
+	physicsObject[currProj]->SetPosition(pos);
+	physicsObject[currProj]->Velocity = direction * s;
+	
+	vec3 zneg = vec3(1, 0, 0);
+	vec3 a = zneg.cross(direction).normalize();
+	float ang = Kore::acos(zneg.dot(direction));
+	vec3 b = a.cross(zneg);
+	if (b.dot(direction) < 0) ang = -ang;
+	vec3 q = Kore::sin(ang/2) * a;
+	physicsObject[currProj]->SetRotation(Quat(Kore::cos(ang/2), q.x(), q.y(), q.z()));
+
+	timeToLife[currProj] = PROJECTILE_LIFETIME;
+
 	currProj++;
 }
 
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < currProj; i++) {
-		if (projectiles[i]->timeToLife > 0) {
-			projectiles[i]->update(deltaT);
+		if (timeToLife[i] > 0) {
+			
+			physicsObject[i]->UpdateMatrix();
+
+			particles[i]->setPosition(physicsObject[i]->GetPosition());
+			particles[i]->setDirection(vec3(0, 1, 0));
+			particles[i]->update(deltaT);
+
+			timeToLife[i] -= deltaT;
 		}
 		else {
-			Projectile* temp = projectiles[i];
-			projectiles[i] = projectiles[currProj - 1];
-			projectiles[currProj - 1] = temp;
+			timeToLife[i] = timeToLife[currProj - 1];
+			
+			PhysicsObject* physicsObjectTemp = physicsObject[i];
+			physicsObject[i] = physicsObject[currProj - 1];
+			physicsObject[currProj - 1] = physicsObjectTemp;
+
+			ParticleSystem* temp = particles[i];
+			particles[i] = particles[currProj - 1];
+			particles[currProj - 1] = temp;
 
 			--currProj;
 			--i;
@@ -44,7 +82,7 @@ void Projectiles::render(ConstantLocation vLocation, ConstantLocation tintLocati
 	Graphics::setFloat4(tintLocation, vec4(1, 1, 1, 1));
 	float* data = vertexBuffers[1]->lock();
 	for (int i = 0; i < currProj; i++) {
-		mat4 M = projectiles[i]->physicsObject->GetMatrix();
+		mat4 M = physicsObject[i]->GetMatrix();
 		setMatrix(data, i, 0, M);
 		setMatrix(data, i, 1, calculateN(M));
 	}
@@ -56,6 +94,6 @@ void Projectiles::render(ConstantLocation vLocation, ConstantLocation tintLocati
 	Graphics::drawIndexedVerticesInstanced(currProj);
 
 	for (int i = 0; i < currProj; i++) {
-		projectiles[i]->particles->render(tex, vLocation, tintLocation, view);
+		particles[i]->render(tex, vLocation, tintLocation, view);
 	}
 }
