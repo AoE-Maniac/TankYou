@@ -407,6 +407,7 @@ namespace {
 
 		pickVBs = new VertexBuffer*[2];
 		pickVBs[0] = new VertexBuffer(6, *structures[0], 0);
+		pickVBs[0]->lock(); pickVBs[0]->unlock();
 		pickVBs[1] = new VertexBuffer(1, *structures[1], 1);
 		float* data = pickVBs[1]->lock();
 		setMatrix(data, 0, 0, mat4::Identity());
