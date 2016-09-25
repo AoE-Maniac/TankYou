@@ -25,4 +25,5 @@ private:
 	float* timeToLife;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
+	void kill(int projectile);
 };

@@ -6,10 +6,10 @@ Steering::Steering() {
     ariveRadius = 10;
 }
 
-vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, vec3 maxVelocity) {
+vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
     vec3 distance = targetPos - characterPos;
     distance = distance.normalize();
-    distance.multiplyComponents(maxVelocity);
+    distance.multiply(maxVelocity);
     
     if (distance.getLength() < ariveRadius) {
         // Slow down the character
@@ -19,11 +19,11 @@ vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, vec3 maxVelocity) {
     return distance;
 }
 
-vec3 Steering::Flee(vec3 characterPos, vec3 targetPos, vec3 maxVelocity) {
+vec3 Steering::Flee(vec3 characterPos, vec3 targetPos, float maxVelocity) {
     return -Seek(characterPos, targetPos, maxVelocity);
 }
 
-vec3 Steering::Wander(vec3 characterPos, vec3& targetPos, vec3 maxVelocity) {
+vec3 Steering::Wander(vec3 characterPos, vec3& targetPos, float maxVelocity) {
     if (Arrive(characterPos, targetPos)) {
         targetPos = vec3(characterPos.x() + Random::get(-20,20), 1, characterPos.z() + Random::get(-20,20));
     }

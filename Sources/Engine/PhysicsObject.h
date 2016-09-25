@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
@@ -19,12 +20,25 @@ using namespace Kore;
 #include "MeshObject.h"
 #include "PhysicsWorld.h"
 
+class PhysicsObject;
+
+typedef enum
+{
+    PROJECTILE=1,
+    TANK=2,
+    FLOOR=3,
+} COLLIDING_OBJECT;
+
+
+typedef std::function<void(COLLIDING_OBJECT)> collision_callback;
+
 // A physically simulated object
 class PhysicsObject {
 vec3 Position;
 Quat Rotation;
 
 public:
+    COLLIDING_OBJECT type;
 	bool IgnoreGravity;
 	bool IgnoreRotation;
 	float Mass;
@@ -33,6 +47,8 @@ public:
 
 	mat3 MomentOfInertia;
 	mat3 InverseMomentOfInertia;
+    
+    collision_callback callback;
 
 	void SetPosition(vec3 pos) {
 		Position = pos;
@@ -54,7 +70,7 @@ public:
 	
 	MeshObject* Mesh;
 
-	PhysicsObject(float mass, bool ignoreGravity, bool ignoreRotation);
+	PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation);
 
 	// Do the integration step for the equations of motion
 	void Integrate(float deltaT);
