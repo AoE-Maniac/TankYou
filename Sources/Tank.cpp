@@ -122,7 +122,7 @@ void Tank::updateStateMachine(float deltaT) {
                 // Shoot and Kill
                 vec3 p = GetPosition();
                 vec3 l = getTurretLookAt();
-                mProj->fire(p, l, 1, 1);
+                mProj->fire(p, enemyTank, 1, 1);
                 
             } else {
                 // Track the enemy

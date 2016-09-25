@@ -4,11 +4,13 @@
 
 using namespace Kore;
 
-Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
+Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
 	timeToLife = new float[maxProjectiles];
 	damage = new int[maxProjectiles];
 	physicsObject = new PhysicsObject*[maxProjectiles];
+	targets = new PhysicsObject*[maxProjectiles];
 	particles = new ParticleSystem*[maxProjectiles];
+	hitDist = hitDistance;
 	
 	for (int i = 0; i < maxProjectiles; i++) {
 		timeToLife[i] = 0;
@@ -19,6 +21,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
+		
 		physics->AddDynamicObject(physicsObject[i]);
 	
 		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
@@ -31,11 +34,11 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, vec3 dir, float s, int dmg) {
+void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg) {
 	assert(currProj + 1 < maxProj);
 
 	if (currProj + 1 < maxProj) {
-		vec3 direction = dir.normalize();
+		vec3 direction = (target->GetPosition() - pos).normalize();
 		physicsObject[currProj]->SetPosition(pos);
 		physicsObject[currProj]->Velocity = direction * s;
 		physicsObject[currProj]->active = true;
@@ -52,21 +55,30 @@ void Projectiles::fire(vec3 pos, vec3 dir, float s, int dmg) {
 
 		damage[currProj] = dmg;
 
+		targets[currProj] = target;
+
 		currProj++;
 	}
 }
 
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < currProj; i++) {
-		if (timeToLife[i] > 0) {
+		if (timeToLife[i] > 0 || physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist) {
 			particles[i]->setPosition(physicsObject[i]->GetPosition());
 			particles[i]->setDirection(vec3(0, 1, 0));
 			particles[i]->update(deltaT);
 
+			// TODO: Scheint nicht zu funktionieren
+			physicsObject[i]->Velocity = (targets[i]->GetPosition() - physicsObject[i]->GetPosition()).normalize() * physicsObject[i]->Velocity.getLength();
+
 			timeToLife[i] -= deltaT;
 		}
 		else {
-			log(Info, "ttl over, killing.");
+			if(physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist)
+				log(Info, "Hit, killing");
+			else
+				log(Info, "ttl over, killing.");
+
 			kill(i);
 			i--;
 		}
