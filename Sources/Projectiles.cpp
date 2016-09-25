@@ -17,6 +17,7 @@ Projectiles::Projectiles(int maxProjectiles, Texture* particleTex, MeshObject* m
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
+		physicsObject[i]->callback = [=](COLLIDING_OBJECT other) { kill(i); };
 		physics->AddDynamicObject(physicsObject[i]);
 	
 		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
@@ -62,20 +63,24 @@ void Projectiles::update(float deltaT) {
 			timeToLife[i] -= deltaT;
 		}
 		else {
-			timeToLife[i] = timeToLife[currProj - 1];
-			
-			PhysicsObject* physicsObjectTemp = physicsObject[i];
-			physicsObject[i] = physicsObject[currProj - 1];
-			physicsObject[currProj - 1] = physicsObjectTemp;
-
-			ParticleSystem* temp = particles[i];
-			particles[i] = particles[currProj - 1];
-			particles[currProj - 1] = temp;
-
-			--currProj;
-			--i;
+			kill(i);
+			i--;
 		}
 	}
+}
+
+void Projectiles::kill(int projectile) {
+	timeToLife[projectile] = timeToLife[currProj - 1];
+			
+	PhysicsObject* physicsObjectTemp = physicsObject[projectile];
+	physicsObject[projectile] = physicsObject[currProj - 1];
+	physicsObject[currProj - 1] = physicsObjectTemp;
+
+	ParticleSystem* temp = particles[projectile];
+	particles[projectile] = particles[currProj - 1];
+	particles[currProj - 1] = temp;
+
+	--currProj;
 }
 
 void Projectiles::render(ConstantLocation vLocation, ConstantLocation tintLocation, TextureUnit tex, mat4 view) {
