@@ -5,7 +5,12 @@
 
 using namespace Kore;
 
+namespace {
+	int maxProjectiles = 0;
+}
+
 Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
+	::maxProjectiles = maxProjectiles;
 	timeToLife = new float[maxProjectiles];
 	collision_data = new projectile_collision_data[maxProjectiles];
 	physicsObject = new PhysicsObject*[maxProjectiles];
@@ -85,14 +90,17 @@ void Projectiles::update(float deltaT) {
                // physicsObject[i]->Velocity = (targets[i]->GetPosition() - physicsObject[i]->GetPosition()).normalize() * physicsObject[i]->Velocity.getLength();
                 
                 vec3 position = physicsObject[i]->GetPosition();
-                vec3 target = targets[i]->GetPosition();
+				vec3 target;
+				if (targets[i] != nullptr) {
+					target = targets[i]->GetPosition();
+				}
                 vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
                 
                 physicsObject[i]->Velocity = direction;
                 physicsObject[i]->Integrate(deltaT);
                 timeToLife[i] -= deltaT;
             }
-            else {
+            else if (targets[i] != nullptr) {
                 if(physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist)
                     log(Info, "Hit, killing");
                 else
@@ -100,6 +108,20 @@ void Projectiles::update(float deltaT) {
 
                 kill(i, physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist);
             }
+		}
+	}
+}
+
+void Projectiles::remove(Tank* tank) {
+	for (int i = 0; i < maxProjectiles; ++i) {
+		if (shooters[i] == tank) {
+			shooters[i] = nullptr;
+		}
+		if (physicsObject[i] == tank) {
+			physicsObject[i] = nullptr;
+		}
+		if (targets[i] == tank) {
+			targets[i] = nullptr;
 		}
 	}
 }
