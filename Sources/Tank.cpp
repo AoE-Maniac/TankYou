@@ -212,7 +212,7 @@ void Tank::updateStateMachine(float deltaT) {
         case Following: {
             //log(Info, "Following: %i", mFrac);
 
-			if (enemyTank == nullptr) {
+			if (enemyTank == nullptr || enemyTank->won) {
 				currentState = Wandering;
 				break;
 			}
@@ -237,7 +237,7 @@ void Tank::updateStateMachine(float deltaT) {
         case Attack: {
             //log(Info, "Shoot %i", mFrac);
 
-			if (enemyTank == nullptr) {
+			if (enemyTank == nullptr || enemyTank->won) {
 				currentState = Wandering;
 				break;
 			}
