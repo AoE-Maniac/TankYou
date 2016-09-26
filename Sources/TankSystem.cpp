@@ -22,6 +22,7 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 	
 	destroyed = 0;
 	deserted = 0;
+	multipleSelect = false;
 
 	initBars(vec2(2.0f, 0.5f), structures);
 }

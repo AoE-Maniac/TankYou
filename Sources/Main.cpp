@@ -59,6 +59,7 @@ namespace {
 	Kravur* font24;
 	Kravur* font34;
 	Kravur* font44;
+	Kravur* font64;
 	Text* textRenderer;
 	
 	mat4 P;
@@ -97,6 +98,7 @@ namespace {
     
 	double lastTime;
     double gameOverTime = 0;
+	int gameOverKills = 0;
 
 	InstancedMeshObject* tankTop;
 	InstancedMeshObject* tankBottom;
@@ -146,7 +148,7 @@ namespace {
 		Kore::Audio::update();
 		
 		Graphics::begin();
-		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag | Graphics::ClearStencilFlag, 0xff9999FF, 1.0f, 0);
+		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag | Graphics::ClearStencilFlag, 0xFF000000, 1.0f, 0);
 
 		// Important: We need to set the program before we set a uniform
 		program->set();
@@ -243,39 +245,40 @@ namespace {
 		textRenderer->start();
 		if (t < START_DELAY) {
 			textRenderer->setFont(font44);
-			renderCentered("Tank you!", height / 2 - 100);
+			renderCentered("Tank You!", height / 2 - 100);
 			textRenderer->setFont(font24);
 			renderCentered("Make the war last forever. But be warned, experienced", height / 2 + 50);
 			renderCentered("soldiers might realize that the bloodshed is pointless.", height / 2 + 100);
 		}
-		else {
+		else if (tankTics->deserted < MAX_DESERTED) {
 			char c[42];
 			char d[42];
 			char k[42];
-			sprintf(c, "Time: %i", (int)t);
+			sprintf(c, "Time: %i", (int)t - START_DELAY);
 			sprintf(d, "Deserted: %i / %i", tankTics->deserted, MAX_DESERTED);
 			sprintf(k, "Destroyed: %i", tankTics->destroyed);
-			textRenderer->setFont(font14);
+			textRenderer->setFont(font24);
 			renderShadowText(c, 15, 15);
-			renderShadowText(k, 15, 30);
-			renderShadowText(d, 15, 45);
-			if (tankTics->deserted >= MAX_DESERTED) {
-				textRenderer->setFont(font44);
-				renderCentered("Game over!", height / 2 - 100);
-				textRenderer->setFont(font34);
-				if(gameOverTime == 0.0f)
-					gameOverTime = t - START_DELAY;
-				char gameOverText[256];
-				sprintf(gameOverText, "Tank you for playing (you survived for %i seconds)...", (int)gameOverTime);
-				renderCentered(gameOverText, height / 2);
-				textRenderer->setFont(font24);
-				renderCentered("A jam game by:", height / 2 + 130);
-				renderCentered("Polona Caserman", height / 2 + 210, width / 4.0f);
-				renderCentered("Robert Konrad", height / 2 + 210);
-				renderCentered("Lars Lotter", height / 2 + 210, width * 3.0f / 4);
-				renderCentered("Max Maag", height / 2 + 270, width / 3.0f);
-				renderCentered("Christian Reuter", height / 2 + 270, width * 2.0f / 3.0f);
-			}
+			renderShadowText(k, 15, 45);
+			renderShadowText(d, 15, 75);
+		}
+		else {
+			textRenderer->setFont(font44);
+			renderCentered("Game over!", height / 2 - 150);
+			textRenderer->setFont(font34);
+			if(gameOverTime == 0.0f)
+				gameOverTime = t - START_DELAY;
+			if (gameOverKills == 0) gameOverKills = tankTics->destroyed;
+			char gameOverText[256];
+			sprintf(gameOverText, "The war lasted %i seconds and killed %i...", (int)gameOverTime, gameOverKills);
+			renderCentered(gameOverText, height / 2);
+			textRenderer->setFont(font24);
+			renderCentered("Tank you for playing our jam game:", height / 2 + 80);
+			renderCentered("Polona Caserman", height / 2 + 160, width / 4.0f);
+			renderCentered("Robert Konrad", height / 2 + 160);
+			renderCentered("Lars Lotter", height / 2 + 160, width * 3.0f / 4);
+			renderCentered("Max Maag", height / 2 + 220, width / 3.0f);
+			renderCentered("Christian Reuter", height / 2 + 220, width * 2.0f / 3.0f);
 		}
 		textRenderer->end();
 
@@ -425,6 +428,7 @@ namespace {
 		font24 = Kravur::load("Arial", FontStyle(), 24);
 		font34 = Kravur::load("Arial", FontStyle(), 34);
 		font44 = Kravur::load("Arial", FontStyle(), 44);
+		//font64 = Kravur::load("Arial", FontStyle(), 64);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
 		textRenderer->setFont(font44);
