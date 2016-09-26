@@ -20,7 +20,6 @@ public:
 	void onShooterDeath(int projectileID);
 private:
 	int maxProj;
-	int currProj;
 	float hitDist;
 	MeshObject* sharedMesh;
 	Kore::VertexBuffer** vertexBuffers;
