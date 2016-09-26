@@ -191,6 +191,7 @@ namespace {
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
 
+        projectiles->update(deltaT);
         // Update physics
         physics.Update(deltaT);
     
@@ -198,9 +199,6 @@ namespace {
 
 		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
 		tankTics->render(tex, View, vLocation);
-		
-        // Update physics
-        physics.Update(deltaT);
 
         
         // Render dynamic objects
@@ -221,7 +219,7 @@ namespace {
 
 		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
-		projectiles->update(deltaT);
+		
 		projectiles->render(vLocation, tex, View);
         
         particleRenderer->render(tex, View, vLocation);

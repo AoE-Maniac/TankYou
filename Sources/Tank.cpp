@@ -25,6 +25,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     won = false;
 	myProjectileID = -1;
 	tts = 0;
+    collisionData = this;
 }
 
 float Tank::getHPPerc() {
@@ -194,8 +195,21 @@ void Tank::updateStateMachine(float deltaT) {
         case Attack: {
             //log(Info, "Shoot %i", mFrac);
             
+            bool enemyTankLiving = false;
+            for( int i = 0; i < enemyTanks->size() && ! enemyTankLiving; i++ )
+            {
+                if ((*enemyTanks)[i] == enemyTank) {
+                    enemyTankLiving = true;
+                }
+            }
+            if(!enemyTankLiving)
+            {
+                currentState = Wandering;
+                break;
+            }
+            
             // Shoot and Kill
-            vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
+            vec3 p = vec3(0,1,0) + GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 7.f;
             if (myProjectileID < 0) {
 				if (tts <= 0) {
 					tts = 1;
@@ -248,8 +262,9 @@ void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
 	log(Info, "Tank collided with %d", other);
 	switch(other) {
 	case COLLIDING_OBJECT::PROJECTILE:
-		float projDmg = *((int*) collisionData);
-		hp -= projDmg;
+		float projDmg = (*((projectile_collision_data*) collisionData)).damage;
+        if( (*((projectile_collision_data*) collisionData)).dest == (PhysicsObject*)this )
+            hp -= projDmg;
 		break;
 	}
 }

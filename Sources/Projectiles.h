@@ -11,6 +11,13 @@
 
 class Tank;
 
+typedef struct
+{
+    int damage;
+    Tank* source;
+    PhysicsObject* dest;
+} projectile_collision_data;
+
 class Projectiles {
 public:
 	Projectiles(int maxProjectiles, float hitDistance, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
@@ -26,7 +33,7 @@ private:
 
 	// Projectiles
 	float* timeToLife;
-	int* damage;
+	projectile_collision_data* collision_data;
 	Tank** shooters;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;

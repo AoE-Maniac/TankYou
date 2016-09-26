@@ -7,7 +7,7 @@ using namespace Kore;
 
 Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particleTex, MeshObject* mesh, VertexStructure** structures, PhysicsWorld* physics) : maxProj(maxProjectiles), sharedMesh(mesh) {
 	timeToLife = new float[maxProjectiles];
-	damage = new int[maxProjectiles];
+	collision_data = new projectile_collision_data[maxProjectiles];
 	physicsObject = new PhysicsObject*[maxProjectiles];
 	targets = new PhysicsObject*[maxProjectiles];
 	particles = new ParticleSystem*[maxProjectiles];
@@ -19,16 +19,21 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
         inactiveProjectiles.insert(i);
 		timeToLife[i] = 0;
 
-		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.0f, true, true, false);
-		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
+		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.01f, true, true, false);
+		physicsObject[i]->Collider.radius = 0.05f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-        physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { log(Info, "particle collision with %d", other); kill(i, true); };
-		physicsObject[i]->collisionData = &damage[i];
+        physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) {
+            if( (Tank*)collisionData == targets[i]  )
+            {
+                kill(i, true);
+            }
+        };
+		physicsObject[i]->collisionData = &collision_data[i];
 		physicsObject[i]->active = false;
 		
 		physics->AddDynamicObject(physicsObject[i]);
 	
-		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10 * PROJECTILE_SIZE, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
+		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10.f, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
 	}
 	
 	vertexBuffers = new VertexBuffer*[2];
@@ -44,7 +49,6 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
 	}
     
     int projectile = *(inactiveProjectiles.begin());
-    log(Info, "projectile number: %d", projectile);
     vec3 direction = (target->GetPosition() - pos).normalize();
     physicsObject[projectile]->SetPosition(pos);
     physicsObject[projectile]->Velocity = direction * s;
@@ -59,7 +63,9 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
     physicsObject[projectile]->SetRotation(Quat(Kore::cos(ang/2), q.x(), q.y(), q.z()));
 
     timeToLife[projectile] = PROJECTILE_LIFETIME;
-    damage[projectile] = dmg;
+    collision_data[projectile].damage = dmg;
+    collision_data[projectile].source = shooter;
+    collision_data[projectile].dest = target;
 
     targets[projectile] = target;
     inactiveProjectiles.erase(projectile);
@@ -71,13 +77,19 @@ void Projectiles::update(float deltaT) {
 	for (int i = 0; i < maxProj; i++) {
         if (physicsObject[i]->active) {
             if (timeToLife[i] > 0) {
-                particles[i]->setPosition(physicsObject[i]->GetPosition());
-                particles[i]->setDirection(vec3(0, 1, 0));
-                particles[i]->update(deltaT);
+             //   particles[i]->setPosition(physicsObject[i]->GetPosition());
+             //   particles[i]->setDirection(vec3(0, 1, 0));
+             //   particles[i]->update(deltaT);
 
 			// TODO: Scheint nicht zu funktionieren
-                physicsObject[i]->Velocity = (targets[i]->GetPosition() - physicsObject[i]->GetPosition()).normalize() * physicsObject[i]->Velocity.getLength();
-
+               // physicsObject[i]->Velocity = (targets[i]->GetPosition() - physicsObject[i]->GetPosition()).normalize() * physicsObject[i]->Velocity.getLength();
+                
+                vec3 position = physicsObject[i]->GetPosition();
+                vec3 target = targets[i]->GetPosition();
+                vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
+                
+                physicsObject[i]->Velocity = direction;
+                physicsObject[i]->Integrate(deltaT);
                 timeToLife[i] -= deltaT;
             }
             else {
@@ -86,10 +98,7 @@ void Projectiles::update(float deltaT) {
                 else
                     log(Info, "ttl over, killing.");
 
-                log(Info, "kill");
                 kill(i, physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist);
-                log(Info, "kill end");
-                i--;
             }
 		}
 	}
