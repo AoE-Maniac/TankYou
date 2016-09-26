@@ -46,6 +46,17 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	vertexBuffers[1] = new VertexBuffer(maxProjectiles, *structures[1], 1);
 }
 
+namespace {
+	Sound* sound = nullptr;
+
+	Sound* getSound() {
+		if (sound == nullptr) {
+			sound = new Sound("impact_sound.wav");
+		}
+		return sound;
+	}
+}
+
 int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
     assert(inactiveProjectiles.size() > 0);
 
@@ -53,9 +64,9 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
 		return -1;
 	}
     
-    Sound *shootSound = new Sound("impact_sound.wav");
-    shootSound->setVolume(0.1);
-    Mixer::play(shootSound);
+    Sound* shootSound = getSound();
+    shootSound->setVolume(0.3);
+    Mixer::play(shootSound, Random::get(50, 200) / 100.0f);
     
     int projectile = *(inactiveProjectiles.begin());
     vec3 direction = (target->GetPosition() - pos).normalize();
@@ -98,22 +109,19 @@ void Projectiles::update(float deltaT) {
 				if (targets[i] != nullptr) {
 					target = targets[i]->GetPosition();
                     
-                    float pt = (position-target).getLength();
+                    float pt = abs((position-target).getLength());
                     vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
                     
                     if( shooters[i] != nullptr )
                     {
                         vec3 sourcepos = shooters[i]->getPosition();
-                        float st = (sourcepos-target).getLength();
-                        if( pt/st >= 0.5 )
-                        {
-                            direction[1] *= -1;
-                        }
+                        float st = abs((sourcepos-target).getLength());
+                        direction[1] += 10*(pt/st);
                     }
                     physicsObject[i]->Velocity = direction;
 				} else
                 {
-                    //physicsObject[i]->active = false;
+                    kill(i, false);
                 }
                 
                 physicsObject[i]->Integrate(deltaT);
