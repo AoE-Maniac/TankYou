@@ -245,6 +245,7 @@ namespace {
 		textRenderer->drawString(k, 0xffffffff, 15, 30, mat3::Identity());
 		textRenderer->drawString(d, 0xffffffff, 15, 45, mat3::Identity());
 		if (tankTics->deserted >= 1) {
+			textRenderer->drawString("Game over!", 0x000000aa, width / 2 + 4, height / 2 - 15 + 4, mat3::Identity());
 			textRenderer->drawString("Game over!", 0xffffffff, width / 2, height / 2 - 15, mat3::Identity());
 			textRenderer->drawString("Tank you for playing...", 0xffffffff, width / 2, height / 2 + 15, mat3::Identity());
             
