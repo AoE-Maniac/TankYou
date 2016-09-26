@@ -103,6 +103,8 @@ namespace {
 	TankSystem* tankTics;
     ParticleRenderer* particleRenderer;
 
+	Ground* ground;
+
 	vec3 screenToWorld(vec2 screenPos) {
 		vec4 pos((2 * screenPos.x()) / width - 1.0f, -((2 * screenPos.y()) / height - 1.0f), 0.0f, 1.0f);
 
@@ -387,12 +389,12 @@ namespace {
         
         Random::init(123);
 
-		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT);
+		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, &ground);
 	}
 }
 
 int kore(int argc, char** argv) {
-	Kore::System::setName("Korerorinpa");
+  Kore::System::setName("Korerorinpa");
 	Kore::System::setup();
 
 	Kore::WindowOptions options;
