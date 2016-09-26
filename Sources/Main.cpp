@@ -37,6 +37,8 @@ using namespace Kore;
 namespace {
 	const int width = 1024;
 	const int height = 768;
+	const int MAX_DESERTED = 3;
+	const int START_DELAY = 8;
 
 	int mouseX = width / 2;
 	int mouseY = height / 2;
@@ -46,7 +48,6 @@ namespace {
 	Shader* fragmentShader;
 	Program* program;
 
-	float cameraAngle = 0.0f;
 	float cameraZoom = 0.5f;
 
 	bool left;
@@ -94,8 +95,6 @@ namespace {
 	Texture* particleImage;
     Explosion* explosionSystem;
     
-//    Steering* steer;
-
 	double lastTime;
     double gameOverTime = 0;
 
@@ -128,6 +127,17 @@ namespace {
 		return Kore::max(0.0f, Kore::min(1.0f, val));
 	}
 
+	void renderShadowText(char* s,  float w, float h) {
+		int offset = textRenderer->font->size / 12;
+		textRenderer->drawString(s, 0x000000aa, w + offset, h + offset, mat3::Identity());
+		textRenderer->drawString(s, 0xffffffff, w, h, mat3::Identity());
+	}
+
+	void renderCentered(char* s, float h, float w = width / 2) {
+		float l = textRenderer->font->stringWidth(s);
+		renderShadowText(s, w - l / 2, h);
+	}
+
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -144,42 +154,37 @@ namespace {
 		Graphics::setRenderState(BlendingState, true);
 		Graphics::setRenderState(BackfaceCulling, NoCulling);
 		Graphics::setRenderState(DepthTest, true);
-
-		// set the camera
-		cameraAngle += 0.3f * deltaT;
-
-		float x = 0 + 10 * Kore::cos(cameraAngle);
-		float z = 0 + 10 * Kore::sin(cameraAngle);
 		
-		// Interpolate the camera to not follow small physics movements
-		float alpha = 0.3f;
-
-		const float cameraSpeed = 1.5f;
-		if (mouseY < 50 ) {
-			cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
+		if (t >= START_DELAY) {
+			const float cameraSpeed = 1.5f;
+			if (mouseY < 50) {
+				cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
+			}
+			if (up) {
+				cameraPosition.z() += cameraSpeed;
+			}
+			if (mouseY > height - 50) {
+				cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
+			}
+			if (down) {
+				cameraPosition.z() -= cameraSpeed;
+			}
+			if (mouseX < 50) {
+				cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
+			}
+			if (right) {
+				cameraPosition.x() -= cameraSpeed;
+			}
+			if (mouseX > width - 50) {
+				cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
+			}
+			if (left) {
+				cameraPosition.x() += cameraSpeed;
+			}
 		}
-        if( up )
-        {
-            cameraPosition.z() += cameraSpeed * clamp01(50.0f);
-        }
-		if (mouseY > height - 50 ) {
-			cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
+		else {
+			cameraZoom = t / START_DELAY;
 		}
-        if ( down ) {
-            cameraPosition.z() -= cameraSpeed * clamp01(50.0f);
-        }
-		if (mouseX < 50) {
-			cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
-		}
-        if (right) {
-            cameraPosition.x() -= cameraSpeed * clamp01(50.0f);
-        }
-		if (mouseX > width - 50) {
-			cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
-		}
-        if (left) {
-            cameraPosition.x() += cameraSpeed * clamp01(50.0f);
-        }
 		
 		cameraPosition.y() = cameraZoom * 150 + (1 - cameraZoom) * 10;
 		vec3 off = vec3(0, -1, 0) * cameraZoom + (1 - cameraZoom) * vec3(0, -1, 1);
@@ -197,26 +202,14 @@ namespace {
 		lightPosY = 100; // 10;
 		lightPosZ = 100; //20 * Kore::cos(2 * t);
 		Graphics::setFloat3(lightPosLocation, lightPosX, lightPosY, lightPosZ);
-
-		// Handle inputs
-		float forceX = 0.0f;
-		float forceZ = 0.0f;
-		if (up) forceX += 1.0f;
-		if (down) forceX -= 1.0f;
-		if (left) forceZ -= 1.0f;
-		if (right) forceZ += 1.0f;
-
-		// Apply inputs
-		vec3 force(forceX, 0.0f, forceZ);
-		force = force * 20.0f;
-
-        projectiles->update(deltaT);
-        // Update physics
-        physics.Update(deltaT);
+		
+		if (t >= START_DELAY) {
+			projectiles->update(deltaT);
+			// Update physics
+			physics.Update(deltaT);
     
-		tankTics->update(deltaT);
-
-
+			tankTics->update(deltaT);
+		}
         
         // Render dynamic objects
         /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
@@ -248,30 +241,55 @@ namespace {
 		particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
-        char c[42];
-		char d[42];
-		char k[42];
-        sprintf(c, "Time: %i", (int)t);
-		sprintf(d, "Deserted: %i", tankTics->deserted);
-		sprintf(k, "Destroyed: %i", tankTics->destroyed);
-        textRenderer->drawString(c, 0xffffffff, 15, 15, mat3::Identity());
-		textRenderer->drawString(k, 0xffffffff, 15, 30, mat3::Identity());
-		textRenderer->drawString(d, 0xffffffff, 15, 45, mat3::Identity());
-		if (tankTics->deserted >= 1) {
-			textRenderer->drawString("Game over!", 0x000000aa, width / 2 + 4, height / 2 - 15 + 4, mat3::Identity());
-			textRenderer->drawString("Game over!", 0xffffffff, width / 2, height / 2 - 15, mat3::Identity());
-			textRenderer->drawString("Tank you for playing...", 0xffffffff, width / 2, height / 2 + 15, mat3::Identity());
-            
-            if(gameOverTime == 0.0f)
-                gameOverTime = t;
-            char gameOverText[256];
-            sprintf(gameOverText, "You survived for %i seconds", (int)gameOverTime);
-            textRenderer->drawString(gameOverText, 0xffffffff, width / 2, height / 2, mat3::Identity());
+		if (t < START_DELAY) {
+			textRenderer->setFont(font44);
+			renderCentered("Tank you!", height / 2 - 100);
+			textRenderer->setFont(font24);
+			renderCentered("Make the war last forever. But be warned, experienced", height / 2 + 50);
+			renderCentered("soldiers might realize that the bloodshed is pointless.", height / 2 + 100);
+		}
+		else {
+			char c[42];
+			char d[42];
+			char k[42];
+			sprintf(c, "Time: %i", (int)t);
+			sprintf(d, "Deserted: %i / %i", tankTics->deserted, MAX_DESERTED);
+			sprintf(k, "Destroyed: %i", tankTics->destroyed);
+			textRenderer->setFont(font14);
+			renderShadowText(c, 15, 15);
+			renderShadowText(k, 15, 30);
+			renderShadowText(d, 15, 45);
+			if (tankTics->deserted >= MAX_DESERTED) {
+				textRenderer->setFont(font44);
+				renderCentered("Game over!", height / 2 - 100);
+				textRenderer->setFont(font34);
+				if(gameOverTime == 0.0f)
+					gameOverTime = t - START_DELAY;
+				char gameOverText[256];
+				sprintf(gameOverText, "Tank you for playing (you survived for %i seconds)...", (int)gameOverTime);
+				renderCentered(gameOverText, height / 2);
+				textRenderer->setFont(font24);
+				renderCentered("A jam game by:", height / 2 + 130);
+				renderCentered("Polona Caserman", height / 2 + 210, width / 4.0f);
+				renderCentered("Robert Konrad", height / 2 + 210);
+				renderCentered("Lars Lotter", height / 2 + 210, width * 3.0f / 4);
+				renderCentered("Max Maag", height / 2 + 270, width / 3.0f);
+				renderCentered("Christian Reuter", height / 2 + 270, width * 2.0f / 3.0f);
+			}
 		}
 		textRenderer->end();
 
 		Graphics::end();
 		Graphics::swapBuffers();
+	}
+
+	void skipIntro() {
+		if (System::time() - startTime < START_DELAY) {
+			float diff = START_DELAY - (System::time() - startTime);
+			startTime -= diff;
+			lastTime += diff;
+			cameraZoom = 1;
+		}
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -328,6 +346,7 @@ namespace {
 		pickDir.normalize();
 
 		if (button == 0) {
+			skipIntro();
 			tankTics->select(cameraPosition, pickDir);
 		}
 		else if (button == 1) {

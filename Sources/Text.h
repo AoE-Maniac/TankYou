@@ -12,12 +12,12 @@ private:
 	Kore::VertexBuffer* rectVertexBuffer;
 	float* rectVertices;
 	Kore::IndexBuffer* indexBuffer;
-	Kravur* font;
 	Kore::Texture* lastTexture;
 	int fontSize;
 	bool bilinear;
 	Kore::Program* program;
 public:
+	Kravur* font;
 	Text();
 	void setProjection(int width, int height);
 private:
