@@ -35,8 +35,8 @@
 using namespace Kore;
 
 namespace {
-	const int width = 800;
-	const int height = 600;
+	const int width = 1024;
+	const int height = 768;
 
 	int mouseX = width / 2;
 	int mouseY = height / 2;
@@ -54,7 +54,10 @@ namespace {
 	bool up;
 	bool down;
 
-	Kravur* font;
+	Kravur* font14;
+	Kravur* font24;
+	Kravur* font34;
+	Kravur* font44;
 	Text* textRenderer;
 	
 	mat4 P;
@@ -215,19 +218,21 @@ namespace {
 			(*current)->mesh->render(tex, View);
 		}*/
 
-		//Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
+		//Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
+		
+        //Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
 		
-		//Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View, vLocation);
-		
+		Graphics::setRenderState(DepthTest, false);
+		projectiles->render(vLocation, tex, View);
+        Graphics::setRenderState(DepthTest, true);
+        
+
 		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
-		
-		projectiles->render(vLocation, tex, View);
-        
-        particleRenderer->render(tex, View, vLocation);
-        
+		tankTics->render(tex, View, vLocation);
+				
+		particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
         char c[42];
@@ -383,10 +388,13 @@ namespace {
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
-		font = Kravur::load("Arial", FontStyle(), 14);
+		font14 = Kravur::load("Arial", FontStyle(), 14);
+		font24 = Kravur::load("Arial", FontStyle(), 24);
+		font34 = Kravur::load("Arial", FontStyle(), 34);
+		font44 = Kravur::load("Arial", FontStyle(), 44);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
-		textRenderer->setFont(font);
+		textRenderer->setFont(font44);
 
 		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
