@@ -281,13 +281,32 @@ namespace {
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
-		if (code == Key_Escape || code == Key_Enter) {
-			skipIntro();
-		}
+		if (code == Key_Up) {
+			up = true;
+		} else if (code == Key_Down) {
+			down = true;
+		} else if (code == Key_Left) {
+			right = true;
+		} else if (code == Key_Right) {
+			left = true;
+        } else if (code == Key_A) {
+            log(Info,"CONTROLL");
+            tankTics->setMultipleSelect(true);
+        }
 	}
 
 	void keyUp(KeyCode code, wchar_t character) {
-
+		if (code == Key_Up) {
+			up = false;
+		} else if (code == Key_Down) {
+			down = false;
+		} else if (code == Key_Left) {
+			right = false;
+		} else if (code == Key_Right) {
+			left = false;
+        } else if (code == Key_A) {
+            tankTics->setMultipleSelect(false);
+        }
 	}
 
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
