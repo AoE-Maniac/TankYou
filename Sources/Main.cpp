@@ -33,10 +33,6 @@
 
 using namespace Kore;
 
-const int MAP_SIZE_INNER = 200;
-const int MAP_SIZE_OUTER = 300;
-const int STONE_COUNT = 64;
-
 namespace {
 	const int width = 800;
 	const int height = 600;

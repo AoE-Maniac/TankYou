@@ -7,7 +7,7 @@ const int MAX_HP = 10;
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	Collider.radius = 0.5f;
 	turretAngle = 0;
-    currentState = Wait;
+    currentState = Won;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
 	maxVelocity = 0.5f;
@@ -40,7 +40,7 @@ void Tank::update(float deltaT) {
     updateStateMachine(deltaT);
     SetTankOrientation(deltaT);
     
-    yPosition = 8.0f;
+    //yPosition = 8.0f;
 }
 
 void Tank::rotateTurret(float angle) {
@@ -92,6 +92,7 @@ void Tank::MoveWithVelocity(vec3 velocity) {
 
 void Tank::MoveToPosition(vec3 position) {
     toPosition = position;
+    log(Info, "%f %f", toPosition.x(), toPosition.z());
     currentState = Move;
 }
 
@@ -122,6 +123,10 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 }
 
 void Tank::updateStateMachine(float deltaT) {
+    
+    if (getXPPerc() >= 1.0f) {
+        currentState = Won;
+    }
     
     switch (currentState) {
         case Wait: {
@@ -187,7 +192,7 @@ void Tank::updateStateMachine(float deltaT) {
             
             // Shoot and Kill
             vec3 p = GetPosition();
-            mProj->fire(p, enemyTank, 1, 1, this);
+            //mProj->fire(p, enemyTank, 1, 1, this);
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance > minDistToShoot) {
@@ -209,7 +214,13 @@ void Tank::updateStateMachine(float deltaT) {
             
             break;
         }
-            
+           
+        case Won: {
+            int x = Random::get(-MAP_SIZE_INNER/2, MAP_SIZE_INNER/2);
+            int z = MAP_SIZE_INNER/2;
+            toPosition = vec3(x, yPosition, z);
+            currentState = Move;
+        }
             
     }
 }
