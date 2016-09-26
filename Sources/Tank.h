@@ -27,6 +27,9 @@ public:
     void MoveToPosition(vec3 position);
     vec3 Velocity;
 	
+	float getHPPerc();
+	float getXPPerc();
+
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);
 	mat4 GetFlagM(mat4 bottomM);
