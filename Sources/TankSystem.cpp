@@ -54,12 +54,12 @@ void TankSystem::initBars(vec2 halfSize, VertexStructure** structures) {
 void spawnTank(PhysicsWorld* world, std::vector<Tank*>& tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
 	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
 	Tank* t1 = new Tank(frac);
-    world->AddDynamicObject(t1);
 	t1->SetEnemy(tanks);
     t1->setProjectile(projectiles);
+	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
 	tanks.push_back(t1);
     explosions->push_back(nullptr);
-	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
+    world->AddDynamicObject(t1);
 }
 
 void TankSystem::update(float dt) {
@@ -194,7 +194,7 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 			mat4 t = Quaternion::Quaternion(axis, angle).matrix();
 			t = getRotM(axis, angle);
 			
-			mat4 botM = tank->GetBottomM();
+			mat4 botM = tank->GetBottomM() * t;
 			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
 			if (hoveredTank == tank) col = vec4(tank->mFrac * 0.25f, 0, (1 - tank->mFrac) * 0.25f, 1);
 			if (tank->selected) col = vec4(Kore::max(1.0f * tank->mFrac, 0.75f), 0.25f, Kore::max(1.0f * (1 - tank->mFrac), 0.75f), 1);
