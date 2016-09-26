@@ -7,7 +7,7 @@ const int MAX_HP = 10;
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
 	Collider.radius = 6.f;
 	turretAngle = 0.f;
-    currentState = Wait;
+    currentState = Wandering;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
 	maxVelocity = 0.5f;
