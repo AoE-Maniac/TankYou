@@ -6,7 +6,7 @@ const int MAX_HP = 10;
 
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
 	Collider.radius = 6.f;
-	turretAngle = 0.f;
+	turretAngle = Kore::pi;
     currentState = Wandering;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
@@ -87,7 +87,7 @@ vec3 Tank::getPosition() {
 
 void Tank::SetOrientationFromVelocity(float deltaT) {
     if (Velocity.getLength() > 0) {
-        float x = -Velocity.x();
+        /*float x = -Velocity.x();
         float z = Velocity.z();
         float orient;
         if(x>0)
@@ -102,12 +102,12 @@ void Tank::SetOrientationFromVelocity(float deltaT) {
             orient = -pi/2;
         orient = orient+(pi/2);
         if(orient > pi/2)
-            orient = -pi/2 + (orient-(pi/2));
+            orient = -pi/2 + (orient-(pi/2));*/
         
-        Orientation = orient;
-        /*
+        float orient = Kore::atan2(Velocity.x(), Velocity.z());;
+        
         if (Kore::abs(orient-Orientation) > 0.3f) {
-            float o = deltaT * Kore::abs(orient-Orientation);
+            float o = deltaT * Kore::pi;
             if (orient < Orientation)
                 Orientation -= o;
             else
@@ -115,7 +115,7 @@ void Tank::SetOrientationFromVelocity(float deltaT) {
         } else {
             Orientation = orient;
         }
-        */
+        
     }
 }
 
@@ -126,8 +126,22 @@ void Tank::MoveWithVelocity(vec3 velocity) {
 }
 
 void Tank::MoveToPosition(vec3 position) {
+    GetMaxPosition(position);
     toPosition = position;
     currentState = Move;
+}
+
+void Tank::GetMaxPosition(vec3& position) {
+    if (position.x() > MAP_SIZE_INNER/2.0f) {
+        position.x() = MAP_SIZE_INNER/2.0f;
+    } else if(position.x() < - MAP_SIZE_INNER/2.0f) {
+        position.x() = -MAP_SIZE_INNER/2.0f;
+    }
+    if (position.z() > MAP_SIZE_INNER/2.0f) {
+        position.z() = MAP_SIZE_INNER/2.0f;
+    } else if(position.z() < - MAP_SIZE_INNER/2.0f) {
+        position.z() = -MAP_SIZE_INNER/2.0f;
+    }
 }
 
 void Tank::SetTankOrientation(float deltaT) {
@@ -178,6 +192,7 @@ void Tank::updateStateMachine(float deltaT) {
             // Wander
             toPosition.y() = yPosition;
             MoveWithVelocity(steer->Wander(getPosition(), toPosition, maxVelocity));
+            GetMaxPosition(toPosition);
             
             // Follow the target
             for (int i = 0; i < enemyTanks->size(); i++) {
@@ -214,7 +229,6 @@ void Tank::updateStateMachine(float deltaT) {
                 // Track the enemy
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
                 MoveWithVelocity(velocity);
-                //turretAngle = Kore::pi;
             }
 
             break;
@@ -239,7 +253,7 @@ void Tank::updateStateMachine(float deltaT) {
             }
             if(!enemyTankLiving)
             {
-                currentState = Wait;
+                currentState = Wandering;
                 break;
             }
             
@@ -263,11 +277,11 @@ void Tank::updateStateMachine(float deltaT) {
         case Move: {
             //log(Info, "Move");
             
-            //rotateTurret(deltaT * pi / 10);
-            RotateTurrentToTarget(toPosition);
+            rotateTurret(deltaT * pi / 10);
+            //RotateTurrentToTarget(toPosition);
             
             if (steer->Arrive(getPosition(), toPosition)) {
-                currentState = Wait;
+                currentState = Wandering;//Wait;
             }
             
             vec3 velocity = steer->Seek(getPosition(), toPosition, maxVelocity);

@@ -85,4 +85,6 @@ private:
     Projectiles* mProj;
     
     void StopTheTank();
+    
+    void GetMaxPosition(vec3& position);
 };
