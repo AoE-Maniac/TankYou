@@ -15,6 +15,7 @@ TankSystem::TankSystem(ParticleRenderer* particleRenderer,InstancedMeshObject* m
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
+	selectedTank = __nullptr;
 }
 
 void spawnTank(std::vector<Tank*>* tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
@@ -89,6 +90,8 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 			Tank* tank = tanks[i];
 			mat4 botM = tank->GetBottomM();
 			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
+			if (tank->selected) col = vec4(Kore::max(1.0f * tank->mFrac, 0.75f), 0.25f, Kore::max(1.0f * (1 - tank->mFrac), 0.75f), 1);
+
 			setMatrix(dataB, j, 0, 36, botM);
 			setMatrix(dataB, j, 16, 36, calculateN(botM * View));
 			setVec4(dataB, j, 32, 36, col);
@@ -113,4 +116,18 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	meshBottom->render(tex, j);
 	meshTop->render(tex, j);
 	meshFlag->render(tex, j);
+}
+
+Tank* TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
+	if (selectedTank != __nullptr) {
+		selectedTank->selected = false;
+	}
+	for (unsigned i = 0; i < tanks.size(); ++i) {
+		if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
+			tanks[i]->selected = true;
+			selectedTank = tanks[i];
+			return tanks[i];
+		}
+	}
+	return __nullptr;
 }

@@ -17,6 +17,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	hp = 10;
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
+	selected = false;
 }
 
 void Tank::update(float deltaT) {
