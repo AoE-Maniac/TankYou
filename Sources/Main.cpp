@@ -54,7 +54,10 @@ namespace {
 	bool up;
 	bool down;
 
-	Kravur* font;
+	Kravur* font14;
+	Kravur* font24;
+	Kravur* font34;
+	Kravur* font44;
 	Text* textRenderer;
 	
 	mat4 P;
@@ -380,10 +383,13 @@ namespace {
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
-		font = Kravur::load("Arial", FontStyle(), 14);
+		font14 = Kravur::load("Arial", FontStyle(), 14);
+		font24 = Kravur::load("Arial", FontStyle(), 24);
+		font34 = Kravur::load("Arial", FontStyle(), 34);
+		font44 = Kravur::load("Arial", FontStyle(), 44);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
-		textRenderer->setFont(font);
+		textRenderer->setFont(font44);
 
 		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
