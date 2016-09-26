@@ -19,6 +19,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
 	selected = false;
+    Orientation = 0;
 }
 
 void Tank::update(float deltaT) {
@@ -30,10 +31,13 @@ void Tank::update(float deltaT) {
 
 void Tank::rotateTurret(float angle) {
 	turretAngle += angle;
+    
+    if(turretAngle > 2 * Kore::pi)
+        turretAngle = 0;
 }
 
 vec3 Tank::getTurretLookAt() {
-	return mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-1,1);
+    return mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-1,1);
 }
 
 vec3 Tank::getPosition() {
@@ -54,6 +58,16 @@ void Tank::SetOrientationFromVelocity(float deltaT) {
             Orientation = orient;
         }
     }
+}
+
+bool Tank::SetTurretOrientation(float deltaAngle, float angle) {
+    turretAngle += deltaAngle;
+    
+    if (turretAngle > angle) {
+        turretAngle = angle;
+        return true;
+    }
+    return false;
 }
 
 void Tank::MoveWithVelocity(vec3 velocity) {
@@ -77,7 +91,7 @@ mat4 Tank::GetBottomM() {
 }
 
 mat4 Tank::GetTopM(mat4 bottomM) {
-	return mat4::Translation(0,1,0) * bottomM * mat4::Rotation(turretAngle, 0, 0);
+    return mat4::Translation(0,1,0) * bottomM * mat4::Rotation(turretAngle, 0, 0);
 }
 
 mat4 Tank::GetFlagM(mat4 bottomM) {
@@ -101,13 +115,11 @@ void Tank::updateStateMachine(float deltaT) {
             
             rotateTurret(deltaT * pi / 10);
             
-            Velocity = vec3(0,0,0);
-            PhysicsObject::Velocity = Velocity;
+            StopTheTank();
             
             break;
         }
-            
-            
+        
         case Wandering: {
             //log(Info, "Wandering");
             
@@ -124,7 +136,7 @@ void Tank::updateStateMachine(float deltaT) {
                     float distance = (GetPosition() - tank->GetPosition()).getLength();
                     if (distance < minDistToFollow) {
                         enemyTank = tank;
-                        currentState = Wait;
+                        currentState = Following;
                     }
                 }
             }
@@ -133,12 +145,13 @@ void Tank::updateStateMachine(float deltaT) {
         }
             
         case Following: {
-            log(Info, "Following: %i", mFrac);
+            //log(Info, "Following: %i", mFrac);
+            
+            SetTurretOrientation(deltaT * pi, pi);
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance < minDistToShoot) {
-                Velocity = vec3(0,0,0);
-                PhysicsObject::Velocity = Velocity;
+                StopTheTank();
                 
                 // Attack the enemy tank
                 currentState = Attack;
@@ -156,27 +169,28 @@ void Tank::updateStateMachine(float deltaT) {
         }
             
         case Attack: {
-            log(Info, "Shoot");
-            
-            MoveWithVelocity(vec3(0,0,0));
-            
-            // Turent should look at the enemy
-            vec3 pos = getTurretLookAt();
-            vec3 to = enemyTank->getPosition();
-            float angle = Kore::atan2(pos.z(), pos.x()) - Kore::atan2(to.z(), to.x());
-            rotateTurret(deltaT * angle);
+            //log(Info, "Shoot %i", mFrac);
             
             // Shoot and Kill
-            vec3 p = GetPosition();
+            vec3 p = getPosition();
             mProj->fire(p, enemyTank, 1, 1);
+            
+            float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
+            if (distance > minDistToShoot) {
+                currentState = Following;
+            }
             
             break;
         }
             
         case Move: {
-            log(Info, "Move");
+            //log(Info, "Move");
             
-            vec3 velocity = steer->Seek(GetPosition(), toPosition, maxVelocity);
+            if (steer->Arrive(getPosition(), toPosition)) {
+                currentState = Wait;
+            }
+            
+            vec3 velocity = steer->Seek(getPosition(), toPosition, maxVelocity);
             MoveWithVelocity(velocity);
             
             break;
@@ -185,7 +199,12 @@ void Tank::updateStateMachine(float deltaT) {
             
     }
 }
-    
+
+void Tank::StopTheTank() {
+    Velocity = vec3(0,0,0);
+    PhysicsObject::Velocity = Velocity;
+}
+
 void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
 	log(Info, "Tank collided with %d", other);
 	switch(other) {
