@@ -56,7 +56,7 @@ public:
 
 private:
 	float turretAngle;
-    float RotateTurrentToTarget();
+    float RotateTurrentToTarget(vec3 targetPosition);
     
     float Orientation;
     void SetOrientationFromVelocity(float deltaT);
