@@ -8,13 +8,15 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/Explosion.h"
 #include "Projectiles.h"
+#include "Landscape.h"
 
 enum StateMachineState {
     Wandering,
     Following,
     Attack,
     Move,
-    Wait
+    Wait,
+    Won
 };
 
 class Tank : public PhysicsObject {
@@ -45,8 +47,10 @@ public:
 	int hp;
 	int kills;
     int mFrac;
+	int myProjectileID;
     
     void FollowAndAttack(Tank* tank);
+	void onDeath();
 
 private:
 	float turretAngle;

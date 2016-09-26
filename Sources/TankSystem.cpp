@@ -111,6 +111,7 @@ bool TankSystem::kill(int i) {
         if(explosions[i]->isReady() == true)
         {
             particleRenderer->removeParticleSystem(explosions[i]);
+			tanks[i]->onDeath();
             delete explosions[i];
             explosions[i] = nullptr;
             delete tanks[i];
