@@ -33,7 +33,7 @@ float Tank::getHPPerc() {
 }
 
 float Tank::getXPPerc() {
-	return Kore::min(1.0f, Kore::max(0.0f, kills / 50.0f));
+	return Kore::min(1.0f, Kore::max(0.0f, kills / 10.0f));
 }
 
 void Tank::score() {
@@ -42,6 +42,10 @@ void Tank::score() {
 
 void Tank::onDeath() {
 	mProj->onShooterDeath(myProjectileID);
+}
+
+void Tank::desert() {
+	currentState = Won;
 }
 
 void Tank::update(float deltaT) {
@@ -155,10 +159,6 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 float angle = 0;
 void Tank::updateStateMachine(float deltaT) {
     tts -= deltaT;
-
-    if (!won && getXPPerc() >= 1.0f) {
-        currentState = Won;
-    }
     
     switch (currentState) {
         case Wait: {

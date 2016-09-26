@@ -20,6 +20,9 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 	texture = new Texture("grey.png", true); 
 	selectedTank = nullptr;
 	hoveredTank = nullptr;
+	
+	destroyed = 0;
+	deserted = 0;
 
 	initBars(vec2(2.0f, 0.5f), structures);
 }
@@ -85,6 +88,11 @@ void TankSystem::update(float dt) {
         {
             tank->Integrate(dt);
             tank->update(dt);
+
+			if (!tank->won && tank->getXPPerc() >= 1.0f) {
+				tank->desert();
+				deserted++;
+			}
 			
 			vec3 pos = tank->GetPosition();
 			pos.y() = ground->getHeight(pos.x(), pos.z()) + 0.5f;
@@ -116,6 +124,10 @@ bool TankSystem::kill(int i) {
         particleRenderer->addParticleSystem(explosions[i]);
         Sound *winSound = new Sound("shoot_sound.wav");
         Mixer::play(winSound);
+		destroyed++;
+		if (tanks[i]->won) {
+			deserted--;
+		}
     } else
     {
         if(explosions[i]->isReady() == true)
@@ -149,8 +161,7 @@ mat4 getRotM(vec3 ax, float an) {
 	result[2][0] = z * x *(1 - cos) - y * sin;
 	result[2][1] = z * y * (1 - cos) + x * sin;
 	result[2][2] =  cos + z * z * (1 - cos);
-
-
+	
 	return result;
 }
 

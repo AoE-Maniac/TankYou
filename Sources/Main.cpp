@@ -139,6 +139,7 @@ namespace {
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 		Graphics::setRenderState(BackfaceCulling, NoCulling);
+		Graphics::setRenderState(DepthTest, true);
 
 		// set the camera
 		cameraAngle += 0.3f * deltaT;
@@ -227,7 +228,16 @@ namespace {
         particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
-		textRenderer->drawString("Hello", 0xffffffff, 50, 50, mat3::Identity());
+		char d[42];
+		char k[42];
+		sprintf(d, "Deserted: %i", tankTics->deserted);
+		sprintf(k, "Destroyed: %i", tankTics->destroyed);
+		textRenderer->drawString(k, 0xffffffff, 15, 15, mat3::Identity());
+		textRenderer->drawString(d, 0xffffffff, 15, 30, mat3::Identity());
+		if (tankTics->deserted >= 1) {
+			textRenderer->drawString("Game over!", 0xffffffff, width / 2, height / 2 - 15, mat3::Identity());
+			textRenderer->drawString("Tank you for playing...", 0xffffffff, width / 2, height / 2 + 15, mat3::Identity());
+		}
 		textRenderer->end();
 
 		Graphics::end();

@@ -34,6 +34,7 @@ public:
 	float getHPPerc();
 	float getXPPerc();
 	void score();
+	void desert();
 
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);
