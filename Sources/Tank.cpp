@@ -26,6 +26,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
 	myProjectileID = -1;
 	tts = 0;
     collisionData = this;
+	enemyTank = nullptr;
 }
 
 float Tank::getHPPerc() {
@@ -210,6 +211,11 @@ void Tank::updateStateMachine(float deltaT) {
             
         case Following: {
             //log(Info, "Following: %i", mFrac);
+
+			if (enemyTank == nullptr) {
+				currentState = Wandering;
+				break;
+			}
             
             RotateTurrentToTarget(enemyTank->GetPosition());
             
@@ -230,6 +236,11 @@ void Tank::updateStateMachine(float deltaT) {
             
         case Attack: {
             //log(Info, "Shoot %i", mFrac);
+
+			if (enemyTank == nullptr) {
+				currentState = Wandering;
+				break;
+			}
             
             RotateTurrentToTarget(enemyTank->GetPosition());
 
@@ -319,3 +330,8 @@ void Tank::FollowAndAttack(Tank *tank) {
     currentState = Following;
 }
 
+void Tank::RemoveEnemy(Tank* tank) {
+	if (enemyTank == tank) {
+		enemyTank = nullptr;
+	}
+}

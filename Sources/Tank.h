@@ -42,6 +42,7 @@ public:
     
     void SetEnemy(std::vector<Tank*>& enemyTanks);
     std::vector<Tank*>* GetEnemy() const;
+	void RemoveEnemy(Tank* tank);
     
     void setProjectile(Projectiles* projectiles);
 
