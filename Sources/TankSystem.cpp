@@ -1,7 +1,7 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(ParticleRenderer* particleRenderer,InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles) :
+TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer,InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
@@ -11,16 +11,18 @@ TankSystem::TankSystem(ParticleRenderer* particleRenderer,InstancedMeshObject* m
 		spawnPos2b(spawn2b),
 		spawnDelay(delay),
         mProjectiles(projectiles),
-        particleRenderer(particleRenderer) {
+        particleRenderer(particleRenderer),
+        world(world) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
 	selectedTank = __nullptr;
 }
 
-void spawnTank(std::vector<Tank*>& tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
+void spawnTank(PhysicsWorld* world, std::vector<Tank*>& tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
 	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
 	Tank* t1 = new Tank(frac);
+    world->AddDynamicObject(t1);
 	t1->SetEnemy(tanks);
     t1->setProjectile(projectiles);
 	tanks.push_back(t1);
@@ -30,8 +32,8 @@ void spawnTank(std::vector<Tank*>& tanks, std::vector<Explosion*>* explosions, v
 
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		spawnTank(tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
-		spawnTank(tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
+		spawnTank(world, tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
+		spawnTank(world, tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
 		
 		spawnTimer = spawnDelay;
 	}

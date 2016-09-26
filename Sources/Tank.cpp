@@ -3,8 +3,8 @@
 #include "Kore/Math/Matrix.h"
 
 
-Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
-	Collider.radius = 0.5f;
+Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
+	Collider.radius = 6.f;
 	turretAngle = 0;
     currentState = Wandering;
     steer = new Steering;

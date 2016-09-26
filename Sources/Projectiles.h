@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "Engine/Particles.h"
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
@@ -26,6 +28,7 @@ private:
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
 	PhysicsObject** targets;
+    std::set<int> inactiveProjectiles;
 
 	void kill(int projectile);
 };

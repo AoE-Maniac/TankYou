@@ -44,6 +44,7 @@ public:
 	bool active;
 	bool IgnoreGravity;
 	bool IgnoreRotation;
+    bool IgnoreNewtonLaws;
 	float Mass;
 	vec3 Velocity;
 	vec3 AngularVelocity;
@@ -73,7 +74,7 @@ public:
 	
 	MeshObject* Mesh;
 
-	PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation);
+	PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation, bool ignoreNewtonLaws);
 
 	// Do the integration step for the equations of motion
 	void Integrate(float deltaT);
