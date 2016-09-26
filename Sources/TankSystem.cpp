@@ -214,7 +214,7 @@ void TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
 }
 
 void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
-	if (selectedTank != nullptr) {
+	if (selectedTank != nullptr && !selectedTank->won) {
 		Tank* hitTank = getHitTank(cameraPosition, pickDir);
 
 		if (hitTank == nullptr) {
@@ -233,7 +233,8 @@ void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
 Tank* TankSystem::getHitTank(vec3 cameraPosition, vec3 pickDir) {
 	for (unsigned i = 0; i < tanks.size(); ++i) {
 		if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
-			return tanks[i];
+            if (!tanks[i]->won)
+                return tanks[i];
 		}
 	}
 	return nullptr;

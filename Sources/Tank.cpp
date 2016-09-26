@@ -7,7 +7,7 @@ const int MAX_HP = 10;
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
 	Collider.radius = 6.f;
 	turretAngle = 0;
-    currentState = Won;
+    currentState = Wait;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
 	maxVelocity = 0.5f;
@@ -22,6 +22,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     mFrac = frac;
 	selected = false;
     Orientation = 0;
+    won = false;
 	myProjectileID = -1;
 	tts = 0;
 }
@@ -131,7 +132,7 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 void Tank::updateStateMachine(float deltaT) {
     tts -= deltaT;
 
-    if (getXPPerc() >= 1.0f) {
+    if (!won && getXPPerc() >= 1.0f) {
         currentState = Won;
     }
     
@@ -186,11 +187,7 @@ void Tank::updateStateMachine(float deltaT) {
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
                 MoveWithVelocity(velocity);
             }
-            
-            // Check if enemy is dead
-            //if(enemyTank == null) {}
-            
-            
+
             break;
         }
             
@@ -228,7 +225,12 @@ void Tank::updateStateMachine(float deltaT) {
         }
            
         case Won: {
-            int x = Random::get(-MAP_SIZE_INNER/2, MAP_SIZE_INNER/2);
+            log(Info, "Won %i", mFrac);
+            
+            won = true;
+            selected = false;
+            
+            int x = getPosition().x();
             int z = MAP_SIZE_INNER/2;
             toPosition = vec3(x, yPosition, z);
             currentState = Move;

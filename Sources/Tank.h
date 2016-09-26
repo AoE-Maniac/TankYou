@@ -47,6 +47,7 @@ public:
 	int hp;
 	int kills;
     int mFrac;
+    bool won;
 	int myProjectileID;
 	float tts;
     
