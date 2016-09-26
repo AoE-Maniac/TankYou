@@ -27,11 +27,11 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
 }
 
 float Tank::getHPPerc() {
-	return (1.0f * hp) / MAX_HP;
+	return Kore::min(1.0f, Kore::max(0.0f, (1.0f * hp) / MAX_HP));
 }
 
 float Tank::getXPPerc() {
-	return kills / 3.0f;
+	return Kore::min(1.0f, Kore::max(0.0f, kills / 5.0f));
 }
 
 void Tank::score() {
