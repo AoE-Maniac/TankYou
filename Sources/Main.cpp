@@ -355,10 +355,6 @@ namespace {
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
 
         tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
-        
-		/*Sound* winSound;
-		winSound = new Sound("sound.wav");
-		Mixer::play(winSound);*/
 
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
