@@ -6,7 +6,7 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/PhysicsWorld.h"
 
-#define PROJECTILE_SIZE 0.1f
+#define PROJECTILE_SIZE 1
 #define PROJECTILE_LIFETIME 3;
 
 class Tank;
