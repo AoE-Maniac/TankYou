@@ -386,6 +386,10 @@ namespace {
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
 		font = Kravur::load("Arial", FontStyle(), 14);
+
+		
+        Sound *bgSound = new Sound("WarTheme.wav");
+        Mixer::play(bgSound);
 	}
 }
 
