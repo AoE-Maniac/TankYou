@@ -55,6 +55,7 @@ namespace {
 	bool down;
 
 	Kravur* font;
+	Text* textRenderer;
 	
 	mat4 P;
 	mat4 View;
@@ -224,6 +225,10 @@ namespace {
         
         particleRenderer->render(tex, View, vLocation);
 
+		textRenderer->start();
+		textRenderer->drawString("Hello", 0xffffffff, 50, 50, mat3::Identity());
+		textRenderer->end();
+
 		Graphics::end();
 		Graphics::swapBuffers();
 	}
@@ -358,6 +363,9 @@ namespace {
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
 		font = Kravur::load("Arial", FontStyle(), 14);
+		textRenderer = new Text;
+		textRenderer->setProjection(width, height);
+		textRenderer->setFont(font);
 
 		
         Sound *bgSound = new Sound("WarTheme.wav");

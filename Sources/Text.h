@@ -16,9 +16,10 @@ private:
 	Kore::Texture* lastTexture;
 	int fontSize;
 	bool bilinear;
+	Kore::Program* program;
 public:
 	Text();
-	void setProjection(const Kore::mat4& projectionMatrix);
+	void setProjection(int width, int height);
 private:
 	void initBuffers();
 	void setRectVertices(float bottomleftx, float bottomlefty, float topleftx, float toplefty,
@@ -29,6 +30,7 @@ private:
 public:
 	void setBilinearFilter(bool bilinear);
 	void setFont(Kravur* font);
+	void start();
 	void drawString(const char* text, int color, float x, float y, const Kore::mat3& transformation);
 	void end();
 };
