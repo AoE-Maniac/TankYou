@@ -33,10 +33,6 @@
 
 using namespace Kore;
 
-const int MAP_SIZE_INNER = 200;
-const int MAP_SIZE_OUTER = 300;
-const int STONE_COUNT = 64;
-
 namespace {
 	const int width = 800;
 	const int height = 600;
@@ -350,7 +346,7 @@ namespace {
 		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
 
-		spherePO = new PhysicsObject(TANK, 5, true, false);
+		spherePO = new PhysicsObject(TANK, 5, true, false, true);
 		spherePO->Collider.radius = 0.5f;
 		spherePO->Mesh = sphereMesh;
 		physics.AddDynamicObject(spherePO);
@@ -370,7 +366,7 @@ namespace {
 		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
 		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
 
-        tankTics = new TankSystem(particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles);
+		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures);
 
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
@@ -389,7 +385,7 @@ namespace {
         
         Random::init(123);
 
-		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, &ground);
+		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 	}
 }
 

@@ -4,7 +4,7 @@
 
 using namespace Kore;
 
-PhysicsObject::PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation) : Mass(mass), IgnoreGravity(ignoreGravity), IgnoreRotation(ignoreRotation), type(type) {
+PhysicsObject::PhysicsObject(COLLIDING_OBJECT type, float mass, bool ignoreGravity, bool ignoreRotation, bool ignoreNewtonLaws=false) : Mass(mass), IgnoreGravity(ignoreGravity), IgnoreRotation(ignoreRotation), IgnoreNewtonLaws(ignoreNewtonLaws), type(type) {
 	Accumulator = vec3(0, 0, 0);
 	Velocity = vec3(0, 0, 0);
 	Collider.radius = 0.5f;
@@ -157,10 +157,17 @@ void PhysicsObject::HandleCollision(TriangleMeshCollider& collider, float deltaT
 
 void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
 	// Check if we are colliding with the plane
+    /*
 	if (Collider.IntersectsWith(other->Collider)) {
-		float restitution = 0.8f;
+        if(type == 1)
+            log(Info, "Projectile Collision with %d", other->type);
+        if(type == 2)
+            log(Info, "Tank Collision with %d", other->type);
+        
+		float restitution = 0.001f;
 
 		vec3 collisionNormal = Collider.GetCollisionNormal(other->Collider);
+        log(Info, "collision-normal (%f,%f,%f)",collisionNormal[0],collisionNormal[1],collisionNormal[2]);
 			
 		float separatingVelocity = -(other->Velocity - Velocity) * collisionNormal;
 
@@ -172,18 +179,28 @@ void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
 			
 		// Move the object out of the collider
 		float penetrationDepth = -Collider.PenetrationDepth(other->Collider);
-				
+        
 		SetPosition(Position - collisionNormal * penetrationDepth);
 		other->SetPosition(other->Position + collisionNormal * penetrationDepth );
 
 		vec3 impulse = collisionNormal * -deltaVelocity;
+        
+        if(!IgnoreNewtonLaws)
+        {
+            ApplyImpulse(impulse);
+        }
+        if(!other->IgnoreNewtonLaws);
+        {
+            other->ApplyImpulse(-impulse);
+        }
 
-		ApplyImpulse(impulse);
-		other->ApplyImpulse(-impulse);
-
+        */
+        // Projectiles dont collide with each other
+        if( other->type == type )
+            return;
 		if(callback)
 			callback(type, collisionData);
-	}
+	//}
 }
 
 void PhysicsObject::ApplyImpulse(vec3 impulse) {

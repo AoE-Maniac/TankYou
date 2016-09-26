@@ -18,7 +18,7 @@ Kore::Texture* landscapeTexture;
 int stoneCount;
 InstancedMeshObject* stoneMesh;
 
-void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground** ground) {
+void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground*& ground) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
@@ -31,7 +31,7 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
 	float* vertices = landscapeVertices[0]->lock();
 	int i = 0;
 
-  float* height = new float[w*h];
+  float* height = new float[(w+1)*(h+1)];
 
 	for (int y = 0; y <= h; ++y) {
 		for (int x = 0; x <= w; ++x) {
@@ -55,8 +55,8 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
       height[y*w+x] = color / 255.0f * 10.0f;
 		}
 	}
-	
-  (*ground) = new Ground(height, w, h, size, size);
+
+  ground = new Ground(height, w, h, size, size);
 
 	stoneCount = sCount;
 	stoneMesh = sMesh;

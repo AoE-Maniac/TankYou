@@ -11,7 +11,7 @@ Steering::Steering() {
 vec3 Steering::Seek(vec3 characterPos, vec3 targetPos, float maxVelocity) {
     vec3 distance = targetPos - characterPos;
     distance = distance.normalize();
-    distance.multiply(maxVelocity);
+    distance = distance * maxVelocity;
     
     if (distance.getLength() < ariveRadius) {
         // Slow down the character
@@ -38,7 +38,8 @@ vec3 Steering::PursueTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel
     vec3 p = targetPos + targetVel * time;              // Predict the target position
     vec3 velocity = p - characterPos;
     velocity = velocity / velocity.getLength();
-    velocity.multiply(maxVelocity);
+    //velocity.multiply(maxVelocity);
+    velocity = velocity * maxVelocity;
     return velocity;
 }
 
