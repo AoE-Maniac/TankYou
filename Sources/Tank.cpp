@@ -68,10 +68,27 @@ vec3 Tank::getPosition() {
 
 void Tank::SetOrientationFromVelocity(float deltaT) {
     if (Velocity.getLength() > 0) {
-        float orient = Kore::atan2(Velocity.x(), Velocity.z());
+        float x = -Velocity.x();
+        float z = Velocity.z();
+        float orient;
+        if(x>0)
+            orient = Kore::atan2(z,x);
+        else if(x<0 && z>=0)
+            orient = Kore::atan2(z,x) + pi;
+        else if(x<0 && z<0)
+            orient = Kore::atan2(z,x) - pi;
+        else if(x==0 && z>0)
+            orient = pi/2;
+        else
+            orient = -pi/2;
+        orient = orient+(pi/2);
+        if(orient > pi/2)
+            orient = -pi/2 + (orient-(pi/2));
         
+        Orientation = orient;
+        /*
         if (Kore::abs(orient-Orientation) > 0.3f) {
-            float o = deltaT * pi;
+            float o = deltaT * Kore::abs(orient-Orientation);
             if (orient < Orientation)
                 Orientation -= o;
             else
@@ -79,6 +96,7 @@ void Tank::SetOrientationFromVelocity(float deltaT) {
         } else {
             Orientation = orient;
         }
+        */
     }
 }
 
