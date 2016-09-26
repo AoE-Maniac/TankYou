@@ -9,10 +9,12 @@
 #define PROJECTILE_SIZE 0.1f
 #define PROJECTILE_LIFETIME 3;
 
+class Tank;
+
 class Projectiles {
 public:
 	Projectiles(int maxProjectiles, float hitDistance, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
-	void fire(vec3 pos, PhysicsObject* target, float s, int dmg);
+	void fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter);
 	void update(float deltaT);
 	void render(Kore::ConstantLocation vLocation, Kore::TextureUnit tex, Kore::mat4 view);
 private:
@@ -25,10 +27,11 @@ private:
 	// Projectiles
 	float* timeToLife;
 	int* damage;
+	Tank** shooters;
 	PhysicsObject** physicsObject;
 	ParticleSystem** particles;
 	PhysicsObject** targets;
     std::set<int> inactiveProjectiles;
 
-	void kill(int projectile);
+	void kill(int projectile, bool score);
 };

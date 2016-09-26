@@ -1,5 +1,6 @@
 #include "Engine/pch.h"
 #include "Projectiles.h"
+#include "Tank.h"
 #include <cassert>
 
 using namespace Kore;
@@ -19,7 +20,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.0f, true, true, false);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
+		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i, true); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
 		
@@ -35,7 +36,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg) {
+void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg,Tank* shooter) {
     assert(inactiveProjectiles.size() > 0);
     
     int projectile = *(inactiveProjectiles.begin());
@@ -58,6 +59,7 @@ void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg) {
 
     targets[projectile] = target;
     inactiveProjectiles.erase(projectile);
+    shooters[currProj] = shooter;
 }
 
 void Projectiles::update(float deltaT) {
@@ -81,7 +83,7 @@ void Projectiles::update(float deltaT) {
                     log(Info, "ttl over, killing.");
 
                 log(Info, "kill");
-                kill(i);
+                kill(i, physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist);
                 log(Info, "kill end");
                 i--;
             }
@@ -89,9 +91,15 @@ void Projectiles::update(float deltaT) {
 	}
 }
 
-void Projectiles::kill(int projectile) {
+void Projectiles::kill(int projectile, bool kill) {
     physicsObject[projectile]->active = false;
     inactiveProjectiles.insert(projectile);
+
+	if (shooters[currProj] != nullptr) {
+		if (kill) {
+			shooters[currProj]->score();
+		}
+	}
 }
 
 void Projectiles::render(ConstantLocation vLocation, TextureUnit tex, mat4 view) {
