@@ -155,6 +155,15 @@ std::vector<Tank*>* Tank::GetEnemy() const {
     return enemyTanks;
 }
 
+bool Tank::isEnemyTankAlive() {
+    for( int i = 0; i < enemyTanks->size(); i++ )
+    {
+        if ((*enemyTanks)[i] == enemyTank) {
+            return true;
+        }
+    }
+	return false;
+}
 
 float angle = 0;
 void Tank::updateStateMachine(float deltaT) {
@@ -195,6 +204,10 @@ void Tank::updateStateMachine(float deltaT) {
             
         case Following: {
             //log(Info, "Following: %i", mFrac);
+			if(!isEnemyTankAlive()) {
+                currentState = Wandering;
+                break;
+            }
             
             RotateTurrentToTarget(enemyTank->GetPosition());
             
@@ -216,19 +229,8 @@ void Tank::updateStateMachine(float deltaT) {
             
         case Attack: {
             //log(Info, "Shoot %i", mFrac);
-            
-            RotateTurrentToTarget(enemyTank->GetPosition());
-
-            bool enemyTankLiving = false;
-            for( int i = 0; i < enemyTanks->size() && ! enemyTankLiving; i++ )
-            {
-                if ((*enemyTanks)[i] == enemyTank) {
-                    enemyTankLiving = true;
-                }
-            }
-            if(!enemyTankLiving)
-            {
-                currentState = Wait;
+			if(!isEnemyTankAlive()) {
+                currentState = Wandering;
                 break;
             }
             

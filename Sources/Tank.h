@@ -35,6 +35,7 @@ public:
 	float getXPPerc();
 	void score();
 	void desert();
+	bool isEnemyTankAlive();
 
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);

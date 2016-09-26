@@ -4,6 +4,7 @@
 #include <Kore/Math/Matrix.h>
 #include <Kore/Log.h>
 
+#include "Landscape.h"
 #include "Ground.h"
 #include "astar.h"
 
@@ -46,6 +47,8 @@ float Ground::getHeight(float x, float z) {
 }
 
 vec3 Ground::getNormal(float x, float z) {
+	return getLandscapeNormal(x, z);
+
 	Ground::TriangleInfo info = getTriangle(x, z);
   if(info.indices.x() == -1)
     return vec3(0, 1, 0);
