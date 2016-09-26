@@ -41,7 +41,7 @@ void TankSystem::update(float dt) {
         Tank* tank = tanks[i];
         float xpos = tank->getPosition()[0];
         float ypos = tank->getPosition()[2];
-		if(tank->hp <= 0 || explosions[i] != nullptr || (xpos <= 10.f  && xpos >= -10.f && ypos <= 10.f && ypos >= -10.f))
+		if(tank->hp <= 0 || explosions[i] != nullptr)
         {
             if( kill(i) )
             {
