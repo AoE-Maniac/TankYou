@@ -47,7 +47,9 @@ public:
 	int hp;
 	int kills;
     int mFrac;
+    bool won;
 	int myProjectileID;
+	float tts;
     
     void FollowAndAttack(Tank* tank);
 	void onDeath();

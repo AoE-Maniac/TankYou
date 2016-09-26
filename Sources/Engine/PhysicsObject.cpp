@@ -203,7 +203,9 @@ void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
         {
             other->callback(type, collisionData);
 			callback(other->type, other->collisionData);
-        }
+        } else {
+          log(Info, "No callback");
+    }
 	//}
 }
 

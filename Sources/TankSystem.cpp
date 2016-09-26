@@ -17,7 +17,8 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
 	texture = new Texture("grey.png", true); 
-	selectedTank = __nullptr;
+	selectedTank = nullptr;
+	hoveredTank = nullptr;
 
 	initBars(vec2(2.0f, 0.5f), structures);
 }
@@ -95,6 +96,10 @@ void TankSystem::update(float dt) {
         }
     }
 	
+	if (selectedTank != nullptr && selectedTank->won) {
+		selectedTank = nullptr;
+	}
+
 	spawnTimer -= dt;
 }
 
@@ -132,15 +137,18 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	modView.Set(0, 3, 0.0f);
 	modView.Set(1, 3, 0.0f);
 	modView.Set(2, 3, 0.0f);
-
+	
     int j = 0;
+    int k = 0;
     for (int i = 0; i < tanks.size(); i++) {
         if(explosions[i] == nullptr)
         {
 			Tank* tank = tanks[i];
 			mat4 botM = tank->GetBottomM();
 			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
+			if (hoveredTank == tank) col = vec4(tank->mFrac * 0.25f, 0, (1 - tank->mFrac) * 0.25f, 1);
 			if (tank->selected) col = vec4(Kore::max(1.0f * tank->mFrac, 0.75f), 0.25f, Kore::max(1.0f * (1 - tank->mFrac), 0.75f), 1);
+			if (tank->won) col = vec4(1, 1, 1, 1);
 
 			setMatrix(dataB, j, 0, 36, botM);
 			setMatrix(dataB, j, 16, 36, calculateN(botM * View));
@@ -155,32 +163,37 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 			setMatrix(dataF, j, 0, 36, flagM);
 			setMatrix(dataF, j, 16, 36, calculateN(flagM * View));
 			setVec4(dataF, j, 32, 36, col);
+            ++j;
 
 			mat4 M = mat4::Translation(tank->GetPosition().x(), tank->GetPosition().y() + 6, tank->GetPosition().z() + 1);
 			
-			setMatrix(dataBars, 4 * j, 0, 36, M * modView);
-			setMatrix(dataBars, 4 * j, 16, 36, calculateN(M * modView));
-			setVec4(dataBars, 4 * j, 32, 36, vec4(1, 1, 1, 1));
+			setMatrix(dataBars, k, 0, 36, M * modView);
+			setMatrix(dataBars, k, 16, 36, calculateN(M * modView));
+			setVec4(dataBars, k, 32, 36, vec4(1, 1, 1, 1));
 		
 			M = M * mat4::Scale(tank->getHPPerc(), 1.0f, 1.0f);
 
-			setMatrix(dataBars, 4 * j + 1, 0, 36, M * modView);
-			setMatrix(dataBars, 4 * j + 1, 16, 36, calculateN(M * modView));
-			setVec4(dataBars, 4 * j + 1, 32, 36, col);
+			setMatrix(dataBars, k + 1, 0, 36, M * modView);
+			setMatrix(dataBars, k + 1, 16, 36, calculateN(M * modView));
+			setVec4(dataBars, k + 1, 32, 36, col);
 
-			M = mat4::Translation(tank->GetPosition().x(), tank->GetPosition().y() + 5, tank->GetPosition().z());
+			k += 2;
+
+			if (!tank->won) {
+				M = mat4::Translation(tank->GetPosition().x(), tank->GetPosition().y() + 5, tank->GetPosition().z());
 			
-			setMatrix(dataBars, 4 * j + 2, 0, 36, M * modView);
-			setMatrix(dataBars, 4 * j + 2, 16, 36, calculateN(M * modView));
-			setVec4(dataBars, 4 * j + 2, 32, 36, vec4(1, 1, 1, 1));
+				setMatrix(dataBars, k, 0, 36, M * modView);
+				setMatrix(dataBars, k, 16, 36, calculateN(M * modView));
+				setVec4(dataBars, k, 32, 36, vec4(1, 1, 1, 1));
 		
-			M = M * mat4::Scale(tank->getXPPerc(), 1.0f, 1.0f);
+				M = M * mat4::Scale(tank->getXPPerc(), 1.0f, 1.0f);
 
-			setMatrix(dataBars, 4 * j + 3, 0, 36, M * modView);
-			setMatrix(dataBars, 4 * j + 3, 16, 36, calculateN(M * modView));
-			setVec4(dataBars, 4 * j + 3, 32, 36, col);
+				setMatrix(dataBars, k + 1, 0, 36, M * modView);
+				setMatrix(dataBars, k + 1, 16, 36, calculateN(M * modView));
+				setVec4(dataBars, k + 1, 32, 36, col);
 			
-            ++j;
+				k += 2;
+			}
         }
 	}
     
@@ -197,8 +210,12 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	Graphics::setTexture(tex, texture);
 	Graphics::setVertexBuffers(vbs, 2);
 	Graphics::setIndexBuffer(*ib);
-	Graphics::drawIndexedVerticesInstanced(j * 4);
+	Graphics::drawIndexedVerticesInstanced(k);
 	Graphics::setRenderState(RenderState::DepthWrite, true);
+}
+
+void TankSystem::hover(vec3 cameraPosition, vec3 pickDir) {
+	hoveredTank = getHitTank(cameraPosition, pickDir);
 }
 
 void TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
@@ -208,13 +225,13 @@ void TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
 	}
 
 	selectedTank = getHitTank(cameraPosition, pickDir);
-	if (selectedTank != nullptr) {
+	if (selectedTank != nullptr && !selectedTank->won) {
 		selectedTank->selected = true;
 	}
 }
 
 void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
-	if (selectedTank != nullptr) {
+	if (selectedTank != nullptr && !selectedTank->won) {
 		Tank* hitTank = getHitTank(cameraPosition, pickDir);
 
 		if (hitTank == nullptr) {
@@ -223,7 +240,7 @@ void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
 			selectedTank->MoveToPosition(pos);
 			log(Kore::LogLevel::Info, "Moving to %f, %f, %f", pos.x(), pos.y(), pos.z());
 		}
-		else if (hitTank->mFrac != selectedTank->mFrac) {
+		else if (hitTank->mFrac != selectedTank->mFrac || hitTank->won) {
 			selectedTank->FollowAndAttack(hitTank);
 			log(Kore::LogLevel::Info, "Attack at %f, %f, %f", hitTank->GetPosition().x(), hitTank->GetPosition().y(), hitTank->GetPosition().z());
 		}
@@ -233,7 +250,7 @@ void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
 Tank* TankSystem::getHitTank(vec3 cameraPosition, vec3 pickDir) {
 	for (unsigned i = 0; i < tanks.size(); ++i) {
 		if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
-			return tanks[i];
+            return tanks[i];
 		}
 	}
 	return nullptr;
