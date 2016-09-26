@@ -186,7 +186,7 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Shoot %i", mFrac);
             
             // Shoot and Kill
-            vec3 p = GetPosition();
+            vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
             mProj->fire(p, enemyTank, 1, 1, this);
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();

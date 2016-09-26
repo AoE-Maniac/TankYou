@@ -12,6 +12,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	targets = new PhysicsObject*[maxProjectiles];
 	particles = new ParticleSystem*[maxProjectiles];
 	hitDist = hitDistance;
+    shooters = new Tank*[maxProjectiles];
 	
 	for (int i = 0; i < maxProjectiles; i++) {
         inactiveProjectiles.insert(i);
@@ -20,7 +21,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.0f, true, true, false);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i, true); };
+        physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { log(Info, "particle collision with %d", other); kill(i, true); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
 		
@@ -59,7 +60,7 @@ void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg,Tank* s
 
     targets[projectile] = target;
     inactiveProjectiles.erase(projectile);
-    shooters[currProj] = shooter;
+    shooters[projectile] = shooter;
 }
 
 void Projectiles::update(float deltaT) {
