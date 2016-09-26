@@ -8,12 +8,15 @@
 #include "Engine/PhysicsObject.h"
 #include "Engine/Explosion.h"
 #include "Projectiles.h"
+#include "Landscape.h"
 
 enum StateMachineState {
     Wandering,
     Following,
     Attack,
-    TEST
+    Move,
+    Wait,
+    Won
 };
 
 class Tank : public PhysicsObject {
@@ -27,6 +30,10 @@ public:
     void MoveToPosition(vec3 position);
     vec3 Velocity;
 	
+	float getHPPerc();
+	float getXPPerc();
+	void score();
+
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);
 	mat4 GetFlagM(mat4 bottomM);
@@ -38,6 +45,7 @@ public:
 
 	bool selected;
 	int hp;
+	int kills;
     int mFrac;
     
     void FollowAndAttack(Tank* tank);
@@ -47,12 +55,13 @@ private:
     float Orientation;
     void SetOrientationFromVelocity(float deltaT);
     void SetTankOrientation(float deltaT);
+    bool SetTurretOrientation(float deltaAngle, float angle);
     
     std::vector<Tank*>* enemyTanks;
     Tank* enemyTank;
     
     Steering* steer;
-    vec3 randomPosition;
+    vec3 toPosition;
     float maxVelocity;
     
     float yPosition;
@@ -66,4 +75,6 @@ private:
 	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
     Projectiles* mProj;
+    
+    void StopTheTank();
 };

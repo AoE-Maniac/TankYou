@@ -13,11 +13,12 @@
 
 using namespace Kore;
 
-#define MAX_TANKS 100
+#define MAX_TANKS 2//100
 
 class TankSystem {
 public:
-	TankSystem(ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles);
+	TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures);
+	void initBars(vec2 halfSize, VertexStructure** structures);
 	void update(float dt);
 	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
 	void select(vec3 cameraPosition, vec3 pickDir);
@@ -26,6 +27,7 @@ public:
 private:
 	Tank* selectedTank;
     ParticleRenderer* particleRenderer;
+    PhysicsWorld* world;
 	float spawnDelay;
 	float spawnTimer;
 	vec3 spawnPos1a;
@@ -42,4 +44,8 @@ private:
     Projectiles* mProjectiles;
 	bool kill(int i);
 	Tank* getHitTank(vec3 cameraPosition, vec3 pickDir);
+
+	Kore::VertexBuffer** vbs;
+	Kore::IndexBuffer* ib;
+	Kore::Texture* texture;
 };
