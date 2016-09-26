@@ -15,12 +15,27 @@ Kore::VertexBuffer** landscapeVertices;
 Kore::IndexBuffer* landscapeIndices;
 Kore::Texture* landscapeTexture;
 
-int stoneCount;
-InstancedMeshObject* stoneMesh;
+namespace {
+	int stoneCount;
+	InstancedMeshObject* stoneMesh;
+	Kore::Image* normalmap;
+}
+
+vec3 getLandscapeNormal(float x, float y) {
+	int normal = normalmap->at(static_cast<int>((x / MAP_SIZE_OUTER + 1.0f) / 2.0f * normalmap->width), static_cast<int>((y / MAP_SIZE_OUTER + 1.0f) / 2.0f * normalmap->height));
+	int nxi = (normal & 0xff000000) >> 24;
+	int nyi = (normal & 0xff0000) >> 16;
+	int nzi = (normal & 0xff00) >> 8;
+	float nx = (nxi / 255.0f - 0.5f) * 2.0f;
+	float ny = (nyi / 255.0f - 0.5f) * 2.0f;
+	float nz = (nzi / 255.0f - 0.5f) * 2.0f;
+	return vec3(nx, ny, nz);
+}
+
 
 void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground*& ground) {
 	Kore::Image* map = new Kore::Image("map.png", true);
-	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
+	normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
 
 	const int w = 250;

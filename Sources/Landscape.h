@@ -15,3 +15,4 @@ extern Kore::Texture* landscapeTexture;
 
 void createLandscape(Kore::VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground*&);
 void renderLandscape(Kore::TextureUnit tex);
+vec3 getLandscapeNormal(float x, float y);
