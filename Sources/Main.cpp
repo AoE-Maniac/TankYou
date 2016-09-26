@@ -155,18 +155,31 @@ namespace {
 		float alpha = 0.3f;
 
 		const float cameraSpeed = 1.5f;
-		if (mouseY < 50) {
+		if (mouseY < 50 ) {
 			cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
 		}
-		if (mouseY > height - 50) {
+        if( up )
+        {
+            cameraPosition.z() += cameraSpeed * clamp01(50.0f);
+        }
+		if (mouseY > height - 50 ) {
 			cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
 		}
+        if ( down ) {
+            cameraPosition.z() -= cameraSpeed * clamp01(50.0f);
+        }
 		if (mouseX < 50) {
 			cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
 		}
+        if (right) {
+            cameraPosition.x() -= cameraSpeed * clamp01(50.0f);
+        }
 		if (mouseX > width - 50) {
 			cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
 		}
+        if (left) {
+            cameraPosition.x() += cameraSpeed * clamp01(50.0f);
+        }
 		
 		cameraPosition.y() = cameraZoom * 150 + (1 - cameraZoom) * 10;
 		vec3 off = vec3(0, -1, 0) * cameraZoom + (1 - cameraZoom) * vec3(0, -1, 1);
@@ -270,7 +283,10 @@ namespace {
 			right = true;
 		} else if (code == Key_Right) {
 			left = true;
-		}
+        } else if (code == Key_A) {
+            log(Info,"CONTROLL");
+            tankTics->setMultipleSelect(true);
+        }
 	}
 
 	void keyUp(KeyCode code, wchar_t character) {
@@ -282,7 +298,9 @@ namespace {
 			right = false;
 		} else if (code == Key_Right) {
 			left = false;
-		}
+        } else if (code == Key_A) {
+            tankTics->setMultipleSelect(false);
+        }
 	}
 
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
@@ -362,8 +380,8 @@ namespace {
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
-		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
+		//TriangleMeshCollider* tmc = new TriangleMeshCollider();
+		//tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		//physics.AddStaticCollider(tmc);
 
 		Graphics::setRenderState(DepthTest, true);
