@@ -2,6 +2,7 @@
 #include "Tank.h"
 #include "Kore/Math/Matrix.h"
 
+const int MAX_HP = 10;
 
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
 	Collider.radius = 0.5f;
@@ -15,11 +16,24 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     minDistToFollow = 100;
     minDistToShoot = 20;
 	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
-	hp = 10;
+	hp = MAX_HP;
+	kills = 0;
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
 	selected = false;
     Orientation = 0;
+}
+
+float Tank::getHPPerc() {
+	return (1.0f * hp) / MAX_HP;
+}
+
+float Tank::getXPPerc() {
+	return kills / 3.0f;
+}
+
+void Tank::score() {
+	kills++;
 }
 
 void Tank::update(float deltaT) {
@@ -172,8 +186,8 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Shoot %i", mFrac);
             
             // Shoot and Kill
-            vec3 p = getPosition();
-            mProj->fire(p, enemyTank, 1, 1);
+            vec3 p = GetPosition();
+            mProj->fire(p, enemyTank, 1, 1, this);
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance > minDistToShoot) {
