@@ -93,10 +93,25 @@ void Projectiles::update(float deltaT) {
 				vec3 target;
 				if (targets[i] != nullptr) {
 					target = targets[i]->GetPosition();
-				}
-                vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
+                    
+                    float pt = (position-target).getLength();
+                    vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
+                    
+                    if( shooters[i] != nullptr )
+                    {
+                        vec3 sourcepos = shooters[i]->getPosition();
+                        float st = (sourcepos-target).getLength();
+                        if( pt/st >= 0.5 )
+                        {
+                            direction[1] *= -1;
+                        }
+                    }
+                    physicsObject[i]->Velocity = direction;
+				} else
+                {
+                    physicsObject[i]->active = false;
+                }
                 
-                physicsObject[i]->Velocity = direction;
                 physicsObject[i]->Integrate(deltaT);
                 timeToLife[i] -= deltaT;
             }
