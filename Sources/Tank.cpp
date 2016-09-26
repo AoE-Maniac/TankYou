@@ -14,7 +14,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     yPosition = 8.0f;
     Velocity = vec3(0,0,0);
     minDistToFollow = 100;
-    minDistToShoot = 20;
+    minDistToShoot = 50;
 	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = MAX_HP;
 	kills = 0;
@@ -24,6 +24,8 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     Orientation = Random::get(Kore::pi);
     won = false;
 	myProjectileID = -1;
+	tts = 0;
+    collisionData = this;
 }
 
 float Tank::getHPPerc() {
@@ -31,7 +33,7 @@ float Tank::getHPPerc() {
 }
 
 float Tank::getXPPerc() {
-	return Kore::min(1.0f, Kore::max(0.0f, kills / 5.0f));
+	return Kore::min(1.0f, Kore::max(0.0f, kills / 50.0f));
 }
 
 void Tank::score() {
@@ -134,7 +136,8 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 
 float angle = 0;
 void Tank::updateStateMachine(float deltaT) {
-    
+    tts -= deltaT;
+
     if (!won && getXPPerc() >= 1.0f) {
         currentState = Won;
     }
@@ -143,32 +146,7 @@ void Tank::updateStateMachine(float deltaT) {
         case Wait: {
             //log(Info, "Wait");
             
-            //rotateTurret(deltaT * pi / 10);
-            
-            if(selected) {
-            
-            vec3 getTankLook = getTankLookAt();
-            //log(Info, "tank %f %f %i", getTankLook.x(), getTankLook.z(), mFrac);
-            
-                vec3 turretLookAt = getTurretLookAt();
-                //log(Info, "turret %f %f %i", turretLookAt.x(), turretLookAt.z(), mFrac);
-                vec3 endPos = toPosition - GetPosition();
-                endPos = endPos/endPos.getLength();
-                //log(Info, "end %f %f %i", endPos.x(), endPos.z(), mFrac);
-                //vec3 turretLookAt = vec3(-1,0,1);
-                //vec3 endPos = vec3(1,0,1);
-                angle = Kore::atan2(turretLookAt.z(),turretLookAt.x()) - Kore::atan2(endPos.z(),endPos.x());
-                //log(Info, "%f %f", angle, Orientation);
-            
-                angle-= Orientation;
-                
-                rotateTurret(angle * deltaT);
-
-                //turretAngle += angle;
-                
-            }
-
-            
+            rotateTurret(deltaT * pi / 10);
             
             break;
         }
@@ -200,7 +178,7 @@ void Tank::updateStateMachine(float deltaT) {
         case Following: {
             //log(Info, "Following: %i", mFrac);
             
-            //RotateTurrentToTarget();
+            RotateTurrentToTarget(enemyTank->GetPosition());
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance < minDistToShoot) {
@@ -212,7 +190,7 @@ void Tank::updateStateMachine(float deltaT) {
                 // Track the enemy
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
                 MoveWithVelocity(velocity);
-                turretAngle = Kore::pi;
+                //turretAngle = Kore::pi;
             }
 
             break;
@@ -222,11 +200,27 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Shoot %i", mFrac);
             
             RotateTurrentToTarget(enemyTank->GetPosition());
+
+            bool enemyTankLiving = false;
+            for( int i = 0; i < enemyTanks->size() && ! enemyTankLiving; i++ )
+            {
+                if ((*enemyTanks)[i] == enemyTank) {
+                    enemyTankLiving = true;
+                }
+            }
+            if(!enemyTankLiving)
+            {
+                currentState = Wait;
+                break;
+            }
             
             // Shoot and Kill
-            vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
+            vec3 p = vec3(0,1,0) + GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 7.f;
             if (myProjectileID < 0) {
-                //myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+				if (tts <= 0) {
+					tts = 1;
+					myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+				}
             }
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
@@ -277,8 +271,9 @@ void Tank::onCollision(COLLIDING_OBJECT other, void* collisionData) {
 	log(Info, "Tank collided with %d", other);
 	switch(other) {
 	case COLLIDING_OBJECT::PROJECTILE:
-		float projDmg = *((int*) collisionData);
-		hp -= projDmg;
+		float projDmg = (*((projectile_collision_data*) collisionData)).damage;
+        if( (*((projectile_collision_data*) collisionData)).dest == (PhysicsObject*)this )
+            hp -= projDmg;
 		break;
 	}
 }

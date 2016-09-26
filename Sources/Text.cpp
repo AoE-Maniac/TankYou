@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Text.h"
+#include <Kore/IO/FileReader.h>
 
 using namespace Kore;
 
@@ -15,14 +16,13 @@ namespace {
 	}
 }
 
-Text::Text() : bilinear(false) {
+Text::Text() : bilinear(false), lastTexture(nullptr) {
 	bufferIndex = 0;
 	initBuffers();
-	//projectionLocation = shaderPipeline.getConstantLocation("projectionMatrix");
-	//textureLocation = shaderPipeline.getTextureUnit("tex");
 }
 
-void Text::setProjection(const mat4& projectionMatrix) {
+void Text::setProjection(int width, int height) {
+	projectionMatrix = mat4::orthogonalProjection(0, width, height, 0, 0.1, 1000);
 	this->projectionMatrix = projectionMatrix;
 }
 
@@ -31,6 +31,19 @@ void Text::initBuffers() {
 	structure.add("vertexPosition", Float3VertexData);
 	structure.add("texPosition", Float2VertexData);
 	structure.add("vertexColor", Float4VertexData);
+
+	FileReader vs("text.vert");
+	FileReader fs("text.frag");
+	Shader* vertexShader = new Shader(vs.readAll(), vs.size(), VertexShader);
+	Shader* fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
+	program = new Program;
+	program->setVertexShader(vertexShader);
+	program->setFragmentShader(fragmentShader);
+	program->link(structure);
+
+	projectionLocation = program->getConstantLocation("projectionMatrix");
+	textureLocation = program->getTextureUnit("tex");
+
 	rectVertexBuffer = new VertexBuffer(bufferSize * 4, structure);
 	rectVertices = rectVertexBuffer->lock();
 
@@ -84,12 +97,13 @@ void Text::setRectTexCoords(float left, float top, float right, float bottom) {
 
 void Text::setRectColors(float opacity, int color) {
 	int baseIndex = bufferIndex * 9 * 4;
-	float R = (color >> 24) / 255.0f;
+	float R = ((color >> 24) & 0xff) / 255.0f;
 	float G = ((color >> 16) & 0xff) / 255.0f;
 	float B = ((color >> 8) & 0xff) / 255.0f;
 	float A = ((color) & 0xff) / 255.0f;
 
 	float a = opacity * A;
+
 	rectVertices[baseIndex + 5] = R;
 	rectVertices[baseIndex + 6] = G;
 	rectVertices[baseIndex + 7] = B;
@@ -119,10 +133,13 @@ void Text::drawBuffer() {
 	Graphics::setTexture(textureLocation, lastTexture);
 	Graphics::setMatrix(projectionLocation, projectionMatrix);
 	//Graphics::setTextureParameters(textureLocation, TextureAddressing.Clamp, TextureAddressing.Clamp, bilinear ? TextureFilter.LinearFilter : TextureFilter.PointFilter, bilinear ? TextureFilter.LinearFilter : TextureFilter.PointFilter, MipMapFilter.NoMipFilter);
-	
+	Graphics::setTextureMipmapFilter(textureLocation, NoMipFilter);
+	Graphics::setTextureAddressing(textureLocation, U, Clamp);
+	Graphics::setTextureAddressing(textureLocation, V, Clamp);
+
 	Graphics::drawIndexedVertices(0, bufferIndex * 2 * 3);
 
-	Graphics::setTexture(textureLocation, nullptr);
+	//Graphics::setTexture(textureLocation, nullptr);
 	bufferIndex = 0;
 	rectVertices = rectVertexBuffer->lock();
 }
@@ -134,6 +151,13 @@ void Text::setBilinearFilter(bool bilinear) {
 
 void Text::setFont(Kravur* font) {
 	this->font = font;
+}
+
+void Text::start() {
+	program->set();
+	Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
+	Graphics::setRenderState(BlendingState, true);
+	Graphics::setRenderState(DepthTest, false);
 }
 
 void Text::drawString(const char* text, int color, float x, float y, const mat3& transformation) {

@@ -30,8 +30,9 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
 	landscapeVertices[0] = new VertexBuffer((w + 1) * (h + 1), *structures[0], 0);
 	float* vertices = landscapeVertices[0]->lock();
 	int i = 0;
-
-  float* height = new float[(w+1)*(h+1)];
+	
+	float* height = new float[(w+1)*(h+1)];
+	vec3* normals = new vec3[(w+1)*(h+1)];
 
 	for (int y = 0; y <= h; ++y) {
 		for (int x = 0; x <= w; ++x) {
@@ -44,19 +45,21 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
 			float nx = (nxi / 255.0f - 0.5f) * 2.0f;
 			float ny = (nyi / 255.0f - 0.5f) * 2.0f;
 			float nz = (nzi / 255.0f - 0.5f) * 2.0f;
+			float hght = color / 255.0f * 10.0f;
 			vertices[i++] = -size / 2 + size / w * x;
-			vertices[i++] = color / 255.0f * 10.0f;
+			vertices[i++] = hght;
 			vertices[i++] = -size / 2 + size / h * y;
 			vertices[i++] = x % 2;
 			vertices[i++] = y % 2;
 			vertices[i++] = nx;
 			vertices[i++] = ny;
 			vertices[i++] = nz;
-      height[y*w+x] = color / 255.0f * 10.0f;
+			height[y * w + x] = hght;
+			normals[y * w + x] = vec3(nx, ny, nz);
 		}
 	}
 
-  ground = new Ground(height, w, h, size, size);
+	ground = new Ground(height, normals, w, h, size, size);
 
 	stoneCount = sCount;
 	stoneMesh = sMesh;

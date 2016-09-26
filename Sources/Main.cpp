@@ -55,6 +55,7 @@ namespace {
 	bool down;
 
 	Kravur* font;
+	Text* textRenderer;
 	
 	mat4 P;
 	mat4 View;
@@ -75,7 +76,6 @@ namespace {
 	MeshObject* sphereMesh;
 	InstancedMeshObject* stoneMesh;
 	MeshObject* projectileMesh;
-	PhysicsObject* spherePO;
 
 	Projectiles* projectiles;
 
@@ -89,7 +89,6 @@ namespace {
 	BoxCollider boxCollider(vec3(-46.0f, -4.0f, 44.0f), vec3(10.6f, 4.4f, 4.0f));
 
 	Texture* particleImage;
-	ParticleSystem* particleSystem;
     Explosion* explosionSystem;
     
 //    Steering* steer;
@@ -192,24 +191,14 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		spherePO->ApplyForceToCenter(force);
 
+        projectiles->update(deltaT);
         // Update physics
         physics.Update(deltaT);
     
 		tankTics->update(deltaT);
 
-		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View, vLocation);
-		
-        // Update physics
-        physics.Update(deltaT);
 
-		// Check for game over
-		bool result = spherePO->Collider.IntersectsWith(boxCollider);
-		if (result) {
-			// ...
-		}
         
         // Render dynamic objects
         /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
@@ -224,28 +213,25 @@ namespace {
 			(*current)->mesh->render(tex, View);
 		}*/
 
-		Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
+		//Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
+		
+		//Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
+		tankTics->render(tex, View, vLocation);
+		
+		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
-		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
-		// Update and render particles
-		particleSystem->setPosition(spherePO->GetPosition());
-		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
-		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, View);
-
-		projectiles->update(deltaT);
+		
 		projectiles->render(vLocation, tex, View);
         
         particleRenderer->render(tex, View, vLocation);
 
+		textRenderer->start();
+		textRenderer->drawString("Hello", 0xffffffff, 50, 50, mat3::Identity());
+		textRenderer->end();
+
 		Graphics::end();
 		Graphics::swapBuffers();
-	}
-
-	void ResetSphere(vec3 Position, vec3 Velocity) {
-		spherePO->SetPosition(Position);
-		spherePO->Velocity = Velocity;
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -279,13 +265,8 @@ namespace {
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-				
-		static int pick = 0;
-		/*for (unsigned i = 0; i < tanks.size(); ++i) {
-			if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
-				log(Info, "Picky %i", pick++);
-			}
-		}*/
+		
+		tankTics->hover(cameraPosition, pickDir);
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -348,28 +329,15 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
-
-		spherePO = new PhysicsObject(TANK, 5, true, false, true);
-		spherePO->Collider.radius = 0.5f;
-		spherePO->Mesh = sphereMesh;
-		physics.AddDynamicObject(spherePO);
-
-		ResetSphere(vec3(-10, 5.5f, 10), vec3(0, 0, 0));
+    
         
         particleImage = new Texture("particle.png", true);
-        particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
 		TriangleMeshCollider* tmc = new TriangleMeshCollider();
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		//physics.AddStaticCollider(tmc);
-
-		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
-		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
-		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
-
-		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures);
 
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
@@ -382,7 +350,6 @@ namespace {
 
 		cameraPosition = vec3(0, 0.5f, 0);
 		cameraZoom = 0.5f;
-		lookAt = spherePO->GetPosition();
         
 //        steer = new Steering;
         
@@ -391,6 +358,18 @@ namespace {
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
 		font = Kravur::load("Arial", FontStyle(), 14);
+		textRenderer = new Text;
+		textRenderer->setProjection(width, height);
+		textRenderer->setFont(font);
+
+		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
+		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
+
+		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures, ground);
+
+		Sound *bgSound = new Sound("WarTheme.wav");
+        Mixer::play(bgSound);
 	}
 }
 

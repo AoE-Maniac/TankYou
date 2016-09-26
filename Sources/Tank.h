@@ -50,6 +50,7 @@ public:
     int mFrac;
     bool won;
 	int myProjectileID;
+	float tts;
     
     void FollowAndAttack(Tank* tank);
 	void onDeath();
