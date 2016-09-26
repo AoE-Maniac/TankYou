@@ -80,12 +80,9 @@ Ground::TriangleInfo Ground::getTriangle(float x, float z) {
     float triangleXSize = xSize / (xCount-1);
     float triangleZSize = zSize / (zCount-1);
 
-    log(Info, "Tri size: %f, %f", triangleXSize, triangleZSize);
 
 	  int xi = Kore::floor(x/xSize * xCount + 0.5f * xCount);
 	  int zi = Kore::floor(z/zSize * zCount + 0.5f * zCount);
-
-    log(Info, "xi, zi: %d, %d", xi, zi);
 
     info.triCoords[0] = (x - xi * triangleXSize + xSize/2) / triangleXSize;
     info.triCoords[1] = (z - zi * triangleZSize + zSize/2) / triangleZSize;

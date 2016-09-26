@@ -113,7 +113,7 @@ void Projectiles::update(float deltaT) {
                     physicsObject[i]->Velocity = direction;
 				} else
                 {
-                    physicsObject[i]->active = false;
+                    //physicsObject[i]->active = false;
                 }
                 
                 physicsObject[i]->Integrate(deltaT);

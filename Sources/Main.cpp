@@ -160,14 +160,26 @@ namespace {
 			if (mouseY < 50) {
 				cameraPosition.z() += cameraSpeed * clamp01(1 - mouseY / 50.0f);
 			}
+			if (up) {
+				cameraPosition.z() += cameraSpeed;
+			}
 			if (mouseY > height - 50) {
 				cameraPosition.z() -= cameraSpeed * clamp01((mouseY - height + 50) / 50.0f);
+			}
+			if (down) {
+				cameraPosition.z() -= cameraSpeed;
 			}
 			if (mouseX < 50) {
 				cameraPosition.x() -= cameraSpeed * clamp01(1 - mouseX / 50.0f);
 			}
+			if (right) {
+				cameraPosition.x() -= cameraSpeed;
+			}
 			if (mouseX > width - 50) {
 				cameraPosition.x() += cameraSpeed * clamp01((mouseX - width + 50) / 50.0f);
+			}
+			if (left) {
+				cameraPosition.x() += cameraSpeed;
 			}
 		}
 		else {
@@ -387,8 +399,8 @@ namespace {
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
-		TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
+		//TriangleMeshCollider* tmc = new TriangleMeshCollider();
+		//tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		//physics.AddStaticCollider(tmc);
 
 		Graphics::setRenderState(DepthTest, true);

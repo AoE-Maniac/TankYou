@@ -94,7 +94,7 @@ void TankSystem::update(float dt) {
 			}
 			
 			vec3 pos = tank->GetPosition();
-			pos.y() = ground->getHeight(pos.x(), pos.z()) + 0.5f;
+			pos.y() = ground->getHeight(pos.x(), pos.z()) + 2.f;
 			tank->SetPosition(pos);
         }
     }
