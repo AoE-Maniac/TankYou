@@ -22,6 +22,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     mFrac = frac;
 	selected = false;
     Orientation = 0;
+	myProjectileID = -1;
 }
 
 float Tank::getHPPerc() {
@@ -34,6 +35,10 @@ float Tank::getXPPerc() {
 
 void Tank::score() {
 	kills++;
+}
+
+void Tank::onDeath() {
+	mProj->onShooterDeath(myProjectileID);
 }
 
 void Tank::update(float deltaT) {
@@ -191,8 +196,10 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Shoot %i", mFrac);
             
             // Shoot and Kill
-            vec3 p = GetPosition();
-            //mProj->fire(p, enemyTank, 1, 1, this);
+            vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
+            if (myProjectileID < 0) {
+                myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+            }
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance > minDistToShoot) {

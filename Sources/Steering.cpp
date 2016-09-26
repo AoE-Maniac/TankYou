@@ -1,6 +1,8 @@
 #include "Engine/pch.h"
 #include "Steering.h"
 
+// TODO : follow path
+
 Steering::Steering() {
     Random::init(1);
     ariveRadius = 10;
@@ -46,8 +48,5 @@ vec3 Steering::EvadeTarget(vec3 characterPos, vec3 targetPos, vec3 characterVel,
 }
 
 bool Steering::Arrive(vec3 characterPos, vec3 targetPos) {
-    vec3 distance = targetPos - characterPos;
-    if (distance.getLength() < ariveRadius)
-        return true;
-    return false;
+	return targetPos.distance(characterPos) < ariveRadius;
 }

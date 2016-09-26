@@ -198,8 +198,12 @@ void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
         // Projectiles dont collide with each other
         if( other->type == type )
             return;
+        log(Info, "colliding types: %d %d", other->type, type);
 		if(callback)
-			callback(type, collisionData);
+        {
+            other->callback(type, collisionData);
+			callback(other->type, other->collisionData);
+        }
 	//}
 }
 

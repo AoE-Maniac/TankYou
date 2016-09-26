@@ -1,9 +1,13 @@
 #pragma once
 
 #include <list>
+#include <vector>
 
 #include "Kore/Math/Vector.h"
 
 using namespace Kore;
 
-std::list<vec3> astar(std::vector<vec3> nodes, std::vector<std::vector<int>> neighbours, vec3 start, vec3 goal);
+typedef std::vector<vec3> NodeList;
+typedef std::vector<std::vector<int>> NeighbourList;
+
+std::list<vec3> astar(NodeList nodes, NeighbourList neighbours, vec3 start, vec3 goal);

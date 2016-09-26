@@ -1,5 +1,9 @@
 #include "pch.h"
+
+#include <vector>
+
 #include "Landscape.h"
+#include <Kore/Math/Vector.h>
 #include <Kore/Math/Random.h>
 
 #include "Engine/Rendering.h"
@@ -14,7 +18,7 @@ Kore::Texture* landscapeTexture;
 int stoneCount;
 InstancedMeshObject* stoneMesh;
 
-void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount) {
+void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground*& ground) {
 	Kore::Image* map = new Kore::Image("map.png", true);
 	Kore::Image* normalmap = new Kore::Image("mapnormals.png", true);
 	landscapeTexture = new Texture("sand.png", true);
@@ -26,6 +30,9 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
 	landscapeVertices[0] = new VertexBuffer((w + 1) * (h + 1), *structures[0], 0);
 	float* vertices = landscapeVertices[0]->lock();
 	int i = 0;
+
+  float* height = new float[(w+1)*(h+1)];
+
 	for (int y = 0; y <= h; ++y) {
 		for (int x = 0; x <= w; ++x) {
 			int color = 0xff00 & map->at(static_cast<int>(x / (float)(w + 1) * map->width), static_cast<int>(y / (float)(h + 1) * map->height));
@@ -37,12 +44,19 @@ void createLandscape(VertexStructure** structures, float size, InstancedMeshObje
 			float nx = (nxi / 255.0f - 0.5f) * 2.0f;
 			float ny = (nyi / 255.0f - 0.5f) * 2.0f;
 			float nz = (nzi / 255.0f - 0.5f) * 2.0f;
-			vertices[i++] = -size / 2 + size / w * x; vertices[i++] = color / 255.0f * 10.0f; vertices[i++] = -size / 2 + size / h * y;
-			vertices[i++] = x % 2; vertices[i++] = y % 2;
-			vertices[i++] = nx; vertices[i++] = ny; vertices[i++] = nz;
+			vertices[i++] = -size / 2 + size / w * x;
+			vertices[i++] = color / 255.0f * 10.0f;
+			vertices[i++] = -size / 2 + size / h * y;
+			vertices[i++] = x % 2;
+			vertices[i++] = y % 2;
+			vertices[i++] = nx;
+			vertices[i++] = ny;
+			vertices[i++] = nz;
+      height[y*w+x] = color / 255.0f * 10.0f;
 		}
 	}
-	
+
+  ground = new Ground(height, w, h, size, size);
 
 	stoneCount = sCount;
 	stoneMesh = sMesh;
