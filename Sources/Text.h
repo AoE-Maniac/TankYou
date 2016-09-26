@@ -8,7 +8,6 @@ private:
 	Kore::mat4 projectionMatrix;
 	Kore::ConstantLocation projectionLocation;
 	Kore::TextureUnit textureLocation;
-	const int bufferSize = 100;
 	int bufferIndex;
 	Kore::VertexBuffer* rectVertexBuffer;
 	float* rectVertices;
@@ -16,7 +15,7 @@ private:
 	Kravur* font;
 	Kore::Texture* lastTexture;
 	int fontSize;
-	bool bilinear = false;
+	bool bilinear;
 public:
 	Text();
 	void setProjection(const Kore::mat4& projectionMatrix);

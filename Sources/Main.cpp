@@ -24,6 +24,7 @@
 #include "Engine/Rendering.h"
 #include "Engine/Explosion.h"
 #include "Landscape.h"
+#include "Text.h"
 
 #include "Projectiles.h"
 //#include "Steering.h"
@@ -52,6 +53,8 @@ namespace {
 	bool right;
 	bool up;
 	bool down;
+
+	Kravur* font;
 	
 	mat4 P;
 	mat4 View;
@@ -384,6 +387,8 @@ namespace {
         Random::init(123);
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT);
+
+		font = Kravur::load("Arial", FontStyle(), 14);
 	}
 }
 
