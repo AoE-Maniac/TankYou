@@ -157,8 +157,9 @@ void PhysicsObject::HandleCollision(TriangleMeshCollider& collider, float deltaT
 
 void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
 	// Check if we are colliding with the plane
-    /*
+    
 	if (Collider.IntersectsWith(other->Collider)) {
+        /*
         if(type == 1)
             log(Info, "Projectile Collision with %d", other->type);
         if(type == 2)
@@ -198,13 +199,14 @@ void PhysicsObject::HandleCollision(PhysicsObject* other, float deltaT) {
         // Projectiles dont collide with each other
         if( other->type == type )
             return;
-        log(Info, "colliding types: %d %d", other->type, type);
 		if(callback)
         {
             other->callback(type, collisionData);
 			callback(other->type, other->collisionData);
+        } else {
+          log(Info, "No callback");
         }
-	//}
+    }
 }
 
 void PhysicsObject::ApplyImpulse(vec3 impulse) {
