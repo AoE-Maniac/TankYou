@@ -354,7 +354,7 @@ public:
 
 	// from the internetz, guaranteed to work
 	bool IntersectsWith(Kore::vec3 orig, Kore::vec3 dir) const {
-		float radius = this->radius * 5; // size hack
+		float radius = this->radius *  7.5; // size hack
 		float t0, t1; // solutions for t if the ray intersects 
 		// geometric solution
 		Kore::vec3 L = center - orig;
