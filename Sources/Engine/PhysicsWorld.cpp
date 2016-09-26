@@ -59,3 +59,14 @@ void PhysicsWorld::AddDynamicObject(PhysicsObject* po) {
 	dynamicObjects[currentDynamicObjects] = po;
 	currentDynamicObjects++;
 }
+
+void PhysicsWorld::RemoveDynamicObject(PhysicsObject* dynamicObject) {
+	for (int i = 0; i < currentDynamicObjects; ++i) {
+		if (dynamicObjects[i] == dynamicObject) {
+			dynamicObjects[i] = dynamicObjects[currentDynamicObjects - 1];
+			--currentDynamicObjects;
+			break;
+		}
+	}
+	
+}

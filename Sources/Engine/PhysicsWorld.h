@@ -41,4 +41,6 @@ public:
 
 	// Add a dynamic object to be simulated
 	void AddDynamicObject(PhysicsObject* dynamicObject);
+
+	void RemoveDynamicObject(PhysicsObject* dynamicObject);
 };
