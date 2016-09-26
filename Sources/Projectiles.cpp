@@ -109,13 +109,13 @@ void Projectiles::update(float deltaT) {
 				if (targets[i] != nullptr) {
 					target = targets[i]->GetPosition();
                     
-                    float pt = abs((position-target).getLength());
+                    float pt = Kore::abs((position-target).getLength());
                     vec3 direction = (target - physicsObject[i]->GetPosition()).normalize()*20.f;
                     
                     if( shooters[i] != nullptr )
                     {
                         vec3 sourcepos = shooters[i]->getPosition();
-                        float st = abs((sourcepos-target).getLength());
+                        float st = Kore::abs((sourcepos-target).getLength());
                         direction[1] += 10*(pt/st);
                     }
                     physicsObject[i]->Velocity = direction;
