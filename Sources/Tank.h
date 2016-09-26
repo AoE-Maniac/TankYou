@@ -12,6 +12,8 @@
 enum StateMachineState {
     Wandering,
     Following,
+    Attack,
+    TEST
 };
 
 class Tank : public PhysicsObject {
@@ -21,7 +23,8 @@ public:
 	void update(float deltaT);
 	vec3 getTurretLookAt();
 	vec3 getPosition();
-    void Move(float deltaT, vec3 velocity);
+    void MoveWithVelocity(vec3 velocity);
+    void MoveToPosition(vec3 position);
     vec3 Velocity;
 	
 	mat4 GetBottomM();
@@ -35,6 +38,8 @@ public:
 
 	int hp;
     int mFrac;
+    
+    void FollowAndAttack(Tank* tank);
 
 private:
 	float turretAngle;
