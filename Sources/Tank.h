@@ -13,7 +13,8 @@ enum StateMachineState {
     Wandering,
     Following,
     Attack,
-    TEST
+    Move,
+    Wait
 };
 
 class Tank : public PhysicsObject {
@@ -55,7 +56,7 @@ private:
     Tank* enemyTank;
     
     Steering* steer;
-    vec3 randomPosition;
+    vec3 toPosition;
     float maxVelocity;
     
     float yPosition;
