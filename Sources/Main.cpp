@@ -295,6 +295,17 @@ namespace {
 			projectiles->fire(p, l, 10);
 			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
 		}*/
+		
+		vec3 position = screenToWorld(vec2(mouseX, mouseY));
+		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
+		pickDir.normalize();
+
+		if (button == 0) {
+			tankTics->select(cameraPosition, pickDir);
+		}
+		else if (button == 1) {
+			tankTics->issueCommand(cameraPosition, pickDir);
+		}
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {

@@ -36,6 +36,7 @@ public:
     
     void setProjectile(Projectiles* projectiles);
 
+	bool selected;
 	int hp;
     int mFrac;
     
