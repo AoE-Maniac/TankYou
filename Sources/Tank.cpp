@@ -14,7 +14,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     yPosition = 8.0f;
     Velocity = vec3(0,0,0);
     minDistToFollow = 100;
-    minDistToShoot = 20;
+    minDistToShoot = 50;
 	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = MAX_HP;
 	kills = 0;
@@ -23,6 +23,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
 	selected = false;
     Orientation = 0;
 	myProjectileID = -1;
+	tts = 0;
 }
 
 float Tank::getHPPerc() {
@@ -30,7 +31,7 @@ float Tank::getHPPerc() {
 }
 
 float Tank::getXPPerc() {
-	return Kore::min(1.0f, Kore::max(0.0f, kills / 5.0f));
+	return Kore::min(1.0f, Kore::max(0.0f, kills / 50.0f));
 }
 
 void Tank::score() {
@@ -128,7 +129,8 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 }
 
 void Tank::updateStateMachine(float deltaT) {
-    
+    tts -= deltaT;
+
     if (getXPPerc() >= 1.0f) {
         currentState = Won;
     }
@@ -198,7 +200,10 @@ void Tank::updateStateMachine(float deltaT) {
             // Shoot and Kill
             vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
             if (myProjectileID < 0) {
-                myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+				if (tts <= 0) {
+					tts = 1;
+					myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+				}
             }
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
