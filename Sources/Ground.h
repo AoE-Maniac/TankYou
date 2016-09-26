@@ -7,12 +7,13 @@
 
 class Ground {
 public:
-	Ground(float* height, int xCount, int zCount, float xSize, float zSize);
+	Ground(float* height, vec3* normals, int xCount, int zCount, float xSize, float zSize);
 	float getHeight(float x, float z);
 	vec3 getNormal(float x, float z);
 
 private:
 	float* height;
+	vec3* normals;
 	int xCount;
 	int zCount;
 	float xSize;

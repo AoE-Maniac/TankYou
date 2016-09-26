@@ -6,7 +6,7 @@ const int MAX_HP = 10;
 
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
 	Collider.radius = 6.f;
-	turretAngle = 0;
+	turretAngle = 0.f;
     currentState = Wait;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
@@ -21,7 +21,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
 	selected = false;
-    Orientation = 0;
+    Orientation = Random::get(Kore::pi);
     won = false;
 	myProjectileID = -1;
 	tts = 0;
@@ -53,13 +53,27 @@ void Tank::update(float deltaT) {
 
 void Tank::rotateTurret(float angle) {
 	turretAngle += angle;
+}
+
+float Tank::RotateTurrentToTarget(vec3 targetPosition) {
+    vec3 fromPos = getTurretLookAt();
+    vec3 toPos = targetPosition - GetPosition();
+    toPos = toPos/toPos.getLength();
+    float angle = Kore::atan2(fromPos.z(),fromPos.x()) - Kore::atan2(toPos.z(),toPos.x());
     
-    if(turretAngle > 2 * Kore::pi)
-        turretAngle = 0;
+    angle -= Orientation;
+
+    turretAngle += angle;
+    
+    return angle;
 }
 
 vec3 Tank::getTurretLookAt() {
     return mat4::Rotation(turretAngle, 0, 0) * vec4(0,0,-1,1);
+}
+
+vec3 Tank::getTankLookAt() {
+    return mat4::Rotation(Orientation, 0, 0) * vec4(0,0,-1,1);
 }
 
 vec3 Tank::getPosition() {
@@ -100,25 +114,14 @@ void Tank::SetOrientationFromVelocity(float deltaT) {
     }
 }
 
-bool Tank::SetTurretOrientation(float deltaAngle, float angle) {
-    turretAngle += deltaAngle;
-    
-    if (turretAngle > angle) {
-        turretAngle = angle;
-        return true;
-    }
-    return false;
-}
-
 void Tank::MoveWithVelocity(vec3 velocity) {
-    Velocity = velocity;
+    Velocity = velocity * 0.5f;
     //ApplyForceToCenter(Velocity);
     ApplyImpulse(Velocity);
 }
 
 void Tank::MoveToPosition(vec3 position) {
     toPosition = position;
-    log(Info, "%f %f", toPosition.x(), toPosition.z());
     currentState = Move;
 }
 
@@ -148,6 +151,8 @@ std::vector<Tank*>* Tank::GetEnemy() const {
     return enemyTanks;
 }
 
+
+float angle = 0;
 void Tank::updateStateMachine(float deltaT) {
     tts -= deltaT;
 
@@ -160,8 +165,6 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Wait");
             
             rotateTurret(deltaT * pi / 10);
-            
-            StopTheTank();
             
             break;
         }
@@ -193,7 +196,7 @@ void Tank::updateStateMachine(float deltaT) {
         case Following: {
             //log(Info, "Following: %i", mFrac);
             
-            SetTurretOrientation(deltaT * pi, pi);
+            RotateTurrentToTarget(enemyTank->GetPosition());
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance < minDistToShoot) {
@@ -205,6 +208,7 @@ void Tank::updateStateMachine(float deltaT) {
                 // Track the enemy
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
                 MoveWithVelocity(velocity);
+                //turretAngle = Kore::pi;
             }
 
             break;
@@ -213,6 +217,8 @@ void Tank::updateStateMachine(float deltaT) {
         case Attack: {
             //log(Info, "Shoot %i", mFrac);
             
+            RotateTurrentToTarget(enemyTank->GetPosition());
+
             bool enemyTankLiving = false;
             for( int i = 0; i < enemyTanks->size() && ! enemyTankLiving; i++ )
             {
@@ -246,6 +252,9 @@ void Tank::updateStateMachine(float deltaT) {
         case Move: {
             //log(Info, "Move");
             
+            //rotateTurret(deltaT * pi / 10);
+            RotateTurrentToTarget(toPosition);
+            
             if (steer->Arrive(getPosition(), toPosition)) {
                 currentState = Wait;
             }
@@ -257,7 +266,7 @@ void Tank::updateStateMachine(float deltaT) {
         }
            
         case Won: {
-            log(Info, "Won %i", mFrac);
+            //log(Info, "Won %i", mFrac);
             
             won = true;
             selected = false;
