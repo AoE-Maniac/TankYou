@@ -3,11 +3,13 @@
 #include <vector>
 
 #include <Kore/Math/Vector.h>
+#include <Kore/Audio/Mixer.h>
 
 #include "Tank.h"
 #include "Engine/InstancedMeshObject.h"
 #include "Engine/Explosion.h"
 #include "ParticleRenderer.h"
+
 
 using namespace Kore;
 
@@ -36,7 +38,8 @@ private:
     Texture* particleTexture;
 	std::vector<Tank*> tanks;
     std::vector<Explosion*> explosions;
+    std::vector<int> emptyIndices;
     Projectiles* mProjectiles;
-	void kill(int i);
+	bool kill(int i);
 	Tank* getHitTank(vec3 cameraPosition, vec3 pickDir);
 };

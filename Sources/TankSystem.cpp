@@ -18,36 +18,46 @@ TankSystem::TankSystem(ParticleRenderer* particleRenderer,InstancedMeshObject* m
 	selectedTank = __nullptr;
 }
 
-void spawnTank(std::vector<Tank*>* tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
+void spawnTank(std::vector<Tank*>& tanks, std::vector<Explosion*>* explosions, vec3 spawnPosa, vec3 spawnPosb, int frac, Projectiles* projectiles) {
 	float a = (Kore::Random::get(0, 1000) * 1.0f / 1000);
 	Tank* t1 = new Tank(frac);
-	t1->SetEnemy(*tanks);
+	t1->SetEnemy(tanks);
     t1->setProjectile(projectiles);
-	tanks->push_back(t1);
+	tanks.push_back(t1);
     explosions->push_back(nullptr);
 	t1->SetPosition(a * spawnPosa + (1 - a) * spawnPosb);
 }
 
 void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
-		spawnTank(&tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
-		spawnTank(&tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
+		spawnTank(tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
+		spawnTank(tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
 		
 		spawnTimer = spawnDelay;
 	}
 
+    std::vector<int> emptyIndices;
     for (int i = 0; i < tanks.size(); i++) {
         Tank* tank = tanks[i];
-
+        float xpos = tank->getPosition()[0];
+        float ypos = tank->getPosition()[2];
 		if(tank->hp <= 0 || explosions[i] != nullptr)
-			kill(i);
+        {
+            if( kill(i) )
+            {
+                tanks.erase(tanks.begin()+i);
+                explosions.erase(explosions.begin()+i);
+                --i;
+            }
+        }
         else
         {
             tank->Integrate(dt);
             tank->update(dt);
         }
-	}
+    }
     
+
     for( int i = 0; i < explosions.size(); i++ )
     {
         if(explosions[i] != nullptr)
@@ -59,23 +69,27 @@ void TankSystem::update(float dt) {
 	spawnTimer -= dt;
 }
 
-void TankSystem::kill(int i) {
-    if(explosions[i] == nullptr)
+bool TankSystem::kill(int i) {
+    if(explosions[i] == nullptr && tanks[i] != nullptr)
     {
         explosions[i] = new Explosion(tanks[i]->getPosition(), 3.f, 10.f, 200,
                                       particleRenderer->getStructures(), particleTexture );
         particleRenderer->addParticleSystem(explosions[i]);
+        Sound *winSound = new Sound("shoot_sound.wav");
+        Mixer::play(winSound);
     } else
     {
         if(explosions[i]->isReady() == true)
         {
-            delete explosions[i];
             particleRenderer->removeParticleSystem(explosions[i]);
+            delete explosions[i];
             explosions[i] = nullptr;
             delete tanks[i];
-            tanks.erase(tanks.begin() + i);
+            tanks[i] = nullptr;
+            return true;
         }
     }
+    return false;
 }
 
 void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) {

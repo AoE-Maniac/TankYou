@@ -99,7 +99,6 @@ void ParticleSystem::update(float deltaTime) {
 
 void ParticleSystem::render(TextureUnit tex, ConstantLocation vLocation, mat4 V) {
 	Graphics::setRenderState(RenderState::DepthWrite, false);
-	Graphics::setRenderState(RenderState::DepthTest, false);
 
 	mat4 view = V.Invert();
 	view.Set(0, 3, 0.0f);
