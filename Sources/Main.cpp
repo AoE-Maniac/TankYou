@@ -363,7 +363,7 @@ namespace {
         
 //        steer = new Steering;
         
-        Random::init(123);
+        Random::init(System::time() * 100);
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
