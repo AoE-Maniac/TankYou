@@ -30,6 +30,7 @@ public:
 	
 	float getHPPerc();
 	float getXPPerc();
+	void score();
 
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);
@@ -42,6 +43,7 @@ public:
 
 	bool selected;
 	int hp;
+	int kills;
     int mFrac;
     
     void FollowAndAttack(Tank* tank);

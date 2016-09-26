@@ -1,5 +1,6 @@
 #include "Engine/pch.h"
 #include "Projectiles.h"
+#include "Tank.h"
 #include <cassert>
 
 using namespace Kore;
@@ -18,7 +19,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.001f, true, true);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i); };
+		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i, true); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
 		
@@ -34,7 +35,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg) {
+void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
 	assert(currProj + 1 < maxProj);
 
 	if (currProj + 1 < maxProj) {
@@ -54,7 +55,7 @@ void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg) {
 		timeToLife[currProj] = PROJECTILE_LIFETIME;
 
 		damage[currProj] = dmg;
-
+		shooters[currProj] = shooter;
 		targets[currProj] = target;
 
 		currProj++;
@@ -79,13 +80,13 @@ void Projectiles::update(float deltaT) {
 			else
 				log(Info, "ttl over, killing.");
 
-			kill(i);
+			kill(i, physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist);
 			i--;
 		}
 	}
 }
 
-void Projectiles::kill(int projectile) {
+void Projectiles::kill(int projectile, bool kill) {
 	timeToLife[projectile] = timeToLife[currProj - 1];
 	timeToLife[currProj - 1] = -1;
 
@@ -103,6 +104,12 @@ void Projectiles::kill(int projectile) {
 	ParticleSystem* temp = particles[projectile];
 	particles[projectile] = particles[currProj - 1];
 	particles[currProj - 1] = temp;
+
+	if (shooters[currProj] != nullptr) {
+		if (kill) {
+			shooters[currProj]->score();
+		}
+	}
 
 	--currProj;
 }

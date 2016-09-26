@@ -17,6 +17,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true) {
     minDistToShoot = 20;
 	callback = std::bind(&Tank::onCollision, this, std::placeholders::_1, std::placeholders::_2);
 	hp = MAX_HP;
+	kills = 0;
     enemyTanks = new std::vector<Tank*>;
     mFrac = frac;
 	selected = false;
@@ -27,8 +28,11 @@ float Tank::getHPPerc() {
 }
 
 float Tank::getXPPerc() {
-	// TODO
-	return 0.25;
+	return kills / 3.0f;
+}
+
+void Tank::score() {
+	kills++;
 }
 
 void Tank::update(float deltaT) {
@@ -178,7 +182,7 @@ void Tank::updateStateMachine(float deltaT) {
             
             // Shoot and Kill
             vec3 p = GetPosition();
-            mProj->fire(p, enemyTank, 1, 1);
+            mProj->fire(p, enemyTank, 1, 1, this);
             
             break;
         }
