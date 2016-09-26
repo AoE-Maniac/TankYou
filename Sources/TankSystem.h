@@ -13,7 +13,7 @@
 
 using namespace Kore;
 
-#define MAX_TANKS 4//100
+#define MAX_TANKS 10//100
 
 class TankSystem {
 public:
