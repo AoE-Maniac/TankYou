@@ -33,7 +33,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 		
 		physics->AddDynamicObject(physicsObject[i]);
 	
-		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10.f, 3.0f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
+		particles[i] = new ParticleSystem(physicsObject[i]->GetPosition(), vec3(0, 10, 0), 10.f, 0.3f, vec4(0.5, 0.5, 0.5, 1), vec4(0.5, 0.5, 0.5, 0), 0, 100, structures, particleTex);
 	}
 	
 	vertexBuffers = new VertexBuffer*[2];
