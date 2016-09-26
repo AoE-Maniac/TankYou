@@ -55,6 +55,7 @@ private:
     float Orientation;
     void SetOrientationFromVelocity(float deltaT);
     void SetTankOrientation(float deltaT);
+    bool SetTurretOrientation(float deltaAngle, float angle);
     
     std::vector<Tank*>* enemyTanks;
     Tank* enemyTank;
@@ -74,4 +75,6 @@ private:
 	void onCollision(COLLIDING_OBJECT other, void* collisionData);
     
     Projectiles* mProj;
+    
+    void StopTheTank();
 };
