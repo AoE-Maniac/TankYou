@@ -21,11 +21,13 @@ public:
 	void initBars(vec2 halfSize, VertexStructure** structures);
 	void update(float dt);
 	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
+	void hover(vec3 cameraPosition, vec3 pickDir);
 	void select(vec3 cameraPosition, vec3 pickDir);
 	void issueCommand(vec3 cameraPosition, vec3 pickDir);
 
 private:
 	Tank* selectedTank;
+	Tank* hoveredTank;
     ParticleRenderer* particleRenderer;
     PhysicsWorld* world;
 	float spawnDelay;

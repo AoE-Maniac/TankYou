@@ -279,13 +279,8 @@ namespace {
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-				
-		static int pick = 0;
-		/*for (unsigned i = 0; i < tanks.size(); ++i) {
-			if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
-				log(Info, "Picky %i", pick++);
-			}
-		}*/
+		
+		tankTics->hover(cameraPosition, pickDir);
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
