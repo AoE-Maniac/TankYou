@@ -194,12 +194,13 @@ void Tank::updateStateMachine(float deltaT) {
             MoveWithVelocity(steer->Wander(getPosition(), toPosition, maxVelocity));
             GetMaxPosition(toPosition);
             
-            // Follow the target
+            float minDistance = maxfloat();
             for (int i = 0; i < enemyTanks->size(); i++) {
                 Tank* tank = (*enemyTanks)[i];
                 if(mFrac != tank->mFrac) {
                     float distance = (GetPosition() - tank->GetPosition()).getLength();
-                    if (distance < minDistToFollow) {
+                    if (distance < minDistToFollow && distance < minDistance) {
+                        minDistance = distance;
                         enemyTank = tank;
                         currentState = Following;
                     }
