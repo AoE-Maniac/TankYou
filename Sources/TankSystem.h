@@ -13,7 +13,7 @@
 
 using namespace Kore;
 
-#define MAX_TANKS 2//100
+#define MAX_TANKS 4//100
 
 class TankSystem {
 public:
@@ -24,6 +24,9 @@ public:
 	void hover(vec3 cameraPosition, vec3 pickDir);
 	void select(vec3 cameraPosition, vec3 pickDir);
 	void issueCommand(vec3 cameraPosition, vec3 pickDir);
+	
+	int destroyed;
+	int deserted;
 
 private:
 	Tank* selectedTank;
