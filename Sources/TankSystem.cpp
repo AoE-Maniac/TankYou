@@ -137,11 +137,11 @@ void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
 		if (hitTank == __nullptr) {
 			float x = (selectedTank->GetPosition().y() - cameraPosition.y()) / pickDir.y();
 			vec3 pos = cameraPosition + x * pickDir;
+			selectedTank->MoveToPosition(pos);
 			log(Kore::LogLevel::Info, "Moving to %f, %f, %f", pos.x(), pos.y(), pos.z());
-			//selectedTank.move(pos);
 		}
 		else if (hitTank->mFrac != selectedTank->mFrac) {
-			//selectedTank.attack(hitTank);
+			selectedTank->FollowAndAttack(hitTank);
 			log(Kore::LogLevel::Info, "Attack at %f, %f, %f", hitTank->GetPosition().x(), hitTank->GetPosition().y(), hitTank->GetPosition().z());
 		}
 	}
