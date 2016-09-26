@@ -75,7 +75,6 @@ namespace {
 	MeshObject* sphereMesh;
 	InstancedMeshObject* stoneMesh;
 	MeshObject* projectileMesh;
-	PhysicsObject* spherePO;
 
 	Projectiles* projectiles;
 
@@ -89,7 +88,6 @@ namespace {
 	BoxCollider boxCollider(vec3(-46.0f, -4.0f, 44.0f), vec3(10.6f, 4.4f, 4.0f));
 
 	Texture* particleImage;
-	ParticleSystem* particleSystem;
     Explosion* explosionSystem;
     
 //    Steering* steer;
@@ -192,7 +190,6 @@ namespace {
 		// Apply inputs
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
-		spherePO->ApplyForceToCenter(force);
 
         // Update physics
         physics.Update(deltaT);
@@ -205,11 +202,6 @@ namespace {
         // Update physics
         physics.Update(deltaT);
 
-		// Check for game over
-		bool result = spherePO->Collider.IntersectsWith(boxCollider);
-		if (result) {
-			// ...
-		}
         
         // Render dynamic objects
         /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
@@ -228,11 +220,6 @@ namespace {
 		renderLandscape(tex);
 
 		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
-		// Update and render particles
-		particleSystem->setPosition(spherePO->GetPosition());
-		particleSystem->setDirection(vec3(-spherePO->Velocity.x(), 3, -spherePO->Velocity.z()));
-		particleSystem->update(deltaT);
-		particleSystem->render(tex, vLocation, View);
 
 		projectiles->update(deltaT);
 		projectiles->render(vLocation, tex, View);
@@ -241,11 +228,6 @@ namespace {
 
 		Graphics::end();
 		Graphics::swapBuffers();
-	}
-
-	void ResetSphere(vec3 Position, vec3 Velocity) {
-		spherePO->SetPosition(Position);
-		spherePO->Velocity = Velocity;
 	}
 
 	void keyDown(KeyCode code, wchar_t character) {
@@ -348,16 +330,9 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
-
-		spherePO = new PhysicsObject(TANK, 5, true, false, true);
-		spherePO->Collider.radius = 0.5f;
-		spherePO->Mesh = sphereMesh;
-		physics.AddDynamicObject(spherePO);
-
-		ResetSphere(vec3(-10, 5.5f, 10), vec3(0, 0, 0));
+    
         
         particleImage = new Texture("particle.png", true);
-        particleSystem = new ParticleSystem(spherePO->GetPosition(), vec3(0, 10, 0), 1.0f, 3.0f, vec4(2.5f, 0, 0, 1), vec4(0, 0, 0, 0), 10, 100, structures, particleImage);
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
@@ -382,7 +357,6 @@ namespace {
 
 		cameraPosition = vec3(0, 0.5f, 0);
 		cameraZoom = 0.5f;
-		lookAt = spherePO->GetPosition();
         
 //        steer = new Steering;
         

@@ -70,7 +70,7 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
 void Projectiles::update(float deltaT) {
 	for (int i = 0; i < maxProj; i++) {
         if (physicsObject[i]->active) {
-            if (timeToLife[i] > 0 || physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist) {
+            if (timeToLife[i] > 0) {
                 particles[i]->setPosition(physicsObject[i]->GetPosition());
                 particles[i]->setDirection(vec3(0, 1, 0));
                 particles[i]->update(deltaT);
