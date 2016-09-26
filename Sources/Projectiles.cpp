@@ -35,7 +35,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
+int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
 	assert(currProj + 1 < maxProj);
 
 	if (currProj + 1 < maxProj) {
@@ -59,7 +59,10 @@ void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* 
 		targets[currProj] = target;
 
 		currProj++;
+
+		return currProj - 1;
 	}
+	return -1;
 }
 
 void Projectiles::update(float deltaT) {
@@ -106,12 +109,17 @@ void Projectiles::kill(int projectile, bool kill) {
 	particles[currProj - 1] = temp;
 
 	if (shooters[currProj] != nullptr) {
+		shooters[currProj]->myProjectileID = -1;
 		if (kill) {
 			shooters[currProj]->score();
 		}
 	}
 
 	--currProj;
+}
+
+void Projectiles::onShooterDeath(int projectileID) {
+	shooters[projectileID] = nullptr;
 }
 
 void Projectiles::render(ConstantLocation vLocation, TextureUnit tex, mat4 view) {
