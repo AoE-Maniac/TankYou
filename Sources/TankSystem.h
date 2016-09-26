@@ -9,21 +9,24 @@
 #include "Engine/InstancedMeshObject.h"
 #include "Engine/Explosion.h"
 #include "ParticleRenderer.h"
-
+#include "Ground.h"
 
 using namespace Kore;
 
-#define MAX_TANKS 2//100
+#define MAX_TANKS 10//100
 
 class TankSystem {
 public:
-	TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures);
+	TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures, Ground* grnd);
 	void initBars(vec2 halfSize, VertexStructure** structures);
 	void update(float dt);
 	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
 	void hover(vec3 cameraPosition, vec3 pickDir);
 	void select(vec3 cameraPosition, vec3 pickDir);
 	void issueCommand(vec3 cameraPosition, vec3 pickDir);
+	
+	int destroyed;
+	int deserted;
 
 private:
 	Tank* selectedTank;
@@ -46,6 +49,7 @@ private:
     Projectiles* mProjectiles;
 	bool kill(int i);
 	Tank* getHitTank(vec3 cameraPosition, vec3 pickDir);
+	Ground* ground;
 
 	Kore::VertexBuffer** vbs;
 	Kore::IndexBuffer* ib;

@@ -25,6 +25,7 @@ public:
 	void rotateTurret(float angle);
 	void update(float deltaT);
 	vec3 getTurretLookAt();
+    vec3 getTankLookAt();
 	vec3 getPosition();
     void MoveWithVelocity(vec3 velocity);
     void MoveToPosition(vec3 position);
@@ -33,6 +34,7 @@ public:
 	float getHPPerc();
 	float getXPPerc();
 	void score();
+	void desert();
 
 	mat4 GetBottomM();
 	mat4 GetTopM(mat4 bottomM);
@@ -56,10 +58,11 @@ public:
 
 private:
 	float turretAngle;
+    float RotateTurrentToTarget(vec3 targetPosition);
+    
     float Orientation;
     void SetOrientationFromVelocity(float deltaT);
     void SetTankOrientation(float deltaT);
-    bool SetTurretOrientation(float deltaAngle, float angle);
     
     std::vector<Tank*>* enemyTanks;
     Tank* enemyTank;

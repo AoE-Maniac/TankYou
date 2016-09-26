@@ -139,6 +139,7 @@ namespace {
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 		Graphics::setRenderState(BackfaceCulling, NoCulling);
+		Graphics::setRenderState(DepthTest, true);
 
 		// set the camera
 		cameraAngle += 0.3f * deltaT;
@@ -192,16 +193,12 @@ namespace {
 		vec3 force(forceX, 0.0f, forceZ);
 		force = force * 20.0f;
 
+        projectiles->update(deltaT);
         // Update physics
         physics.Update(deltaT);
     
 		tankTics->update(deltaT);
 
-		Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		tankTics->render(tex, View, vLocation);
-		
-        // Update physics
-        physics.Update(deltaT);
 
         
         // Render dynamic objects
@@ -217,18 +214,30 @@ namespace {
 			(*current)->mesh->render(tex, View);
 		}*/
 
-		Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
+		//Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
+		
+		//Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
+		tankTics->render(tex, View, vLocation);
+		
+		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
-		Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
-
-		projectiles->update(deltaT);
+		
 		projectiles->render(vLocation, tex, View);
         
         particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
-		textRenderer->drawString("Hello", 0xffffffff, 50, 50, mat3::Identity());
+		char d[42];
+		char k[42];
+		sprintf(d, "Deserted: %i", tankTics->deserted);
+		sprintf(k, "Destroyed: %i", tankTics->destroyed);
+		textRenderer->drawString(k, 0xffffffff, 15, 15, mat3::Identity());
+		textRenderer->drawString(d, 0xffffffff, 15, 30, mat3::Identity());
+		if (tankTics->deserted >= 1) {
+			textRenderer->drawString("Game over!", 0xffffffff, width / 2, height / 2 - 15, mat3::Identity());
+			textRenderer->drawString("Tank you for playing...", 0xffffffff, width / 2, height / 2 + 15, mat3::Identity());
+		}
 		textRenderer->end();
 
 		Graphics::end();
@@ -340,12 +349,6 @@ namespace {
 		tmc->mesh = new MeshObject("level.obj", "level.png", structures);
 		//physics.AddStaticCollider(tmc);
 
-		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
-		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
-		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
-
-		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures);
-
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
 
@@ -369,8 +372,13 @@ namespace {
 		textRenderer->setProjection(width, height);
 		textRenderer->setFont(font);
 
-		
-        Sound *bgSound = new Sound("WarTheme.wav");
+		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
+		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
+		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
+
+		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures, ground);
+
+		Sound *bgSound = new Sound("WarTheme.wav");
         Mixer::play(bgSound);
 	}
 }
