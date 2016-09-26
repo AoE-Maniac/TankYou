@@ -136,6 +136,9 @@ bool TankSystem::kill(int i) {
 			tanks[i]->onDeath();
             delete explosions[i];
             explosions[i] = nullptr;
+			for (unsigned i2 = 0; i2 < tanks.size(); ++i2) {
+				tanks[i2]->RemoveEnemy(tanks[i]);
+			}
             delete tanks[i];
             tanks[i] = nullptr;
             return true;
