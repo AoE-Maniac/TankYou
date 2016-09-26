@@ -264,21 +264,23 @@ namespace {
 		}
 		else {
 			textRenderer->setFont(font44);
-			renderCentered("Game over!", height / 2 - 200);
+			renderCentered("Game over!", height / 2 - 220);
 			textRenderer->setFont(font34);
 			if(gameOverTime == 0.0f)
 				gameOverTime = t - START_DELAY;
 			if (gameOverKills == 0) gameOverKills = tankTics->destroyed;
 			char gameOverText[256];
 			sprintf(gameOverText, "The war lasted %i seconds and killed %i...", (int)gameOverTime, gameOverKills);
-			renderCentered(gameOverText, height / 2 - 50);
+			renderCentered(gameOverText, height / 2 - 70);
 			textRenderer->setFont(font24);
 			renderCentered("Tank you for playing our jam game:", height / 2 + 80);
-			renderCentered("Polona Caserman", height / 2 + 160, width / 4.0f);
-			renderCentered("Robert Konrad", height / 2 + 160);
-			renderCentered("Lars Lotter", height / 2 + 160, width * 3.0f / 4);
-			renderCentered("Max Maag", height / 2 + 220, width / 3.0f);
-			renderCentered("Christian Reuter", height / 2 + 220, width * 2.0f / 3.0f);
+			renderCentered("Polona Caserman", height / 2 + 140, width / 4.0f);
+			renderCentered("Robert Konrad", height / 2 + 140);
+			renderCentered("Lars Lotter", height / 2 + 140, width * 3.0f / 4);
+			renderCentered("Max Maag", height / 2 + 200, width / 3.0f);
+			renderCentered("Christian Reuter", height / 2 + 200, width * 2.0f / 3.0f);
+			textRenderer->setFont(font14);
+			renderCentered("Background music by Hong Linh Thai and Maria Rumjanzewa", height / 2 + 280);
 		}
 		textRenderer->end();
 
