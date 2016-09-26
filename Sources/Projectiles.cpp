@@ -46,6 +46,17 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	vertexBuffers[1] = new VertexBuffer(maxProjectiles, *structures[1], 1);
 }
 
+namespace {
+	Sound* sound = nullptr;
+
+	Sound* getSound() {
+		if (sound == nullptr) {
+			sound = new Sound("impact_sound.wav");
+		}
+		return sound;
+	}
+}
+
 int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
     assert(inactiveProjectiles.size() > 0);
 
@@ -53,7 +64,7 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
 		return -1;
 	}
     
-    Sound *shootSound = new Sound("impact_sound.wav");
+    Sound* shootSound = getSound();
     shootSound->setVolume(0.3);
     Mixer::play(shootSound, Random::get(50, 200) / 100.0f);
     

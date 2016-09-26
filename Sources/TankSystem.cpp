@@ -120,14 +120,25 @@ void TankSystem::update(float dt) {
 	spawnTimer -= dt;
 }
 
+namespace {
+	Sound* sound = nullptr;
+
+	Sound* getSound() {
+		if (sound == nullptr) {
+			sound = new Sound("shoot_sound.wav");
+		}
+		return sound;
+	}
+}
+
 bool TankSystem::kill(int i) {
     if(explosions[i] == nullptr && tanks[i] != nullptr)
     {
         explosions[i] = new Explosion(tanks[i]->getPosition(), 3.f, 10.f, 200,
                                       particleRenderer->getStructures(), particleTexture );
         particleRenderer->addParticleSystem(explosions[i]);
-        Sound *shootSound = new Sound("shoot_sound.wav");
-        shootSound->setVolume(0.3);
+		Sound* shootSound = getSound();
+		shootSound->setVolume(0.3);
         Mixer::play(shootSound, Random::get(50, 200) / 100.0f);
 		destroyed++;
 		if (tanks[i]->won) {
