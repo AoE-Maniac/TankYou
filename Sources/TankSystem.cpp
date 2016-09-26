@@ -118,14 +118,38 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	meshFlag->render(tex, j);
 }
 
-Tank* TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
+void TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
 	if (selectedTank != __nullptr) {
 		selectedTank->selected = false;
+		selectedTank = __nullptr;
 	}
+
+	selectedTank = getHitTank(cameraPosition, pickDir);
+	if (selectedTank != __nullptr) {
+		selectedTank->selected = true;
+	}
+}
+
+void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
+	if (selectedTank != __nullptr) {
+		Tank* hitTank = getHitTank(cameraPosition, pickDir);
+
+		if (hitTank == __nullptr) {
+			float x = (selectedTank->GetPosition().y() - cameraPosition.y()) / pickDir.y();
+			vec3 pos = cameraPosition + x * pickDir;
+			log(Kore::LogLevel::Info, "Moving to %f, %f, %f", pos.x(), pos.y(), pos.z());
+			//selectedTank.move(pos);
+		}
+		else if (hitTank->mFrac != selectedTank->mFrac) {
+			//selectedTank.attack(hitTank);
+			log(Kore::LogLevel::Info, "Attack at %f, %f, %f", hitTank->GetPosition().x(), hitTank->GetPosition().y(), hitTank->GetPosition().z());
+		}
+	}
+}
+
+Tank* TankSystem::getHitTank(vec3 cameraPosition, vec3 pickDir) {
 	for (unsigned i = 0; i < tanks.size(); ++i) {
 		if (tanks[i]->Collider.IntersectsWith(cameraPosition, pickDir)) {
-			tanks[i]->selected = true;
-			selectedTank = tanks[i];
 			return tanks[i];
 		}
 	}
