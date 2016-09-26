@@ -17,8 +17,7 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
-	texture = new Texture("grey.png", true); 
-	selectedTank = nullptr;
+	texture = new Texture("grey.png", true);
 	hoveredTank = nullptr;
 	
 	destroyed = 0;
@@ -108,10 +107,14 @@ void TankSystem::update(float dt) {
             explosions[i]->update(dt);
         }
     }
-	
-	if (selectedTank != nullptr && selectedTank->won) {
-		selectedTank = nullptr;
-	}
+
+    for(int i = 0; i < selectedTanks.size(); i++)
+    {
+        Tank* selectedTank = selectedTanks[i];
+        if (selectedTank != nullptr && selectedTank->won) {
+            selectedTank = nullptr;
+        }
+    }
 
 	spawnTimer -= dt;
 }
@@ -269,32 +272,53 @@ void TankSystem::hover(vec3 cameraPosition, vec3 pickDir) {
 }
 
 void TankSystem::select(vec3 cameraPosition, vec3 pickDir) {
-	if (selectedTank != nullptr) {
-		selectedTank->selected = false;
-		selectedTank = nullptr;
-	}
-
-	selectedTank = getHitTank(cameraPosition, pickDir);
+    Tank* selectedTank = getHitTank(cameraPosition, pickDir);
 	if (selectedTank != nullptr && !selectedTank->won) {
 		selectedTank->selected = true;
 	}
+    if( multipleSelect )
+        selectedTanks.push_back(selectedTank);
+    else
+    {
+        unselectTanks();
+        selectedTanks.clear();
+        selectedTanks.push_back(selectedTank);
+    }
 }
 
 void TankSystem::issueCommand(vec3 cameraPosition, vec3 pickDir) {
-	if (selectedTank != nullptr && !selectedTank->won) {
-		Tank* hitTank = getHitTank(cameraPosition, pickDir);
-
-		if (hitTank == nullptr) {
-			float x = (selectedTank->GetPosition().y() - cameraPosition.y()) / pickDir.y();
-			vec3 pos = cameraPosition + x * pickDir;
-			selectedTank->MoveToPosition(pos);
-			log(Kore::LogLevel::Info, "Moving to %f, %f, %f", pos.x(), pos.y(), pos.z());
-		}
-		else if (hitTank->mFrac != selectedTank->mFrac || hitTank->won) {
-			selectedTank->FollowAndAttack(hitTank);
-			log(Kore::LogLevel::Info, "Attack at %f, %f, %f", hitTank->GetPosition().x(), hitTank->GetPosition().y(), hitTank->GetPosition().z());
-		}
+    Tank* hitTank = getHitTank(cameraPosition, pickDir);
+    for(int i = 0; i < selectedTanks.size(); i++ )
+    {
+        Tank* selectedTank = selectedTanks[i];
+        if (selectedTank != nullptr && !selectedTank->won) {
+            if (hitTank == nullptr) {
+                float x = (selectedTank->GetPosition().y() - cameraPosition.y()) / pickDir.y();
+                vec3 pos = cameraPosition + x * pickDir;
+                selectedTank->MoveToPosition(pos);
+                log(Kore::LogLevel::Info, "Moving to %f, %f, %f", pos.x(), pos.y(), pos.z());
+            }
+            else if (hitTank->mFrac != selectedTank->mFrac || hitTank->won) {
+                selectedTank->FollowAndAttack(hitTank);
+                log(Kore::LogLevel::Info, "Attack at %f, %f, %f", hitTank->GetPosition().x(), hitTank->GetPosition().y(), hitTank->GetPosition().z());
+            }
+        }
 	}
+}
+
+void TankSystem::unselectTanks()
+{
+    for( int i = 0; i < selectedTanks.size(); i++ )
+    {
+        if( selectedTanks[i] != nullptr )
+            selectedTanks[i]->selected = false;
+    }
+    selectedTanks.clear();
+}
+
+void TankSystem::setMultipleSelect(bool val)
+{
+    multipleSelect = val;
 }
 
 Tank* TankSystem::getHitTank(vec3 cameraPosition, vec3 pickDir) {

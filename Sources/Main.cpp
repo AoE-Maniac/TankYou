@@ -264,7 +264,10 @@ namespace {
 			right = true;
 		} else if (code == Key_Right) {
 			left = true;
-		}
+        } else if (code == Key_A) {
+            log(Info,"CONTROLL");
+            tankTics->setMultipleSelect(true);
+        }
 	}
 
 	void keyUp(KeyCode code, wchar_t character) {
@@ -276,7 +279,9 @@ namespace {
 			right = false;
 		} else if (code == Key_Right) {
 			left = false;
-		}
+        } else if (code == Key_A) {
+            tankTics->setMultipleSelect(false);
+        }
 	}
 
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
