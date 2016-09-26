@@ -4,6 +4,8 @@
 using namespace Kore;
 
 namespace {
+	const int bufferSize = 100;
+
 	//TODO: Make this fast
 	int findIndex(int charcode, int* fontGlyphs, int glyphCount) {
 		for (int i = 0; i < glyphCount; ++i) {
@@ -13,7 +15,7 @@ namespace {
 	}
 }
 
-Text::Text() {
+Text::Text() : bilinear(false) {
 	bufferIndex = 0;
 	initBuffers();
 	//projectionLocation = shaderPipeline.getConstantLocation("projectionMatrix");

@@ -2,6 +2,7 @@
 #include "Kravur.h"
 #include <Kore/IO/FileReader.h>
 #include <map>
+#include <sstream>
 
 using namespace Kore;
 
@@ -9,24 +10,25 @@ namespace {
 	std::map<std::string, Kravur*> fontCache;
 
 	std::string createKey(const char* name, FontStyle style, float size) {
-		std::string key = name;
+		std::stringstream key;
+		key << name;
 		if (style.bold) {
-			key += "#Bold";
+			key << "#Bold";
 		}
 		if (style.italic) {
-			key += "#Italic";
+			key << "#Italic";
 		}
-		key += size;
-		key += ".kravur";
-		return key;
+		key << size;
+		key << ".kravur";
+		return key.str();
 	}
 }
 
 Kravur* Kravur::load(const char* name, FontStyle style, float size) {
 	std::string key = createKey(name, style, size);
-	FileReader reader(name);
 	Kravur* kravur = fontCache[key];
 	if (kravur == nullptr) {
+		FileReader reader(key.c_str());
 		kravur = new Kravur(&reader);
 		kravur->name = name;
 		kravur->style = style;
