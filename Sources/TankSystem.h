@@ -24,12 +24,15 @@ public:
 	void hover(vec3 cameraPosition, vec3 pickDir);
 	void select(vec3 cameraPosition, vec3 pickDir);
 	void issueCommand(vec3 cameraPosition, vec3 pickDir);
+    void setMultipleSelect(bool val);
+    void unselectTanks();
 	
 	int destroyed;
 	int deserted;
 
 private:
-	Tank* selectedTank;
+    bool multipleSelect;
+    std::vector<Tank*> selectedTanks;
 	Tank* hoveredTank;
     ParticleRenderer* particleRenderer;
     PhysicsWorld* world;

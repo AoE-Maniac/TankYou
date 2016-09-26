@@ -32,10 +32,6 @@ float Ground::getHeight(float x, float z) {
 	Ground::TriangleInfo info = getTriangle(x, z);
   if(info.indices.x() == -1)
     return -10.f;
-
-  log(Info, "Triangle for %f, %f:", x, z);
-  log(Info, "%d, %d, %d", info.indices[0], info.indices[1], info.indices[2]);
-  log(Info, "Tri coords: %f, %f", info.triCoords[0], info.triCoords[1]);
   
   return interpolate(
     height[info.indices[0]],
