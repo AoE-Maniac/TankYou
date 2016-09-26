@@ -11,7 +11,9 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	physicsObject = new PhysicsObject*[maxProjectiles];
 	targets = new PhysicsObject*[maxProjectiles];
 	particles = new ParticleSystem*[maxProjectiles];
+	shooters = new Tank*[maxProjectiles];
 	hitDist = hitDistance;
+    shooters = new Tank*[maxProjectiles];
 	
 	for (int i = 0; i < maxProjectiles; i++) {
         inactiveProjectiles.insert(i);
@@ -20,7 +22,7 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 		physicsObject[i] = new PhysicsObject(PROJECTILE, 0.0f, true, true, false);
 		physicsObject[i]->Collider.radius = 0.5f * PROJECTILE_SIZE;
 		physicsObject[i]->Mesh = mesh;
-		physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { kill(i, true); };
+        physicsObject[i]->callback = [=](COLLIDING_OBJECT other, void* collisionData) { log(Info, "particle collision with %d", other); kill(i, true); };
 		physicsObject[i]->collisionData = &damage[i];
 		physicsObject[i]->active = false;
 		
@@ -32,12 +34,14 @@ Projectiles::Projectiles(int maxProjectiles, float hitDistance, Texture* particl
 	vertexBuffers = new VertexBuffer*[2];
 	vertexBuffers[0] = mesh->vertexBuffers[0];
 	vertexBuffers[1] = new VertexBuffer(maxProjectiles, *structures[1], 1);
-
-	currProj = 0;
 }
 
-void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg,Tank* shooter) {
+int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter) {
     assert(inactiveProjectiles.size() > 0);
+
+	if (inactiveProjectiles.size() <= 0) {
+		return -1;
+	}
     
     int projectile = *(inactiveProjectiles.begin());
     log(Info, "projectile number: %d", projectile);
@@ -59,13 +63,13 @@ void Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg,Tank* s
 
     targets[projectile] = target;
     inactiveProjectiles.erase(projectile);
-    shooters[currProj] = shooter;
+    shooters[projectile] = shooter;
+	return projectile;
 }
 
 void Projectiles::update(float deltaT) {
-	for (int i = 0; i < currProj; i++) {
-        if( inactiveProjectiles.find(i) != inactiveProjectiles.end() )
-        {
+	for (int i = 0; i < maxProj; i++) {
+        if (physicsObject[i]->active) {
             if (timeToLife[i] > 0 || physicsObject[i]->GetPosition().distance(targets[i]->GetPosition()) > hitDist) {
                 particles[i]->setPosition(physicsObject[i]->GetPosition());
                 particles[i]->setDirection(vec3(0, 1, 0));
@@ -95,29 +99,40 @@ void Projectiles::kill(int projectile, bool kill) {
     physicsObject[projectile]->active = false;
     inactiveProjectiles.insert(projectile);
 
-	if (shooters[currProj] != nullptr) {
+	if (shooters[projectile] != nullptr) {
+		shooters[projectile]->myProjectileID = -1;
 		if (kill) {
-			shooters[currProj]->score();
+			shooters[projectile]->score();
 		}
 	}
 }
 
+void Projectiles::onShooterDeath(int projectileID) {
+	shooters[projectileID] = nullptr;
+}
+
 void Projectiles::render(ConstantLocation vLocation, TextureUnit tex, mat4 view) {
 	float* data = vertexBuffers[1]->lock();
-	for (int i = 0; i < currProj; i++) {
-		mat4 M = physicsObject[i]->GetMatrix();
-		setMatrix(data, i, 0, 36, M);
-		setMatrix(data, i, 16, 36, calculateN(M));
-		setVec4(data, i, 32, 36, vec4(1, 1, 1, 1));
+	int c = 0;
+	for (int i = 0; i < maxProj; i++) {
+		if (physicsObject[i]->active) {
+			mat4 M = physicsObject[i]->GetMatrix();
+			setMatrix(data, i, 0, 36, M);
+			setMatrix(data, i, 16, 36, calculateN(M));
+			setVec4(data, i, 32, 36, vec4(1, 1, 1, 1));
+			c++;
+		}
 	}
 	vertexBuffers[1]->unlock();
 	
 	Graphics::setTexture(tex, sharedMesh->image);
 	Graphics::setVertexBuffers(vertexBuffers, 2);
 	Graphics::setIndexBuffer(*sharedMesh->indexBuffer);
-	Graphics::drawIndexedVerticesInstanced(currProj);
+	Graphics::drawIndexedVerticesInstanced(c);
 
-	for (int i = 0; i < currProj; i++) {
-		particles[i]->render(tex, vLocation, view);
+	for (int i = 0; i < maxProj; i++) {
+		if (physicsObject[i]->active) {
+			particles[i]->render(tex, vLocation, view);
+		}
 	}
 }

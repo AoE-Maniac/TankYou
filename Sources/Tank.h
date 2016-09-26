@@ -48,8 +48,10 @@ public:
 	int kills;
     int mFrac;
     bool won;
+	int myProjectileID;
     
     void FollowAndAttack(Tank* tank);
+	void onDeath();
 
 private:
 	float turretAngle;

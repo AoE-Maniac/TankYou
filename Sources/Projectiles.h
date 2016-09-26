@@ -14,12 +14,12 @@ class Tank;
 class Projectiles {
 public:
 	Projectiles(int maxProjectiles, float hitDistance, Kore::Texture* particleTex, MeshObject* mesh, Kore::VertexStructure** structures, PhysicsWorld* physics);
-	void fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter);
+	int fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* shooter);
 	void update(float deltaT);
 	void render(Kore::ConstantLocation vLocation, Kore::TextureUnit tex, Kore::mat4 view);
+	void onShooterDeath(int projectileID);
 private:
 	int maxProj;
-	int currProj;
 	float hitDist;
 	MeshObject* sharedMesh;
 	Kore::VertexBuffer** vertexBuffers;

@@ -7,7 +7,7 @@ const int MAX_HP = 10;
 Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, true) {
 	Collider.radius = 6.f;
 	turretAngle = 0;
-    currentState = Wandering;
+    currentState = Wait;
     steer = new Steering;
     toPosition = vec3(25, yPosition, 15);
 	maxVelocity = 0.5f;
@@ -23,6 +23,7 @@ Tank::Tank(int frac) : PhysicsObject(COLLIDING_OBJECT::TANK, 10, true, true, tru
 	selected = false;
     Orientation = 0;
     won = false;
+	myProjectileID = -1;
 }
 
 float Tank::getHPPerc() {
@@ -35,6 +36,10 @@ float Tank::getXPPerc() {
 
 void Tank::score() {
 	kills++;
+}
+
+void Tank::onDeath() {
+	mProj->onShooterDeath(myProjectileID);
 }
 
 void Tank::update(float deltaT) {
@@ -125,7 +130,7 @@ std::vector<Tank*>* Tank::GetEnemy() const {
 
 void Tank::updateStateMachine(float deltaT) {
     
-    if (getXPPerc() >= 1.0f) {
+    if (!won && getXPPerc() >= 1.0f) {
         currentState = Won;
     }
     
@@ -180,11 +185,7 @@ void Tank::updateStateMachine(float deltaT) {
                 vec3 velocity = steer->PursueTarget(GetPosition(), enemyTank->GetPosition(), Velocity, enemyTank->Velocity, maxVelocity);
                 MoveWithVelocity(velocity);
             }
-            
-            // Check if enemy is dead
-            //if(enemyTank == null) {}
-            
-            
+
             break;
         }
             
@@ -192,8 +193,10 @@ void Tank::updateStateMachine(float deltaT) {
             //log(Info, "Shoot %i", mFrac);
             
             // Shoot and Kill
-            vec3 p = GetPosition();
-            //mProj->fire(p, enemyTank, 1, 1, this);
+            vec3 p = GetPosition() + (enemyTank->GetPosition() - GetPosition()).normalize() * 10.f;
+            if (myProjectileID < 0) {
+                myProjectileID = mProj->fire(p, enemyTank, 1, 1, this);
+            }
             
             float distance = (GetPosition() - enemyTank->GetPosition()).getLength();
             if (distance > minDistToShoot) {
@@ -217,7 +220,7 @@ void Tank::updateStateMachine(float deltaT) {
         }
            
         case Won: {
-            log(Info, "Won");
+            log(Info, "Won %i", mFrac);
             
             won = true;
             selected = false;
