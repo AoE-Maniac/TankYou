@@ -204,7 +204,7 @@ void Tank::updateStateMachine(float deltaT) {
             }
             if(!enemyTankLiving)
             {
-                currentState = Wandering;
+                currentState = Wait;
                 break;
             }
             
