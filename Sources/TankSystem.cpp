@@ -1,7 +1,7 @@
 #include "Kore/pch.h"
 #include "TankSystem.h"
 
-TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures) :
+TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures, Ground* grnd) :
 		meshBottom(meshB),
 		meshTop(meshT),
 		meshFlag(meshF),
@@ -12,7 +12,8 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 		spawnDelay(delay),
         mProjectiles(projectiles),
         particleRenderer(particleRenderer),
-        world(world) {
+        world(world),
+		ground(grnd) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
     particleTexture = new Texture("particle.png", true);
@@ -84,6 +85,10 @@ void TankSystem::update(float dt) {
         {
             tank->Integrate(dt);
             tank->update(dt);
+			
+			vec3 pos = tank->GetPosition();
+			pos.y() = ground->getHeight(pos.x(), pos.z()) + 0.5f;
+			tank->SetPosition(pos);
         }
     }
     
@@ -127,6 +132,28 @@ bool TankSystem::kill(int i) {
     return false;
 }
 
+mat4 getRotM(vec3 ax, float an) {
+	mat4 result = mat4::Identity();
+	float cos = Kore::cos(an);
+	float sin = Kore::sin(an);
+	float x = ax.x();
+	float y = ax.y();
+	float z = ax.z();
+	result[0][0] = cos + x * x * (1 - cos);
+	result[0][1] = x * y *(1 - cos) - z * sin;
+	result[0][2] = x * z * (1 - cos) + y * sin;
+	result[1][0] = x * y *(1 - cos) + z * sin;
+	result[1][1] = cos + y * y * (1 - cos);
+	result[1][2] = y * z * (1 - cos) - x * sin;
+	
+	result[2][0] = z * x *(1 - cos) - y * sin;
+	result[2][1] = z * y * (1 - cos) + x * sin;
+	result[2][2] =  cos + z * z * (1 - cos);
+
+
+	return result;
+}
+
 void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) {
 	float* dataB = meshBottom->vertexBuffers[1]->lock();
 	float* dataT = meshTop->vertexBuffers[1]->lock();
@@ -144,6 +171,13 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
         if(explosions[i] == nullptr)
         {
 			Tank* tank = tanks[i];
+
+			vec3 n = ground->getNormal(tank->GetPosition().x(), tank->GetPosition().z());
+			vec3 axis = -vec3(0, 1, 0).cross(n);
+			float angle = -Kore::acos(vec3(0, 1, 0).dot(n));
+			mat4 t = Quaternion::Quaternion(axis, angle).matrix();
+			t = getRotM(axis, angle);
+			
 			mat4 botM = tank->GetBottomM();
 			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
 			if (hoveredTank == tank) col = vec4(tank->mFrac * 0.25f, 0, (1 - tank->mFrac) * 0.25f, 1);
@@ -206,12 +240,12 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	meshTop->render(tex, j);
 	meshFlag->render(tex, j);
 	
-	Graphics::setRenderState(RenderState::DepthWrite, false);
+	Graphics::setRenderState(RenderState::DepthTest, false);
 	Graphics::setTexture(tex, texture);
 	Graphics::setVertexBuffers(vbs, 2);
 	Graphics::setIndexBuffer(*ib);
 	Graphics::drawIndexedVerticesInstanced(k);
-	Graphics::setRenderState(RenderState::DepthWrite, true);
+	Graphics::setRenderState(RenderState::DepthTest, true);
 }
 
 void TankSystem::hover(vec3 cameraPosition, vec3 pickDir) {

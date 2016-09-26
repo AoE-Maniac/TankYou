@@ -9,8 +9,9 @@
 
 using namespace Kore;
 
-Ground::Ground(float* height, int xCount, int zCount, float xSize, float zSize) {
+Ground::Ground(float* height, vec3* normals, int xCount, int zCount, float xSize, float zSize) {
 	this->height = height;
+	this->normals = normals;
 	this->xCount = xCount;
 	this->zCount = zCount;
 	this->xSize = xSize;
@@ -34,7 +35,7 @@ float Ground::getHeight(float x, float z) {
   log(Info, "Triangle for %f, %f:", x, z);
   log(Info, "%d, %d, %d", info.indices[0], info.indices[1], info.indices[2]);
   log(Info, "Tri coords: %f, %f", info.triCoords[0], info.triCoords[1]);
-
+  
   return interpolate(
     height[info.indices[0]],
     height[info.indices[1]],
@@ -42,6 +43,33 @@ float Ground::getHeight(float x, float z) {
     info.triCoords[0],
     info.triCoords[1],
     info.isTopTri);
+}
+
+vec3 Ground::getNormal(float x, float z) {
+	Ground::TriangleInfo info = getTriangle(x, z);
+  if(info.indices.x() == -1)
+    return vec3(0, 1, 0);
+
+  vec3 n = vec3(interpolate(
+    normals[info.indices[0]].x(),
+    normals[info.indices[1]].x(),
+    normals[info.indices[2]].x(),
+    info.triCoords[0],
+    info.triCoords[1],
+    info.isTopTri), interpolate(
+    normals[info.indices[0]].y(),
+    normals[info.indices[1]].y(),
+    normals[info.indices[2]].y(),
+    info.triCoords[0],
+    info.triCoords[1],
+    info.isTopTri), interpolate(
+    normals[info.indices[0]].z(),
+    normals[info.indices[1]].z(),
+    normals[info.indices[2]].z(),
+    info.triCoords[0],
+    info.triCoords[1],
+    info.isTopTri));
+	return n.normalize();
 }
 
 Ground::TriangleInfo Ground::getTriangle(float x, float z) {
@@ -55,8 +83,8 @@ Ground::TriangleInfo Ground::getTriangle(float x, float z) {
 
     log(Info, "Tri size: %f, %f", triangleXSize, triangleZSize);
 
-	  int xi = Kore::floor(x/xSize + 0.5f * xCount);
-	  int zi = Kore::floor(z/zSize + 0.5f * zCount);
+	  int xi = Kore::floor(x/xSize * xCount + 0.5f * xCount);
+	  int zi = Kore::floor(z/zSize * zCount + 0.5f * zCount);
 
     log(Info, "xi, zi: %d, %d", xi, zi);
 
