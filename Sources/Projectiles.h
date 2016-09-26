@@ -25,6 +25,7 @@ public:
 	void update(float deltaT);
 	void render(Kore::ConstantLocation vLocation, Kore::TextureUnit tex, Kore::mat4 view);
 	void onShooterDeath(int projectileID);
+	void remove(Tank* tank);
 private:
 	int maxProj;
 	float hitDist;

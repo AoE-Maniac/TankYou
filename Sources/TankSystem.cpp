@@ -140,6 +140,7 @@ bool TankSystem::kill(int i) {
 				tanks[i2]->RemoveEnemy(tanks[i]);
 			}
 			world->RemoveDynamicObject(tanks[i]);
+			mProjectiles->remove(tanks[i]);
             delete tanks[i];
             tanks[i] = nullptr;
             return true;

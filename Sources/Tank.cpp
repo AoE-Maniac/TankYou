@@ -281,7 +281,11 @@ void Tank::updateStateMachine(float deltaT) {
             //RotateTurrentToTarget(toPosition);
             
             if (steer->Arrive(getPosition(), toPosition)) {
-                currentState = Wandering;//Wait;
+                if (won) {
+                    currentState = Wait;
+                } else {
+                    currentState = Wandering;
+                }
             }
             
             vec3 velocity = steer->Seek(getPosition(), toPosition, maxVelocity);

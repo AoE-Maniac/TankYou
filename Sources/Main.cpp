@@ -94,6 +94,7 @@ namespace {
 //    Steering* steer;
 
 	double lastTime;
+    double gameOverTime = 0;
 
 	InstancedMeshObject* tankTop;
 	InstancedMeshObject* tankBottom;
@@ -222,6 +223,7 @@ namespace {
 		Graphics::setRenderState(DepthTest, false);
 		projectiles->render(vLocation, tex, View);
         Graphics::setRenderState(DepthTest, true);
+        
 
 		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
@@ -230,15 +232,24 @@ namespace {
 		particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
+        char c[42];
 		char d[42];
 		char k[42];
+        sprintf(c, "Time: %i", (int)t);
 		sprintf(d, "Deserted: %i", tankTics->deserted);
 		sprintf(k, "Destroyed: %i", tankTics->destroyed);
-		textRenderer->drawString(k, 0xffffffff, 15, 15, mat3::Identity());
-		textRenderer->drawString(d, 0xffffffff, 15, 30, mat3::Identity());
+        textRenderer->drawString(c, 0xffffffff, 15, 15, mat3::Identity());
+		textRenderer->drawString(k, 0xffffffff, 15, 30, mat3::Identity());
+		textRenderer->drawString(d, 0xffffffff, 15, 45, mat3::Identity());
 		if (tankTics->deserted >= 1) {
 			textRenderer->drawString("Game over!", 0xffffffff, width / 2, height / 2 - 15, mat3::Identity());
 			textRenderer->drawString("Tank you for playing...", 0xffffffff, width / 2, height / 2 + 15, mat3::Identity());
+            
+            if(gameOverTime == 0.0f)
+                gameOverTime = t;
+            char gameOverText[256];
+            sprintf(gameOverText, "You survived for %i seconds", (int)gameOverTime);
+            textRenderer->drawString(gameOverText, 0xffffffff, width / 2, height / 2, mat3::Identity());
 		}
 		textRenderer->end();
 
