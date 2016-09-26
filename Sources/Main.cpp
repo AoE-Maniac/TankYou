@@ -264,14 +264,14 @@ namespace {
 		}
 		else {
 			textRenderer->setFont(font44);
-			renderCentered("Game over!", height / 2 - 150);
+			renderCentered("Game over!", height / 2 - 200);
 			textRenderer->setFont(font34);
 			if(gameOverTime == 0.0f)
 				gameOverTime = t - START_DELAY;
 			if (gameOverKills == 0) gameOverKills = tankTics->destroyed;
 			char gameOverText[256];
 			sprintf(gameOverText, "The war lasted %i seconds and killed %i...", (int)gameOverTime, gameOverKills);
-			renderCentered(gameOverText, height / 2);
+			renderCentered(gameOverText, height / 2 - 50);
 			textRenderer->setFont(font24);
 			renderCentered("Tank you for playing our jam game:", height / 2 + 80);
 			renderCentered("Polona Caserman", height / 2 + 160, width / 4.0f);
