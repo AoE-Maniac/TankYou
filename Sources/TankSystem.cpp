@@ -126,8 +126,8 @@ bool TankSystem::kill(int i) {
                                       particleRenderer->getStructures(), particleTexture );
         particleRenderer->addParticleSystem(explosions[i]);
         Sound *shootSound = new Sound("shoot_sound.wav");
-        shootSound->setVolume(0.1);
-        Mixer::play(shootSound);
+        shootSound->setVolume(0.3);
+        Mixer::play(shootSound, Random::get(50, 200) / 100.0f);
 		destroyed++;
 		if (tanks[i]->won) {
 			deserted--;

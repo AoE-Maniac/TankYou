@@ -54,8 +54,8 @@ int Projectiles::fire(vec3 pos, PhysicsObject* target, float s, int dmg, Tank* s
 	}
     
     Sound *shootSound = new Sound("impact_sound.wav");
-    shootSound->setVolume(0.1);
-    Mixer::play(shootSound);
+    shootSound->setVolume(0.3);
+    Mixer::play(shootSound, Random::get(50, 200) / 100.0f);
     
     int projectile = *(inactiveProjectiles.begin());
     vec3 direction = (target->GetPosition() - pos).normalize();
