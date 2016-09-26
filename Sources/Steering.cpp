@@ -4,7 +4,6 @@
 // TODO : follow path
 
 Steering::Steering() {
-    Random::init(1);
     ariveRadius = 10;
 }
 
