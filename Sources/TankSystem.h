@@ -17,7 +17,7 @@ using namespace Kore;
 
 class TankSystem {
 public:
-	TankSystem(ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures);
+	TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, InstancedMeshObject* meshB, InstancedMeshObject* meshT, InstancedMeshObject* meshF, vec3 spawn1a, vec3 spawn1b, vec3 spawn2a, vec3 spawn2b, float delay, Projectiles* projectiles, VertexStructure** structures);
 	void initBars(vec2 halfSize, VertexStructure** structures);
 	void update(float dt);
 	void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
@@ -27,6 +27,7 @@ public:
 private:
 	Tank* selectedTank;
     ParticleRenderer* particleRenderer;
+    PhysicsWorld* world;
 	float spawnDelay;
 	float spawnTimer;
 	vec3 spawnPos1a;

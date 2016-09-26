@@ -21,7 +21,7 @@ void PhysicsWorld::Update(float deltaT) {
 
 		// Apply gravity (= constant accceleration, so we multiply with the mass and divide in the integration step.
 		// The alternative would be to add gravity during the integration as a constant.
-		if (!(*currentP)->IgnoreGravity) {
+		if (!(*currentP)->IgnoreGravity && !(*currentP)->IgnoreNewtonLaws) {
 			(*currentP)->ApplyForceToCenter(vec3(0, (*currentP)->Mass * -9.81, 0));
 		}
 
@@ -41,7 +41,8 @@ void PhysicsWorld::Update(float deltaT) {
 		}
 
 		// Integrate the equations of motion
-		(*currentP)->Integrate(deltaT);
+        if(!(*currentP)->IgnoreNewtonLaws)
+            (*currentP)->Integrate(deltaT);
 	}
 }
 
