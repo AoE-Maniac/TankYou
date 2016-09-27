@@ -9,7 +9,7 @@
 #pragma once
 
 #include "pch.h"
-#include <Kore/math/matrix.h>
+#include <Kore/Math/Matrix.h>
 #include "Engine/Particles.h"
 #include <set>
 
@@ -22,7 +22,7 @@ class ParticleRenderer
 public:
     ParticleRenderer(Kore::VertexStructure** structures);
     void render(TextureUnit tex, mat4 View, ConstantLocation vLocation);
-    
+
     void addParticleSystem(ParticleSystem* system);
     void removeParticleSystem(ParticleSystem* system);
     Kore::VertexStructure** getStructures();

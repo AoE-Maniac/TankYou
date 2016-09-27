@@ -19,7 +19,7 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
     particleTexture = new Texture("Data/Textures/particle.png", true);
 	texture = new Texture("Data/Textures/white.png", true);
 	hoveredTank = nullptr;
-	
+
 	destroyed = 0;
 	deserted = 0;
 	multipleSelect = false;
@@ -36,7 +36,7 @@ void TankSystem::initBars(vec2 halfSize, VertexStructure** structures) {
 	setVertex(vertices, 2, 1 * halfSize.x(), 1 * halfSize.y(), 0, 1, 1);
 	setVertex(vertices, 3, 1 * halfSize.x(), -1 * halfSize.y(), 0, 1, 0);
 	vbs[0]->unlock();
-	
+
 	vbs[1] = new VertexBuffer(MAX_TANKS * 4, *structures[1], 1);
 
 	// Set index buffer
@@ -66,7 +66,7 @@ void TankSystem::update(float dt) {
 	if (spawnTimer <= 0 && tanks.size() <= MAX_TANKS - 2) {
 		spawnTank(world, tanks, &explosions, spawnPos1a, spawnPos1b, 0, mProjectiles);
 		spawnTank(world, tanks, &explosions, spawnPos2a, spawnPos2b, 1, mProjectiles);
-		
+
 		spawnTimer = spawnDelay;
 	}
 
@@ -93,13 +93,13 @@ void TankSystem::update(float dt) {
 				tank->desert();
 				deserted++;
 			}
-			
+
 			vec3 pos = tank->GetPosition();
 			pos.y() = ground->getHeight(pos.x(), pos.z()) + 2.f;
 			tank->SetPosition(pos);
         }
     }
-    
+
 
     for( int i = 0; i < explosions.size(); i++ )
     {
@@ -178,11 +178,11 @@ mat4 getRotM(vec3 ax, float an) {
 	result[1][0] = x * y *(1 - cos) + z * sin;
 	result[1][1] = cos + y * y * (1 - cos);
 	result[1][2] = y * z * (1 - cos) - x * sin;
-	
+
 	result[2][0] = z * x *(1 - cos) - y * sin;
 	result[2][1] = z * y * (1 - cos) + x * sin;
 	result[2][2] =  cos + z * z * (1 - cos);
-	
+
 	return result;
 }
 
@@ -191,12 +191,12 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 	float* dataT = meshTop->vertexBuffers[1]->lock();
 	float* dataF = meshFlag->vertexBuffers[1]->lock();
 	float* dataBars = vbs[1]->lock();
-    
+
 	mat4 modView = View.Invert();
 	modView.Set(0, 3, 0.0f);
 	modView.Set(1, 3, 0.0f);
 	modView.Set(2, 3, 0.0f);
-	
+
     int j = 0;
     int k = 0;
     for (int i = 0; i < tanks.size(); i++) {
@@ -207,9 +207,9 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 			vec3 n = ground->getNormal(tank->GetPosition().x(), tank->GetPosition().z());
 			vec3 axis = -vec3(0, 1, 0).cross(n);
 			float angle = -Kore::acos(vec3(0, 1, 0).dot(n));
-			mat4 t = Quaternion::Quaternion(axis, angle).matrix();
+			mat4 t = Quaternion(axis, angle).matrix();
 			t = getRotM(axis, angle);
-			
+
 			mat4 botM = tank->GetBottomM() * t;
 			vec4 col = vec4(tank->mFrac * 0.75f, 0, (1 - tank->mFrac) * 0.75f, 1);
 			if (hoveredTank == tank) col = vec4(tank->mFrac * 0.25f, 0, (1 - tank->mFrac) * 0.25f, 1);
@@ -219,12 +219,12 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 			setMatrix(dataB, j, 0, 36, botM);
 			setMatrix(dataB, j, 16, 36, calculateN(botM * View));
 			setVec4(dataB, j, 32, 36, col);
-		
+
 			mat4 topM = tank->GetTopM(botM);
 			setMatrix(dataT, j, 0, 36, topM);
 			setMatrix(dataT, j, 16, 36, calculateN(topM * View));
 			setVec4(dataT, j, 32, 36, col);
-		
+
 			mat4 flagM = tank->GetFlagM(botM);
 			setMatrix(dataF, j, 0, 36, flagM);
 			setMatrix(dataF, j, 16, 36, calculateN(flagM * View));
@@ -232,11 +232,11 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
             ++j;
 
 			mat4 M = mat4::Translation(tank->GetPosition().x(), tank->GetPosition().y() + 6, tank->GetPosition().z() + 1);
-			
+
 			setMatrix(dataBars, k, 0, 36, M * modView);
 			setMatrix(dataBars, k, 16, 36, calculateN(M * modView));
 			setVec4(dataBars, k, 32, 36, vec4(1, 1, 1, 1));
-		
+
 			M = M * mat4::Scale(tank->getHPPerc(), 1.0f, 1.0f);
 
 			setMatrix(dataBars, k + 1, 0, 36, M * modView);
@@ -247,31 +247,31 @@ void TankSystem::render(TextureUnit tex, mat4 View, ConstantLocation vLocation) 
 
 			if (!tank->won) {
 				M = mat4::Translation(tank->GetPosition().x(), tank->GetPosition().y() + 5, tank->GetPosition().z());
-			
+
 				setMatrix(dataBars, k, 0, 36, M * modView);
 				setMatrix(dataBars, k, 16, 36, calculateN(M * modView));
 				setVec4(dataBars, k, 32, 36, vec4(1, 1, 1, 1));
-		
+
 				M = M * mat4::Scale(tank->getXPPerc(), 1.0f, 1.0f);
 
 				setMatrix(dataBars, k + 1, 0, 36, M * modView);
 				setMatrix(dataBars, k + 1, 16, 36, calculateN(M * modView));
 				setVec4(dataBars, k + 1, 32, 36, col);
-			
+
 				k += 2;
 			}
         }
 	}
-    
+
 	meshBottom->vertexBuffers[1]->unlock();
 	meshTop->vertexBuffers[1]->unlock();
 	meshFlag->vertexBuffers[1]->unlock();
 	vbs[1]->unlock();
-	
+
 	meshBottom->render(tex, j);
 	meshTop->render(tex, j);
 	meshFlag->render(tex, j);
-	
+
 	Graphics::setRenderState(RenderState::DepthTest, false);
 	Graphics::setTexture(tex, texture);
 	Graphics::setVertexBuffers(vbs, 2);

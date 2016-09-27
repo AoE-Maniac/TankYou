@@ -58,7 +58,7 @@ namespace {
 	Kravur* font34;
 	Kravur* font44;
 	Text* textRenderer;
-	
+
 	mat4 P;
 	mat4 View;
 
@@ -68,14 +68,14 @@ namespace {
 	float lightPosX;
 	float lightPosY;
 	float lightPosZ;
-	
+
 	InstancedMeshObject* stoneMesh;
 	MeshObject* projectileMesh;
 
 	Projectiles* projectiles;
 
 	PhysicsWorld physics;
-	
+
 	TextureUnit tex;
 	ConstantLocation pLocation;
 	ConstantLocation vLocation;
@@ -85,7 +85,7 @@ namespace {
 
 	Texture* particleImage;
     Explosion* explosionSystem;
-    
+
 	double lastTime;
     double gameOverTime = 0;
 	bool gameOver = false;
@@ -137,7 +137,7 @@ namespace {
 
 		lastTime = t;
 		Kore::Audio::update();
-		
+
 		Graphics::begin();
 		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag | Graphics::ClearStencilFlag, 0xFF000000, 1.0f, 0);
 
@@ -146,7 +146,7 @@ namespace {
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
 		Graphics::setRenderState(DepthTest, true);
-		
+
 		if (t >= START_DELAY) {
 			const float cameraSpeed = 1.5f;
 			if (mouseY < 50) {
@@ -177,11 +177,11 @@ namespace {
 		else {
 			cameraZoom = t / START_DELAY;
 		}
-		
+
 		cameraPosition.y() = cameraZoom * 150 + (1 - cameraZoom) * 10;
 		vec3 off = vec3(0, -1, 0) * cameraZoom + (1 - cameraZoom) * vec3(0, -1, 1);
 		lookAt = cameraPosition + off;
-		
+
 		// Follow the ball with the camera
 		P = mat4::Perspective(0.5f * pi, (float)width / (float)height, 0.1f, 1000);
 		View = mat4::lookAt(cameraPosition, lookAt, vec3(0, 0, 1));
@@ -194,7 +194,7 @@ namespace {
 		lightPosY = 100;
 		lightPosZ = 100;
 		Graphics::setFloat3(lightPosLocation, lightPosX, lightPosY, lightPosZ);
-		
+
 		if (t >= START_DELAY) {
 			projectiles->update(deltaT);
 			physics.Update(deltaT);
@@ -299,10 +299,10 @@ namespace {
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
-		
+
 		tankTics->hover(cameraPosition, pickDir);
 	}
-	
+
 	void mousePress(int windowId, int button, int x, int y) {
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
@@ -318,13 +318,13 @@ namespace {
 	}
 
 	void mouseRelease(int windowId, int button, int x, int y) {
-		
+
 	}
 
 	void mouseScroll(int windowId, int delta) {
 		cameraZoom = clamp(0.0f, 1.0f, cameraZoom + delta * 0.05f);
 	}
-	
+
 	void init() {
 		FileReader vs("shader.vert");
 		FileReader fs("shader.frag");
@@ -337,7 +337,7 @@ namespace {
 		structures[0]->add("pos", Float3VertexData);
 		structures[0]->add("tex", Float2VertexData);
 		structures[0]->add("nor", Float3VertexData);
-		
+
 		structures[1] = new VertexStructure();
 		structures[1]->add("M", Float4x4VertexData);
 		structures[1]->add("N", Float4x4VertexData);
@@ -352,34 +352,34 @@ namespace {
 		pLocation = program->getConstantLocation("P");
 		vLocation = program->getConstantLocation("V");
 		lightPosLocation = program->getConstantLocation("lightPos");
-		
+
 		stoneMesh = new InstancedMeshObject("Data/Meshes/stone.obj", "Data/Textures/stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("Data/Meshes/projectile.obj", "Data/Textures/projectile.png", structures, PROJECTILE_SIZE);
-		
+
         particleImage = new Texture("Data/Textures/particle.png", true);
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
-        
+
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
 
 		Graphics::setTextureAddressing(tex, U, Repeat);
 		Graphics::setTextureAddressing(tex, V, Repeat);
 
-        
+
         explosionSystem = new Explosion(vec3(2,6,0), 2.f, 10.f, 300, structures, particleImage);
 
 		cameraPosition = vec3(0, 0.5f, 0);
 		cameraZoom = 0.5f;
-        
+
         Random::init(System::time() * 100);
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
-		font14 = Kravur::load("Data/Fonts/Arial", FontStyle(), 14);
-		font24 = Kravur::load("Data/Fonts/Arial", FontStyle(), 24);
-		font34 = Kravur::load("Data/Fonts/Arial", FontStyle(), 34);
-		font44 = Kravur::load("Data/Fonts/Arial", FontStyle(), 44);
+		font14 = Kravur::load("Data/Fonts/arial", FontStyle(), 14);
+		font24 = Kravur::load("Data/Fonts/arial", FontStyle(), 24);
+		font34 = Kravur::load("Data/Fonts/arial", FontStyle(), 34);
+		font44 = Kravur::load("Data/Fonts/arial", FontStyle(), 44);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
 		textRenderer->setFont(font44);
