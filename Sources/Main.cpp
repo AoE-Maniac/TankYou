@@ -447,11 +447,11 @@ namespace {
 }
 
 int kore(int argc, char** argv) {
-  Kore::System::setName("Korerorinpa");
+  Kore::System::setName("Tank You!");
 	Kore::System::setup();
 
 	Kore::WindowOptions options;
-	options.title = "Korerorinpa";
+	options.title = "Tank You!";
 	options.width = width;
 	options.height = height;
 	options.x = 100;

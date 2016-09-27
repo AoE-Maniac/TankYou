@@ -1,4 +1,4 @@
-var project = new Project('Korerorinpa', __dirname);
+var project = new Project('TankYou', __dirname);
 
 project.addFile('Sources/**');
 project.setDebugDir('Deployment');
