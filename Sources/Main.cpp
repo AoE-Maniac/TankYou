@@ -231,11 +231,8 @@ namespace {
         //Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
 		renderLandscape(tex);
 		
-		Graphics::setRenderState(DepthTest, false);
 		projectiles->render(vLocation, tex, View);
-        Graphics::setRenderState(DepthTest, true);
         
-
 		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
 		tankTics->render(tex, View, vLocation);
