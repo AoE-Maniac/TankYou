@@ -27,9 +27,7 @@
 #include "Text.h"
 
 #include "Projectiles.h"
-//#include "Steering.h"
 #include "TankSystem.h"
-
 #include "Tank.h"
 
 using namespace Kore;
@@ -59,20 +57,13 @@ namespace {
 	Kravur* font24;
 	Kravur* font34;
 	Kravur* font44;
-	Kravur* font64;
 	Text* textRenderer;
 	
 	mat4 P;
 	mat4 View;
-	//mat4 PV;
 
 	vec3 cameraPosition;
-	//vec3 targetCameraPosition;
-	//vec3 oldCameraPosition;
-
 	vec3 lookAt;
-	//vec3 targetLookAt;
-	//vec3 oldLookAt;
 
 	float lightPosX;
 	float lightPosY;
@@ -154,7 +145,6 @@ namespace {
 		program->set();
 		Graphics::setBlendingMode(SourceAlpha, Kore::BlendingOperation::InverseSourceAlpha);
 		Graphics::setRenderState(BlendingState, true);
-		Graphics::setRenderState(BackfaceCulling, NoCulling);
 		Graphics::setRenderState(DepthTest, true);
 		
 		if (t >= START_DELAY) {
@@ -200,9 +190,9 @@ namespace {
 		Graphics::setMatrix(vLocation, View);
 
 		// update light pos
-		lightPosX = 100; //20 * Kore::sin(2 * t);
-		lightPosY = 100; // 10;
-		lightPosZ = 100; //20 * Kore::cos(2 * t);
+		lightPosX = 100;
+		lightPosY = 100;
+		lightPosZ = 100;
 		Graphics::setFloat3(lightPosLocation, lightPosX, lightPosY, lightPosZ);
 		
 		if (t >= START_DELAY) {
@@ -335,14 +325,6 @@ namespace {
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
-		//projectiles->fire(cameraPosition, lookAt - cameraPosition, 10, 1);
-		/*if(!tanks.empty()) {
-			vec3 p = tanks.front()->getPosition();
-			vec3 l = tanks.front()->getTurretLookAt();
-			projectiles->fire(p, l, 10);
-			log(Info, "Boom! (%f, %f, %f) -> (%f, %f, %f)", p.x(), p.y(), p.z(), l.x(), l.y(), l.z());
-		}*/
-		
 		vec3 position = screenToWorld(vec2(mouseX, mouseY));
 		vec3 pickDir = vec3(position.x(), position.y(), position.z()) - cameraPosition;
 		pickDir.normalize();
@@ -395,16 +377,11 @@ namespace {
 		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
 		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
 		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
-    
-        
+		
         particleImage = new Texture("particle.png", true);
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
-		//TriangleMeshCollider* tmc = new TriangleMeshCollider();
-		//tmc->mesh = new MeshObject("level.obj", "level.png", structures);
-		//physics.AddStaticCollider(tmc);
-
 		Graphics::setRenderState(DepthTest, true);
 		Graphics::setRenderState(DepthTestCompare, ZCompareLess);
 
@@ -417,8 +394,6 @@ namespace {
 		cameraPosition = vec3(0, 0.5f, 0);
 		cameraZoom = 0.5f;
         
-//        steer = new Steering;
-        
         Random::init(System::time() * 100);
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
@@ -427,7 +402,6 @@ namespace {
 		font24 = Kravur::load("Arial", FontStyle(), 24);
 		font34 = Kravur::load("Arial", FontStyle(), 34);
 		font44 = Kravur::load("Arial", FontStyle(), 44);
-		//font64 = Kravur::load("Arial", FontStyle(), 64);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
 		textRenderer->setFont(font44);

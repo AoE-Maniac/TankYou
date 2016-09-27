@@ -101,9 +101,6 @@ void Projectiles::update(float deltaT) {
                 particles[i]->setDirection(vec3(0, 1, 0));
                 particles[i]->update(deltaT);
 
-			// TODO: Scheint nicht zu funktionieren
-               // physicsObject[i]->Velocity = (targets[i]->GetPosition() - physicsObject[i]->GetPosition()).normalize() * physicsObject[i]->Velocity.getLength();
-                
                 vec3 position = physicsObject[i]->GetPosition();
 				vec3 target;
 				if (targets[i] != nullptr) {
