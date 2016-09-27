@@ -89,6 +89,7 @@ namespace {
     
 	double lastTime;
     double gameOverTime = 0;
+	bool gameOver = false;
 	int gameOverKills = 0;
 
 	InstancedMeshObject* tankTop;
@@ -197,39 +198,18 @@ namespace {
 		
 		if (t >= START_DELAY) {
 			projectiles->update(deltaT);
-			// Update physics
 			physics.Update(deltaT);
-    
 			tankTics->update(deltaT);
 		}
-        
-        // Render dynamic objects
-        /*for (int i = 0; i < physics.currentDynamicObjects; i++) {
-            PhysicsObject** currentP = &physics.dynamicObjects[i];
-            (*currentP)->UpdateMatrix();
-            (*currentP)->Mesh->render(tex, View);
-        }
-
-		// Render static objects
-		for (int i = 0; i < physics.currentStaticColliders; i++) {
-			TriangleMeshCollider** current = &physics.staticColliders[i];
-			(*current)->mesh->render(tex, View);
-		}*/
-
-		//Graphics::setStencilParameters(Kore::ZCompareAlways, Replace, Keep, Keep, 1, 0xff, 0xff);
-		
-        //Graphics::setStencilParameters(ZCompareEqual, Keep, Keep, Keep, 0, 0xff, 0);
-		renderLandscape(tex);
-		
-		projectiles->render(vLocation, tex, View);
-        
-		//Graphics::setStencilParameters(ZCompareAlways, Keep, Keep, Keep, 0, 0xff, 0xff);
 
 		tankTics->render(tex, View, vLocation);
-				
+		renderLandscape(tex);
+
+		projectiles->render(vLocation, tex, View);
 		particleRenderer->render(tex, View, vLocation);
 
 		textRenderer->start();
+		gameOver = gameOver || tankTics->deserted >= MAX_DESERTED;
 		if (t < START_DELAY) {
 			textRenderer->setFont(font44);
 			renderCentered("Tank You!", height / 2 - 100);
@@ -237,7 +217,7 @@ namespace {
 			renderCentered("Make the war last forever. But be warned, experienced", height / 2 + 50);
 			renderCentered("soldiers might realize that the bloodshed is pointless.", height / 2 + 100);
 		}
-		else if (tankTics->deserted < MAX_DESERTED) {
+		else if (!gameOver) {
 			char c[42];
 			char d[42];
 			char k[42];
