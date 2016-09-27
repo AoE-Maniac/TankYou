@@ -35,7 +35,7 @@ using namespace Kore;
 namespace {
 	const int width = 1024;
 	const int height = 768;
-	const int MAX_DESERTED = 3;
+	const int MAX_DESERTED = 5;
 	const int START_DELAY = 8;
 
 	int mouseX = width / 2;
