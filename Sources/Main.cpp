@@ -201,8 +201,8 @@ namespace {
 			tankTics->update(deltaT);
 		}
 
-		tankTics->render(tex, View, vLocation);
 		renderLandscape(tex);
+		tankTics->render(tex, View, vLocation);
 
 		projectiles->render(vLocation, tex, View);
 		particleRenderer->render(tex, View, vLocation);
