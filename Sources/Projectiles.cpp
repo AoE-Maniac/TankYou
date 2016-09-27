@@ -51,7 +51,7 @@ namespace {
 
 	Sound* getSound() {
 		if (sound == nullptr) {
-			sound = new Sound("impact_sound.wav");
+			sound = new Sound("Data/Sounds/Impact.wav");
 		}
 		return sound;
 	}

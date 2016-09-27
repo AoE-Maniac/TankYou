@@ -16,8 +16,8 @@ TankSystem::TankSystem(PhysicsWorld* world, ParticleRenderer* particleRenderer, 
 		ground(grnd) {
 	tanks.reserve(MAX_TANKS);
 	spawnTimer = spawnDelay;
-    particleTexture = new Texture("particle.png", true);
-	texture = new Texture("grey.png", true);
+    particleTexture = new Texture("Data/Textures/particle.png", true);
+	texture = new Texture("Data/Textures/white.png", true);
 	hoveredTank = nullptr;
 	
 	destroyed = 0;
@@ -125,7 +125,7 @@ namespace {
 
 	Sound* getSound() {
 		if (sound == nullptr) {
-			sound = new Sound("shoot_sound.wav");
+			sound = new Sound("Data/Sounds/Shoot.wav");
 		}
 		return sound;
 	}

@@ -34,9 +34,9 @@ vec3 getLandscapeNormal(float x, float y) {
 
 
 void createLandscape(VertexStructure** structures, float size, InstancedMeshObject* sMesh, int sCount, Ground*& ground) {
-	Kore::Image* map = new Kore::Image("map.png", true);
-	normalmap = new Kore::Image("mapnormals.png", true);
-	landscapeTexture = new Texture("sand.png", true);
+	Kore::Image* map = new Kore::Image("Data/Textures/map.png", true);
+	normalmap = new Kore::Image("Data/Textures/mapnormals.png", true);
+	landscapeTexture = new Texture("Data/Textures/sand.png", true);
 
 	const int w = 250;
 	const int h = 250;

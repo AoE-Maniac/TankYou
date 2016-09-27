@@ -69,7 +69,6 @@ namespace {
 	float lightPosY;
 	float lightPosZ;
 	
-	MeshObject* sphereMesh;
 	InstancedMeshObject* stoneMesh;
 	MeshObject* projectileMesh;
 
@@ -354,11 +353,10 @@ namespace {
 		vLocation = program->getConstantLocation("V");
 		lightPosLocation = program->getConstantLocation("lightPos");
 		
-		sphereMesh = new MeshObject("cube.obj", "cube.png", structures);
-		stoneMesh = new InstancedMeshObject("stone.obj", "stone.png", structures, STONE_COUNT);
-		projectileMesh = new MeshObject("projectile.obj", "projectile.png", structures, PROJECTILE_SIZE);
+		stoneMesh = new InstancedMeshObject("Data/Meshes/stone.obj", "Data/Textures/stone.png", structures, STONE_COUNT);
+		projectileMesh = new MeshObject("Data/Meshes/projectile.obj", "Data/Textures/projectile.png", structures, PROJECTILE_SIZE);
 		
-        particleImage = new Texture("particle.png", true);
+        particleImage = new Texture("Data/Textures/particle.png", true);
         particleRenderer = new ParticleRenderer(structures);
         projectiles = new Projectiles(1000, 20, particleImage, projectileMesh, structures, &physics);
         
@@ -378,21 +376,21 @@ namespace {
 
 		createLandscape(structures, MAP_SIZE_OUTER, stoneMesh, STONE_COUNT, ground);
 
-		font14 = Kravur::load("Arial", FontStyle(), 14);
-		font24 = Kravur::load("Arial", FontStyle(), 24);
-		font34 = Kravur::load("Arial", FontStyle(), 34);
-		font44 = Kravur::load("Arial", FontStyle(), 44);
+		font14 = Kravur::load("Data/Fonts/Arial", FontStyle(), 14);
+		font24 = Kravur::load("Data/Fonts/Arial", FontStyle(), 24);
+		font34 = Kravur::load("Data/Fonts/Arial", FontStyle(), 34);
+		font44 = Kravur::load("Data/Fonts/Arial", FontStyle(), 44);
 		textRenderer = new Text;
 		textRenderer->setProjection(width, height);
 		textRenderer->setFont(font44);
 
-		tankTop = new InstancedMeshObject("tank_top.obj", "tank_top_uv.png", structures, MAX_TANKS, 8);
-		tankBottom = new InstancedMeshObject("tank_bottom.obj", "tank_bottom_uv.png", structures, MAX_TANKS, 10);
-		tankFlag = new InstancedMeshObject("flag.obj", "flag_uv.png", structures, MAX_TANKS, 2);
+		tankTop = new InstancedMeshObject("Data/Meshes/tank_top.obj", "Data/Textures/tank_top.png", structures, MAX_TANKS, 8);
+		tankBottom = new InstancedMeshObject("Data/Meshes/tank_bottom.obj", "Data/Textures/tank_bottom.png", structures, MAX_TANKS, 10);
+		tankFlag = new InstancedMeshObject("Data/Meshes/flag.obj", "Data/Textures/flag.png", structures, MAX_TANKS, 2);
 
 		tankTics = new TankSystem(&physics, particleRenderer, tankBottom, tankTop, tankFlag, vec3(-MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(-MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, -MAP_SIZE_INNER / 2), vec3(MAP_SIZE_INNER / 2, 6, MAP_SIZE_INNER / 2), 3, projectiles, structures, ground);
 
-		Sound *bgSound = new Sound("WarTheme.wav");
+		Sound *bgSound = new Sound("Data/Sounds/WarTheme.wav");
         Mixer::play(bgSound);
 	}
 }
