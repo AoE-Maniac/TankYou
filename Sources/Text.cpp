@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Text.h"
 #include <Kore/IO/FileReader.h>
+#include <string.h>
 
 using namespace Kore;
 

@@ -3,6 +3,7 @@
 #include <Kore/IO/FileReader.h>
 #include <map>
 #include <sstream>
+#include <string.h>
 
 using namespace Kore;
 
